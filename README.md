@@ -20,6 +20,8 @@ com.mle.sbtutils.SbtUtils.publishSettings ++ Seq(
 )
 ```
 
+Then type publishSigned followed by sonatypeRelease, provided by plugin [sbt-sonatype](https://github.com/xerial/sbt-sonatype).
+
 The following keys are available:
 
 ```
