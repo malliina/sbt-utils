@@ -4,7 +4,7 @@ import sbt.Keys._
 object BuildBuild extends Build {
 
   override lazy val settings = super.settings ++ Seq(
-    scalaVersion := "2.10.3"
+    scalaVersion := "2.10.4"
   ) ++ sbtPlugins
 
   def sbtPlugins = Seq(

@@ -20,7 +20,7 @@ trait SbtUtils {
   val sbtUtilsHelp = taskKey[Unit]("Shows help")
 
   def testableProject(name: String) = Project(name, file(".")).settings(Seq(
-    libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+    libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
   ): _*)
 
   lazy val publishSettings = Sonatype.sonatypeSettings ++ Seq(

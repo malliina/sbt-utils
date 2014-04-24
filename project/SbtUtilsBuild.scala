@@ -11,13 +11,14 @@ object SbtUtilsBuild extends Build {
 
   lazy val projectSettings = Sonatype.sonatypeSettings ++ Seq(
     organization := "com.github.malliina",
-    version := "0.0.2",
+    version := "0.0.3",
     sbtPlugin := true,
-    scalaVersion := "2.10.3",
+    scalaVersion := "2.10.4",
+//    crossScalaVersions := Seq("2.11.0", "2.10.4"),
     exportJars := false,
     fork in Test := true,
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "2.0" % "test"
+      "org.scalatest" %% "scalatest" % "2.1.3" % "test"
     ),
     pomExtra := SbtGit.gitPom(name.value, "malliina", "Michael Skogberg", "http://mskogberg.info"),
     credentials ++= creds(Path.userHome / ".ivy2" / "sonatype.txt")
