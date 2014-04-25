@@ -3,6 +3,7 @@ package com.mle.sbtutils
 import sbt.Keys._
 import sbt._
 import xerial.sbt.Sonatype
+import com.typesafe.sbt.pgp.PgpKeys
 
 /**
  *
@@ -18,10 +19,20 @@ trait SbtUtils {
   val gitProjectName = settingKey[String]("Project name on GitHub, defaults to the project name")
   val developerHomePageUrl = settingKey[String]("Developer home page URL, defaults to the GitHub project page")
   val sbtUtilsHelp = taskKey[Unit]("Shows help")
+  //  val publishRelease = taskKey[Unit]("publishSigned followed by sonatypeRelease")
 
-  def testableProject(name: String) = Project(name, file(".")).settings(Seq(
+  def testableProject(name: String): Project = Project(name, file(".")).settings(Seq(
     libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
   ): _*)
+
+  def logProject(name: String): Project = testableProject(name)
+    .settings(Seq(libraryDependencies ++= loggingDeps): _*)
+
+  def loggingDeps = Seq(
+    "org.slf4j" % "slf4j-api" % "1.7.7",
+    "ch.qos.logback" % "logback-classic" % "1.1.2",
+    "ch.qos.logback" % "logback-core" % "1.1.2"
+  )
 
   lazy val publishSettings = Sonatype.sonatypeSettings ++ Seq(
     organization := s"com.github.${gitUserName.value}",
@@ -35,6 +46,12 @@ trait SbtUtils {
       val msg = describe(sbtUtilsHelp, gitUserName, developerName, sonatypeCredentials, gitProjectName, developerHomePageUrl)
       streams.value.log.info(msg)
     }
+    // http://stackoverflow.com/a/19297441
+    //    publishRelease := {
+    //      val unused = PgpKeys.publishSigned.value
+    //      val unused2 = Sonatype.SonatypeKeys.sonatypeRelease.value
+    //      ()
+    //    }
   )
 
   private def creds(file: File): Seq[DirectCredentials] =
