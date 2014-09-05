@@ -3,7 +3,6 @@ package com.mle.sbtutils
 import sbt.Keys._
 import sbt._
 import xerial.sbt.Sonatype
-import com.typesafe.sbt.pgp.PgpKeys
 
 /**
  *
@@ -20,13 +19,6 @@ trait SbtUtils {
   val developerHomePageUrl = settingKey[String]("Developer home page URL, defaults to the GitHub project page")
   val sbtUtilsHelp = taskKey[Unit]("Shows help")
   //  val publishRelease = taskKey[Unit]("publishSigned followed by sonatypeRelease")
-
-  def testableProject(name: String): Project = Project(name, file(".")).settings(Seq(
-    libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
-  ): _*)
-
-  def logProject(name: String): Project = testableProject(name)
-    .settings(Seq(libraryDependencies ++= loggingDeps): _*)
 
   def loggingDeps = Seq(
     "org.slf4j" % "slf4j-api" % "1.7.7",
