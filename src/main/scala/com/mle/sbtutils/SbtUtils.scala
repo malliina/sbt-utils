@@ -21,9 +21,9 @@ trait SbtUtils {
   //  val publishRelease = taskKey[Unit]("publishSigned followed by sonatypeRelease")
 
   def loggingDeps = Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.7",
-    "ch.qos.logback" % "logback-classic" % "1.1.2",
-    "ch.qos.logback" % "logback-core" % "1.1.2"
+    "org.slf4j" % "slf4j-api" % "1.7.12",
+    "ch.qos.logback" % "logback-classic" % "1.1.3",
+    "ch.qos.logback" % "logback-core" % "1.1.3"
   )
 
   lazy val publishSettings = Sonatype.sonatypeSettings ++ Seq(
@@ -53,7 +53,7 @@ trait SbtUtils {
     either.fold(err => Seq.empty, value => Seq(value))
 
   def describe(tasks: ScopedTaskable[_]*) = tasks.map(_.key).map(t => {
-    val tabCount = t.label.size match {
+    val tabCount = t.label.length match {
       case i if i > 16 => 1
       case i if i > 8 => 2
       case _ => 3

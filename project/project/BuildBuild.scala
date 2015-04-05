@@ -9,7 +9,7 @@ object BuildBuild extends Build {
 
   def sbtPlugins = Seq(
     "com.jsuereth" % "sbt-pgp" % "1.0.0",
-    "org.xerial.sbt" % "sbt-sonatype" % "0.2.1"
+    "org.xerial.sbt" % "sbt-sonatype" % "0.2.2"
   ) map addSbtPlugin
 
   override lazy val projects = Seq(root)
