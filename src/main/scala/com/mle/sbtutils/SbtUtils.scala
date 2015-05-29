@@ -26,7 +26,7 @@ trait SbtUtils {
     "ch.qos.logback" % "logback-core" % "1.1.3"
   )
 
-  lazy val publishSettings = Sonatype.sonatypeSettings ++ Seq(
+  lazy val mavenSettings = Sonatype.sonatypeSettings ++ Seq(
     organization := s"com.github.${gitUserName.value}",
     gitProjectName := name.value,
     developerHomePageUrl := s"https://github.com/${gitUserName.value}/${gitProjectName.value}",
