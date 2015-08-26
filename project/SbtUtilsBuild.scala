@@ -12,7 +12,7 @@ object SbtUtilsBuild extends Build {
 
   lazy val projectSettings = bintraySettings ++ Seq(
     organization := "com.github.malliina",
-    version := "0.2.0",
+    version := "0.2.1",
     sbtPlugin := true,
     scalaVersion := "2.10.4",
     exportJars := false,
