@@ -1,4 +1,4 @@
-package com.mle.sbtutils
+package com.malliina.sbtutils
 
 trait SbtGit {
   def gitPom(projectName: String, gitUser: String, realName: String, developerHomePage: String) =

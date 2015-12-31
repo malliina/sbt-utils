@@ -11,10 +11,10 @@ object SbtUtilsBuild extends Build {
   lazy val template = Project("sbt-utils", file(".")).settings(projectSettings: _*)
 
   lazy val projectSettings = bintraySettings ++ Seq(
-    organization := "com.github.malliina",
-    version := "0.2.1",
+    organization := "com.malliina",
+    version := "0.3.0",
     sbtPlugin := true,
-    scalaVersion := "2.10.4",
+    scalaVersion := "2.10.6",
     exportJars := false,
     fork in Test := true,
     libraryDependencies ++= Seq(

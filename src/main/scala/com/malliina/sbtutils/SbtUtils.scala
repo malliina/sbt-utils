@@ -1,4 +1,4 @@
-package com.mle.sbtutils
+package com.malliina.sbtutils
 
 import sbt.Keys._
 import sbt._
