@@ -3,9 +3,6 @@ package com.malliina.sbtutils
 import sbt.Keys._
 import sbt._
 
-/**
- * @author Michael
- */
 object SbtProjects {
   def testableProject(name: String, base: File = file(".")): Project =
     baseProject(name, base).settings(scalaTestSettings: _*)
@@ -14,7 +11,7 @@ object SbtProjects {
     Project(name, base).settings(baseSettings: _*)
 
   def scalaTestSettings = Seq(
-    libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.5" % "test"
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % Test
   )
 
   def baseSettings = Seq(
