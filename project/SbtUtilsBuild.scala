@@ -6,13 +6,13 @@ import bintray.Keys.{bintrayOrganization, repository, bintray}
 /**
  * A scala build file template.
  */
-object SbtUtilsBuild extends Build {
+object SbtUtilsBuild {
 
   lazy val template = Project("sbt-utils", file(".")).settings(projectSettings: _*)
 
   lazy val projectSettings = bintraySettings ++ Seq(
     organization := "com.malliina",
-    version := "0.4.0",
+    version := "0.4.1",
     sbtPlugin := true,
     scalaVersion := "2.10.6",
     exportJars := false,
