@@ -4,10 +4,6 @@ import sbt.Keys._
 import sbt._
 import xerial.sbt.Sonatype
 
-/**
- *
- * @author mle
- */
 trait SbtUtils {
   private val lineSep = sys.props("line.separator")
 

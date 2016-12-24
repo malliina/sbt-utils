@@ -3,7 +3,7 @@ import sbt.Keys._
 
 object BuildBuild {
 
-  lazy val settings = sbtPlugins ++ Seq(
+  val settings = sbtPlugins ++ Seq(
     scalaVersion := "2.10.6"
   )
 
