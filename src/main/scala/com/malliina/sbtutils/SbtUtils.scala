@@ -1,8 +1,13 @@
 package com.malliina.sbtutils
 
+import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
+import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, releaseProcess, releasePublishArtifactsAction, releaseStepCommand}
+import sbtrelease.ReleaseStateTransformations._
 import xerial.sbt.Sonatype
+import bintray.Plugin.bintraySettings
+import bintray.Keys.{bintray, bintrayOrganization, repository}
 
 trait SbtUtils {
   private val lineSep = sys.props("line.separator")
@@ -16,14 +21,21 @@ trait SbtUtils {
   val sbtUtilsHelp = taskKey[Unit]("Shows help")
   //  val publishRelease = taskKey[Unit]("publishSigned followed by sonatypeRelease")
 
-  def loggingDeps = Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.12",
-    "ch.qos.logback" % "logback-classic" % "1.1.3",
-    "ch.qos.logback" % "logback-core" % "1.1.3"
+  lazy val mavenSettings =
+    Sonatype.sonatypeSettings ++
+      customSonatypeSettings ++
+      mavenReleaseSettings
+
+  lazy val pluginSettings = bintraySettings ++ Seq(
+    sbtPlugin := true,
+    scalaVersion := "2.10.6",
+    bintrayOrganization in bintray := None,
+    repository in bintray := "sbt-plugins",
+    publishMavenStyle := false,
+    licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
   )
 
-  lazy val mavenSettings = Sonatype.sonatypeSettings ++ Seq(
-    organization := s"com.github.${gitUserName.value}",
+  def customSonatypeSettings = Seq(
     gitProjectName := name.value,
     developerHomePageUrl := s"https://github.com/${gitUserName.value}/${gitProjectName.value}",
     sonatypeCredentials := Path.userHome / ".ivy2" / "sonatype.txt",
@@ -34,12 +46,23 @@ trait SbtUtils {
       val msg = describe(sbtUtilsHelp, gitUserName, developerName, sonatypeCredentials, gitProjectName, developerHomePageUrl)
       streams.value.log.info(msg)
     }
-    // http://stackoverflow.com/a/19297441
-    //    publishRelease := {
-    //      val unused = PgpKeys.publishSigned.value
-    //      val unused2 = Sonatype.SonatypeKeys.sonatypeRelease.value
-    //      ()
-    //    }
+  )
+
+  def mavenReleaseSettings = Seq(
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
+      setNextVersion,
+      commitNextVersion,
+      ReleaseStep(action = releaseStepCommand("sonatypeReleaseAll")),
+      pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
+    )
   )
 
   private def creds(file: File): Seq[DirectCredentials] =
@@ -57,6 +80,12 @@ trait SbtUtils {
     val sep = (1 to tabCount).map(_ => "\t").mkString
     t.label + sep + t.description.getOrElse("No description")
   }).mkString(lineSep)
+
+  def loggingDeps = Seq(
+    "org.slf4j" % "slf4j-api" % "1.7.12",
+    "ch.qos.logback" % "logback-classic" % "1.1.3",
+    "ch.qos.logback" % "logback-core" % "1.1.3"
+  )
 }
 
 object SbtUtils extends SbtUtils

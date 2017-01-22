@@ -9,7 +9,8 @@ object BuildBuild {
 
   def sbtPlugins = Seq(
     "com.jsuereth" % "sbt-pgp" % "1.0.0",
-    "org.xerial.sbt" % "sbt-sonatype" % "0.2.2",
+    "org.xerial.sbt" % "sbt-sonatype" % "1.1",
+    "com.github.gseitz" % "sbt-release" % "1.0.3",
     "me.lessis" % "bintray-sbt" % "0.2.1"
   ) map addSbtPlugin
 }
