@@ -1,24 +1,13 @@
-import sbt._
+import com.malliina.sbtutils.SbtProjects
 import sbt.Keys._
-import bintray.Plugin.bintraySettings
-import bintray.Keys.{bintrayOrganization, repository, bintray}
+import sbt._
 
 object SbtUtilsBuild {
+  lazy val sbtUtils = SbtProjects.sbtPlugin("sbt-utils").settings(projectSettings: _*)
 
-  lazy val template = Project("sbt-utils", file(".")).settings(projectSettings: _*)
-
-  lazy val projectSettings = bintraySettings ++ Seq(
-    organization := "com.malliina",
-    sbtPlugin := true,
-    scalaVersion := "2.10.6",
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.0.0" % Test
-    ),
-    bintrayOrganization in bintray := None,
-    repository in bintray := "sbt-plugins",
-    publishMavenStyle := false,
-    licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-  ) ++ plugins
+  lazy val projectSettings = plugins ++ Seq(
+    organization := "com.malliina"
+  )
 
   def plugins = Seq(
     "com.jsuereth" % "sbt-pgp" % "1.0.0",

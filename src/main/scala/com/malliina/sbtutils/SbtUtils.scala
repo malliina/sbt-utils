@@ -1,13 +1,13 @@
 package com.malliina.sbtutils
 
+import bintray.Plugin.bintraySettings
+import bintray.Keys.{bintray, bintrayOrganization, repository}
 import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
 import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, releaseProcess, releasePublishArtifactsAction, releaseStepCommand}
 import sbtrelease.ReleaseStateTransformations._
 import xerial.sbt.Sonatype
-import bintray.Plugin.bintraySettings
-import bintray.Keys.{bintray, bintrayOrganization, repository}
 
 trait SbtUtils {
   private val lineSep = sys.props("line.separator")
@@ -26,7 +26,12 @@ trait SbtUtils {
       customSonatypeSettings ++
       mavenReleaseSettings
 
-  lazy val pluginSettings = bintraySettings ++ Seq(
+  lazy val pluginSettings =
+    bintraySettings ++
+      customPluginSettings ++
+      bintrayReleaseSettings
+
+  def customPluginSettings = Seq(
     sbtPlugin := true,
     scalaVersion := "2.10.6",
     bintrayOrganization in bintray := None,
@@ -61,6 +66,22 @@ trait SbtUtils {
       setNextVersion,
       commitNextVersion,
       ReleaseStep(action = releaseStepCommand("sonatypeReleaseAll")),
+      pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
+    )
+  )
+
+  def bintrayReleaseSettings = Seq(
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
+      setNextVersion,
+      commitNextVersion,
       pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
     )
   )

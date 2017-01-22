@@ -1,1 +1,1 @@
-lazy val p = SbtUtilsBuild.template
+lazy val p = SbtUtilsBuild.sbtUtils
