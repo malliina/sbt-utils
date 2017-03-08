@@ -3,7 +3,8 @@ import sbt.Keys._
 import sbt._
 
 object SbtUtilsBuild {
-  lazy val sbtUtils = SbtProjects.sbtPlugin("sbt-utils").settings(projectSettings: _*)
+  lazy val sbtUtils = SbtProjects.sbtPlugin("sbt-utils")
+    .settings(projectSettings: _*)
 
   lazy val projectSettings = plugins ++ Seq(
     organization := "com.malliina"
