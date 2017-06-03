@@ -7,7 +7,7 @@ a couple of values to correctly populate the XML, see Usage.
 
 ## Installation ##
 
-    addSbtPlugin("com.malliina" % "sbt-utils" % "0.4.0")
+    addSbtPlugin("com.malliina" % "sbt-utils" % "0.6.1")
 
 ## Usage ##
 
