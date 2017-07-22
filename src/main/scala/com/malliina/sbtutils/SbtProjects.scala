@@ -15,9 +15,10 @@ object SbtProjects {
       .settings(Seq(libraryDependencies ++= SbtUtils.loggingDeps): _*)
 
   def testableProject(name: String, base: File = file(".")): Project =
-    Project(name, base).settings(scalaTestSettings: _*)
+    Project(name, base).settings(basicSettings: _*)
 
-  def scalaTestSettings = Seq(
+  def basicSettings = Seq(
+    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % Test
   )
 }
