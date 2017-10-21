@@ -1,7 +1,6 @@
 package com.malliina.sbtutils
 
-import bintray.Plugin.bintraySettings
-import bintray.Keys.{bintray, bintrayOrganization, repository}
+import bintray.BintrayKeys.{bintrayRepository, bintrayOrganization}
 import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
@@ -27,15 +26,14 @@ trait SbtUtils {
       mavenReleaseSettings
 
   lazy val pluginSettings =
-    bintraySettings ++
       customPluginSettings ++
       bintrayReleaseSettings
 
   def customPluginSettings = Seq(
     sbtPlugin := true,
-    scalaVersion := "2.10.6",
-    bintrayOrganization in bintray := None,
-    repository in bintray := "sbt-plugins",
+    scalaVersion := "2.12.3",
+    bintrayOrganization := None,
+    bintrayRepository := "sbt-plugins",
     publishMavenStyle := false,
     licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
   )
