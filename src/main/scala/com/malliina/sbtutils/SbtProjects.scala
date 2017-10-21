@@ -1,11 +1,12 @@
 package com.malliina.sbtutils
 
+import bintray.BintrayPlugin
 import sbt.Keys._
 import sbt._
 
 object SbtProjects {
   def mavenPublishProject(name: String) =
-    testableProject(name).settings(SbtUtils.mavenSettings: _*)
+    testableProject(name).settings(SbtUtils.mavenSettings: _*).disablePlugins(BintrayPlugin)
 
   def sbtPlugin(name: String) =
     testableProject(name).settings(SbtUtils.pluginSettings: _*)
@@ -19,6 +20,6 @@ object SbtProjects {
 
   def basicSettings = Seq(
     resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
   )
 }

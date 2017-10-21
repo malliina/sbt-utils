@@ -1,24 +1,24 @@
-# sbt-utils #
+# sbt-utils
 
-This SBT plugin helps publish GitHub projects to Sonatype repositories. It uses
+This SBT plugin helps publish GitHub projects to Sonatype and Bintray. It uses
 [sbt-sonatype](https://github.com/xerial/sbt-sonatype) and fills in the POM XML
-required for Maven central sync on the user's behalf. The user must instead provide
-a couple of values to correctly populate the XML, see Usage.
+required for Maven central sync on the user's behalf. The user must provide
+a couple of values to correctly populate the XML, see *Usage*.
 
-## Installation ##
+## Installation
 
-    addSbtPlugin("com.malliina" % "sbt-utils" % "0.6.1")
+    addSbtPlugin("com.malliina" % "sbt-utils" % "0.7.1")
 
-## Usage ##
+## Usage
 
-Add the following settings to your project:
+To publish to Sonatype, add the following settings to your project:
 
-    com.mle.sbtutils.SbtUtils.publishSettings ++ Seq(
-      gitUserName := "malliina",
-      developerName := "Michael Skogberg"
+    com.malliina.sbtutils.SbtUtils.mavenSettings ++ Seq(
+      gitUserName := "My GitHub Username Here",
+      developerName := "My Name Here"
     )
-
-Then type publishSigned followed by sonatypeRelease, provided by plugin [sbt-sonatype](https://github.com/xerial/sbt-sonatype).
+    
+Type *release* to publish the artifacts. You need credentials to publish.
 
 The following keys are available:
 
@@ -32,4 +32,4 @@ The following keys are available:
     [success] Total time: 0 s, completed 16.3.2014 20:56:25
     >
 
-The generated POM XML declares a license of http://www.opensource.org/licenses/BSD-3-Clause.
+The generated POM XML declares a license of https://opensource.org/licenses/MIT.

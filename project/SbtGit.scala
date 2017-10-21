@@ -3,8 +3,8 @@ trait SbtGit {
     (<url>https://github.com/{gitUser}/{projectName}</url>
       <licenses>
         <license>
-          <name>BSD-style</name>
-          <url>http://www.opensource.org/licenses/BSD-3-Clause</url>
+          <name>MIT License</name>
+          <url>https://opensource.org/licenses/MIT</url>
           <distribution>repo</distribution>
         </license>
       </licenses>

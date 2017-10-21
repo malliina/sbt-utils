@@ -31,7 +31,7 @@ trait SbtUtils {
 
   def customPluginSettings = Seq(
     sbtPlugin := true,
-    scalaVersion := "2.12.3",
+    scalaVersion := "2.12.4",
     bintrayOrganization := None,
     bintrayRepository := "sbt-plugins",
     publishMavenStyle := false,
@@ -44,6 +44,7 @@ trait SbtUtils {
     sonatypeCredentials := Path.userHome / ".ivy2" / "sonatype.txt",
     credentials ++= creds(sonatypeCredentials.value),
     pomExtra := SbtGit.gitPom(gitProjectName.value, gitUserName.value, developerName.value, developerHomePageUrl.value),
+    publishTo := Option(Opts.resolver.sonatypeStaging),
     publishArtifact in Test := false,
     sbtUtilsHelp := {
       val msg = describe(sbtUtilsHelp, gitUserName, developerName, sonatypeCredentials, gitProjectName, developerHomePageUrl)
@@ -88,7 +89,7 @@ trait SbtUtils {
     toSeq(Credentials.loadCredentials(file))
 
   def toSeq[A, B](either: Either[A, B]) =
-    either.fold(err => Seq.empty, value => Seq(value))
+    either.fold(_ => Seq.empty, value => Seq(value))
 
   def describe(tasks: ScopedTaskable[_]*) = tasks.map(_.key).map(t => {
     val tabCount = t.label.length match {
@@ -102,8 +103,8 @@ trait SbtUtils {
 
   def loggingDeps = Seq(
     "org.slf4j" % "slf4j-api" % "1.7.12",
-    "ch.qos.logback" % "logback-classic" % "1.1.3",
-    "ch.qos.logback" % "logback-core" % "1.1.3"
+    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "ch.qos.logback" % "logback-core" % "1.2.3"
   )
 }
 
