@@ -9,8 +9,8 @@ def ivyResolver(name: String, urlStr: String) =
   Resolver.url(name, url(urlStr))(Resolver.ivyStylePatterns)
 
 Seq(
-  "org.xerial.sbt" % "sbt-sonatype" % "2.0",
-  "com.github.gseitz" % "sbt-release" % "1.0.6",
+  "org.xerial.sbt" % "sbt-sonatype" % "2.2",
+  "com.github.gseitz" % "sbt-release" % "1.0.7",
   "com.jsuereth" % "sbt-pgp" % "1.1.0",
   "org.foundweekends" % "sbt-bintray" % "0.5.1"
 ) map addSbtPlugin
