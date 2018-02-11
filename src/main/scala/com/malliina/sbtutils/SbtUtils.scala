@@ -1,12 +1,13 @@
 package com.malliina.sbtutils
 
-import bintray.BintrayKeys.{bintrayRepository, bintrayOrganization}
 import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
 import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, releaseProcess, releasePublishArtifactsAction, releaseStepCommand}
 import sbtrelease.ReleaseStateTransformations._
 import xerial.sbt.Sonatype
+
+object SbtUtils extends SbtUtils
 
 trait SbtUtils {
   private val lineSep = sys.props("line.separator")
@@ -18,7 +19,6 @@ trait SbtUtils {
   val gitProjectName = settingKey[String]("Project name on GitHub, defaults to the project name")
   val developerHomePageUrl = settingKey[String]("Developer home page URL, defaults to the GitHub project page")
   val sbtUtilsHelp = taskKey[Unit]("Shows help")
-  //  val publishRelease = taskKey[Unit]("publishSigned followed by sonatypeRelease")
 
   lazy val mavenSettings =
     Sonatype.sonatypeSettings ++
@@ -32,8 +32,6 @@ trait SbtUtils {
   def customPluginSettings = Seq(
     sbtPlugin := true,
     scalaVersion := "2.12.4",
-    bintrayOrganization := None,
-    bintrayRepository := "sbt-plugins",
     publishMavenStyle := false,
     licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
   )
@@ -102,10 +100,8 @@ trait SbtUtils {
   }).mkString(lineSep)
 
   def loggingDeps = Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.12",
+    "org.slf4j" % "slf4j-api" % "1.7.25",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
     "ch.qos.logback" % "logback-core" % "1.2.3"
   )
 }
-
-object SbtUtils extends SbtUtils

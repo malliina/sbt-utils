@@ -1,12 +1,11 @@
 package com.malliina.sbtutils
 
-import bintray.BintrayPlugin
 import sbt.Keys._
 import sbt._
 
 object SbtProjects {
   def mavenPublishProject(name: String) =
-    testableProject(name).settings(SbtUtils.mavenSettings: _*).disablePlugins(BintrayPlugin)
+    testableProject(name).settings(SbtUtils.mavenSettings: _*)
 
   def sbtPlugin(name: String) =
     testableProject(name).settings(SbtUtils.pluginSettings: _*)
