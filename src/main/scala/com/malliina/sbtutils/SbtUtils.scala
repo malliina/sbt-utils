@@ -31,7 +31,7 @@ trait SbtUtils {
 
   def customPluginSettings = Seq(
     sbtPlugin := true,
-    scalaVersion := "2.12.4",
+    scalaVersion := "2.12.6",
     publishMavenStyle := false,
     licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
   )

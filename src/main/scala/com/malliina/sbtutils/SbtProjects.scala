@@ -19,6 +19,6 @@ object SbtProjects {
 
   def basicSettings = Seq(
     resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
 }

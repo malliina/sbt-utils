@@ -1,4 +1,4 @@
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 
 resolvers ++= Seq(
   ivyResolver("bintray-sbt-plugin-releases", "http://dl.bintray.com/content/sbt/sbt-plugin-releases"),
@@ -9,8 +9,8 @@ def ivyResolver(name: String, urlStr: String) =
   Resolver.url(name, url(urlStr))(Resolver.ivyStylePatterns)
 
 Seq(
-  "org.xerial.sbt" % "sbt-sonatype" % "2.2",
-  "com.github.gseitz" % "sbt-release" % "1.0.7",
-  "com.jsuereth" % "sbt-pgp" % "1.1.0",
-  "org.foundweekends" % "sbt-bintray" % "0.5.1"
+  "org.xerial.sbt" % "sbt-sonatype" % "2.3",
+  "com.github.gseitz" % "sbt-release" % "1.0.9",
+  "com.jsuereth" % "sbt-pgp" % "1.1.1",
+  "org.foundweekends" % "sbt-bintray" % "0.5.4"
 ) map addSbtPlugin

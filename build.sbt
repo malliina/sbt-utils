@@ -4,9 +4,9 @@ import sbtrelease.ReleaseStateTransformations._
 lazy val sbtUtils = Project("sbt-utils", file("."))
 
 organization := "com.malliina"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 sbtPlugin := true
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 bintrayOrganization := None
 bintrayRepository := "sbt-plugins"
 publishMavenStyle := false
@@ -28,7 +28,7 @@ releaseProcess := Seq[ReleaseStep](
 )
 
 Seq(
-  "com.jsuereth" % "sbt-pgp" % "1.1.0",
+  "com.jsuereth" % "sbt-pgp" % "1.1.1",
   "org.xerial.sbt" % "sbt-sonatype" % "2.2",
-  "com.github.gseitz" % "sbt-release" % "1.0.7"
+  "com.github.gseitz" % "sbt-release" % "1.0.9"
 ) map addSbtPlugin
