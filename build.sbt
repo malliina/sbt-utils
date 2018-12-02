@@ -6,7 +6,7 @@ lazy val sbtUtils = Project("sbt-utils", file("."))
 organization := "com.malliina"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 sbtPlugin := true
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.7"
 bintrayOrganization := None
 bintrayRepository := "sbt-plugins"
 publishMavenStyle := false
@@ -28,7 +28,7 @@ releaseProcess := Seq[ReleaseStep](
 )
 
 Seq(
-  "com.jsuereth" % "sbt-pgp" % "1.1.1",
-  "org.xerial.sbt" % "sbt-sonatype" % "2.2",
-  "com.github.gseitz" % "sbt-release" % "1.0.9"
+  "com.jsuereth" % "sbt-pgp" % "1.1.2",
+  "org.xerial.sbt" % "sbt-sonatype" % "2.3",
+  "com.github.gseitz" % "sbt-release" % "1.0.10"
 ) map addSbtPlugin
