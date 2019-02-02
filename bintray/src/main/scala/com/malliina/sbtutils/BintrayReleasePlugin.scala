@@ -30,7 +30,6 @@ object BintrayReleasePlugin extends AutoPlugin {
       commitNextVersion,
       pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
     ),
-    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/"
   )
 }

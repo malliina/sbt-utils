@@ -2,10 +2,22 @@ package com.malliina.sbtutils
 
 import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
-import sbt.{AutoPlugin, File, Opts, Path, Setting, settingKey, _}
+import sbt._
 import sbtrelease.ReleasePlugin
 import sbtrelease.ReleaseStateTransformations._
 import xerial.sbt.Sonatype
+
+object MavenCentralKeys {
+  val gitUserName = settingKey[String]("Git username")
+  val developerName = settingKey[String]("Developer name")
+  // has defaults
+  val sonatypeCredentials =
+    settingKey[File]("Path to sonatype credentials, defaults to ~/.ivy2/sonatype.txt")
+  val gitProjectName = settingKey[String]("Project name on GitHub, defaults to the project name")
+  val developerHomePageUrl =
+    settingKey[String]("Developer home page URL, defaults to the GitHub project page")
+  val sbtUtilsHelp = taskKey[Unit]("Shows help")
+}
 
 object MavenCentralPlugin extends AutoPlugin {
   private val lineSep = sys.props("line.separator")
@@ -50,8 +62,7 @@ object MavenCentralPlugin extends AutoPlugin {
       releaseStepCommand("sonatypeReleaseAll"),
       pushChanges
     ),
-    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/"
   )
 
   private def creds(file: File): Seq[DirectCredentials] =
@@ -73,16 +84,4 @@ object MavenCentralPlugin extends AutoPlugin {
         t.label + sep + t.description.getOrElse("No description")
       })
       .mkString(lineSep)
-}
-
-object MavenCentralKeys {
-  val gitUserName = settingKey[String]("Git username")
-  val developerName = settingKey[String]("Developer name")
-  // has defaults
-  val sonatypeCredentials =
-    settingKey[File]("Path to sonatype credentials, defaults to ~/.ivy2/sonatype.txt")
-  val gitProjectName = settingKey[String]("Project name on GitHub, defaults to the project name")
-  val developerHomePageUrl =
-    settingKey[String]("Developer home page URL, defaults to the GitHub project page")
-  val sbtUtilsHelp = taskKey[Unit]("Shows help")
 }

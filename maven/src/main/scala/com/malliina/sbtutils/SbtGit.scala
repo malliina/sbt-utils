@@ -1,4 +1,4 @@
-package com.malliina.sbtutils;
+package com.malliina.sbtutils
 
 object SbtGit extends SbtGit
 
