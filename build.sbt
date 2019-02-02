@@ -7,7 +7,12 @@ val baseSettings = Seq(
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
 
-val commonSettings = baseSettings ++ Seq(
+val pluginSettings = Seq(
+  "com.jsuereth" % "sbt-pgp" % "1.1.2",
+  "com.github.gseitz" % "sbt-release" % "1.0.11"
+) map addSbtPlugin
+
+val commonSettings = baseSettings ++ pluginSettings ++ Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
   sbtPlugin := true,
   bintrayOrganization := None,
@@ -28,19 +33,14 @@ val commonSettings = baseSettings ++ Seq(
   )
 )
 
-val pluginSettings = Seq(
-  "com.jsuereth" % "sbt-pgp" % "1.1.2",
-  "com.github.gseitz" % "sbt-release" % "1.0.11"
-) map addSbtPlugin
-
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
-  .settings(commonSettings ++ pluginSettings)
+  .settings(commonSettings)
   .settings(
     addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
   )
 
 val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
-  .settings(commonSettings ++ pluginSettings)
+  .settings(commonSettings)
   .settings(
     addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
   )
