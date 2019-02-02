@@ -1,4 +1,6 @@
-package com.malliina.sbtutils
+package com.malliina.sbtutils;
+
+object SbtGit extends SbtGit
 
 trait SbtGit {
   def gitPom(projectName: String, gitUser: String, realName: String, developerHomePage: String) =
@@ -22,4 +24,3 @@ trait SbtGit {
         </developer>
       </developers>)
 }
-object SbtGit extends SbtGit

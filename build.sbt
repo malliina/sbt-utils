@@ -1,34 +1,56 @@
 import com.typesafe.sbt.pgp.PgpKeys
 import sbtrelease.ReleaseStateTransformations._
 
-lazy val sbtUtils = Project("sbt-utils", file("."))
-
-organization := "com.malliina"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
-sbtPlugin := true
-scalaVersion := "2.12.7"
-bintrayOrganization := None
-bintrayRepository := "sbt-plugins"
-publishMavenStyle := false
-licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
-  setNextVersion,
-  commitNextVersion,
-  pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
+val baseSettings = Seq(
+  organization := "com.malliina",
+  scalaVersion := "2.12.8",
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
 
-Seq(
+val commonSettings = baseSettings ++ Seq(
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+  sbtPlugin := true,
+  bintrayOrganization := None,
+  bintrayRepository := "sbt-plugins",
+  publishMavenStyle := false,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
+    setNextVersion,
+    commitNextVersion,
+    pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
+  )
+)
+
+val pluginSettings = Seq(
   "com.jsuereth" % "sbt-pgp" % "1.1.2",
-  "org.xerial.sbt" % "sbt-sonatype" % "2.3",
-  "com.github.gseitz" % "sbt-release" % "1.0.10"
+  "com.github.gseitz" % "sbt-release" % "1.0.11"
 ) map addSbtPlugin
+
+val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
+  .settings(commonSettings ++ pluginSettings)
+  .settings(
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
+  )
+
+val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
+  .settings(commonSettings ++ pluginSettings)
+  .settings(
+    addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
+  )
+
+val sbtUtils = Project("sbt-utils", file("."))
+  .aggregate(sbtUtilsMaven, sbtUtilsBintray)
+  .settings(
+    skip in publish := true,
+    publishArtifact := false,
+    packagedArtifacts := Map.empty,
+    publish := {},
+    publishLocal := {}
+  )
