@@ -13,7 +13,7 @@ val pluginSettings = Seq(
 ) map addSbtPlugin
 
 val commonSettings = baseSettings ++ pluginSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.6" % Test,
   sbtPlugin := true,
   bintrayOrganization := None,
   bintrayRepository := "sbt-plugins",

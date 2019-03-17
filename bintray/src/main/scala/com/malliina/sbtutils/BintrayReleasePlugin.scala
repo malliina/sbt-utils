@@ -6,11 +6,17 @@ import sbt._
 import sbtrelease.ReleasePlugin
 import sbtrelease.ReleaseStateTransformations._
 
+object BintrayReleaseKeys {
+  val beforePublish = taskKey[Unit](
+    "Task to run using the release version but before publishing (e.g. generate documentation)")
+}
+
 object BintrayReleasePlugin extends AutoPlugin {
   override def requires = ReleasePlugin
   import ReleasePlugin.autoImport._
 
-  val autoImport = ReleasePlugin.autoImport
+  val autoImport = BintrayReleaseKeys
+  import BintrayReleaseKeys.beforePublish
 
   override def projectSettings: Seq[Setting[_]] = Seq(
     sbtPlugin := true,
@@ -23,6 +29,7 @@ object BintrayReleasePlugin extends AutoPlugin {
       inquireVersions,
       runTest,
       setReleaseVersion,
+      releaseStepTask(beforePublish),
       commitReleaseVersion,
       tagRelease,
       publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
