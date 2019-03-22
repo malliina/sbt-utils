@@ -9,7 +9,7 @@ def ivyResolver(name: String, urlStr: String) =
   Resolver.url(name, url(urlStr))(Resolver.ivyStylePatterns)
 
 Seq(
-  "org.xerial.sbt" % "sbt-sonatype" % "2.3",
+  "org.xerial.sbt" % "sbt-sonatype" % "2.5",
   "com.github.gseitz" % "sbt-release" % "1.0.11",
   "com.jsuereth" % "sbt-pgp" % "1.1.1",
   "org.foundweekends" % "sbt-bintray" % "0.5.4"

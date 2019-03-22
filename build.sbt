@@ -13,7 +13,7 @@ val pluginSettings = Seq(
 ) map addSbtPlugin
 
 val commonSettings = baseSettings ++ pluginSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.6" % Test,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.7" % Test,
   sbtPlugin := true,
   bintrayOrganization := None,
   bintrayRepository := "sbt-plugins",
@@ -36,7 +36,7 @@ val commonSettings = baseSettings ++ pluginSettings ++ Seq(
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.5")
   )
 
 val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
