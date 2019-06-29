@@ -25,7 +25,6 @@ object MavenCentralKeys {
 
 object MavenCentralPlugin extends AutoPlugin {
   override def requires = Sonatype && ReleasePlugin
-
   import ReleasePlugin.autoImport._
 
   val autoImport = MavenCentralKeys
@@ -38,6 +37,23 @@ object MavenCentralPlugin extends AutoPlugin {
     }.map(_.toCharArray())
   )
 
+  override def globalSettings: Seq[Def.Setting[_]] = Seq(
+    publishArtifact in Test := false,
+    publishMavenStyle := true,
+    commands += Command.command("releaseArtifacts") { state =>
+      val extracted = Project extract state
+      val ciState = extracted.appendWithoutSession(Seq(
+        releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+        releaseProcess := Seq[ReleaseStep](
+          checkSnapshotDependencies,
+          runTest,
+          publishArtifacts,
+          releaseStepCommand("sonatypeReleaseAll")
+        )), state)
+      Command.process("release with-defaults", ciState)
+    }
+  )
+
   override def projectSettings: Seq[Setting[_]] = Seq(
     gitProjectName := name.value,
     developerHomePageUrl := s"https://github.com/${gitUserName.value}/${gitProjectName.value}",
@@ -48,7 +64,6 @@ object MavenCentralPlugin extends AutoPlugin {
                               developerName.value,
                               developerHomePageUrl.value),
     publishTo := Option(Opts.resolver.sonatypeStaging),
-    publishArtifact in Test := false,
     beforePublish := {},
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     releaseProcess := Seq[ReleaseStep](
@@ -59,7 +74,7 @@ object MavenCentralPlugin extends AutoPlugin {
       releaseStepTask(beforePublish),
       commitReleaseVersion,
       tagRelease,
-      publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
+      publishArtifacts,
       setNextVersion,
       commitNextVersion,
       releaseStepCommand("sonatypeReleaseAll"),
@@ -75,17 +90,7 @@ object MavenCentralPlugin extends AutoPlugin {
       setNextVersion,
       commitNextVersion,
       pushChanges
-    ),
-    commands += Command.command("releaseArtifacts") { state =>
-      val extracted = Project extract state
-      val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
-        checkSnapshotDependencies,
-        runTest,
-        publishArtifacts,
-        releaseStepCommand("sonatypeReleaseAll")
-      )), state)
-      Command.process("release with-defaults", ciState)
-    }
+    )
   )
 
   private def creds(file: File): Seq[DirectCredentials] =
