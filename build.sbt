@@ -16,7 +16,6 @@ val pluginSettings = Seq(
 
 val releaseSettings = Seq(
   publishMavenStyle := false,
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
