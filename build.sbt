@@ -31,19 +31,20 @@ val commonSettings = baseSettings ++ pluginSettings ++ Seq(
     setNextVersion,
     commitNextVersion,
     pushChanges
-  ),
-  commands += Command.command("releaseArtifacts") { state =>
-    val extracted = Project extract state
-    val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      runTest,
-      publishArtifacts
-    )), state)
-    Command.process("release with-defaults", ciState)
-  }
+  )
 )
 
-pgpPassphrase in ThisBuild := sys.env.get("PGP_PASSPHRASE").orElse {
+commands in ThisBuild += Command.command("releaseArtifacts") { state =>
+  val extracted = Project extract state
+  val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    runTest,
+    publishArtifacts
+  )), state)
+  Command.process("release with-defaults", ciState)
+}
+
+pgpPassphrase in Global := sys.env.get("PGP_PASSPHRASE").orElse {
   val file = Path.userHome / ".sbt" / ".pgp"
   if (file.exists()) Option(IO.read(file)) else None
 }.map(_.toCharArray)
