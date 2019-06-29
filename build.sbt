@@ -1,6 +1,8 @@
 import com.typesafe.sbt.pgp.PgpKeys
 import sbtrelease.ReleaseStateTransformations._
 
+val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
+
 val baseSettings = Seq(
   organization := "com.malliina",
   scalaVersion := "2.12.8",
@@ -13,7 +15,7 @@ val pluginSettings = Seq(
 ) map addSbtPlugin
 
 val commonSettings = baseSettings ++ pluginSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.7" % Test,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
   sbtPlugin := true,
   bintrayOrganization := None,
   bintrayRepository := "sbt-plugins",
@@ -26,11 +28,19 @@ val commonSettings = baseSettings ++ pluginSettings ++ Seq(
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
     setNextVersion,
     commitNextVersion,
-    pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
-  )
+    pushChanges
+  ),
+  commands += Command.command("releaseArtifacts") { state =>
+    val extracted = Project extract state
+    val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      runTest,
+      publishArtifacts
+    )), state)
+    Command.process("release with-defaults", ciState)
+  }
 )
 
 pgpPassphrase in ThisBuild := sys.env.get("PGP_PASSPHRASE").orElse {

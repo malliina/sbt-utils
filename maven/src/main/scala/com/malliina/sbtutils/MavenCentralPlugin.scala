@@ -5,6 +5,7 @@ import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
 import sbtrelease.ReleasePlugin
+import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.ReleaseStateTransformations._
 import xerial.sbt.Sonatype
 
@@ -19,6 +20,7 @@ object MavenCentralKeys {
     settingKey[String]("Developer home page URL, defaults to the GitHub project page")
   val beforePublish = taskKey[Unit](
     "Task to run using the release version but before publishing (e.g. generate documentation)")
+  val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 }
 
 object MavenCentralPlugin extends AutoPlugin {
@@ -63,7 +65,27 @@ object MavenCentralPlugin extends AutoPlugin {
       releaseStepCommand("sonatypeReleaseAll"),
       pushChanges
     ),
-    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/"
+    tagReleaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    ),
+    commands += Command.command("releaseArtifacts") { state =>
+      val extracted = Project extract state
+      val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
+        checkSnapshotDependencies,
+        runTest,
+        publishArtifacts,
+        releaseStepCommand("sonatypeReleaseAll")
+      )), state)
+      Command.process("release with-defaults", ciState)
+    }
   )
 
   private def creds(file: File): Seq[DirectCredentials] =

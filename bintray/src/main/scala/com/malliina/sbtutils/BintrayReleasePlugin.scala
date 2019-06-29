@@ -4,11 +4,13 @@ import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
 import sbtrelease.ReleasePlugin
+import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.ReleaseStateTransformations._
 
 object BintrayReleaseKeys {
   val beforePublish = taskKey[Unit](
     "Task to run using the release version but before publishing (e.g. generate documentation)")
+  val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 }
 
 object BintrayReleasePlugin extends AutoPlugin {
@@ -16,7 +18,7 @@ object BintrayReleasePlugin extends AutoPlugin {
   import ReleasePlugin.autoImport._
 
   val autoImport = BintrayReleaseKeys
-  import BintrayReleaseKeys.beforePublish
+  import BintrayReleaseKeys.{beforePublish, tagReleaseProcess}
 
   override def projectSettings: Seq[Setting[_]] = Seq(
     sbtPlugin := true,
@@ -32,11 +34,30 @@ object BintrayReleasePlugin extends AutoPlugin {
       releaseStepTask(beforePublish),
       commitReleaseVersion,
       tagRelease,
-      publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
+      publishArtifacts,
       setNextVersion,
       commitNextVersion,
-      pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
+      pushChanges
     ),
-    resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/"
+    tagReleaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    ),
+    commands += Command.command("releaseArtifacts") { state =>
+      val extracted = Project extract state
+      val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
+        checkSnapshotDependencies,
+        runTest,
+        publishArtifacts
+      )), state)
+      Command.process("release with-defaults", ciState)
+    }
   )
 }
