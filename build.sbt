@@ -34,6 +34,18 @@ val commonSettings = baseSettings ++ pluginSettings ++ Seq(
   )
 )
 
+releaseProcess in ThisBuild := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
+
 commands in ThisBuild += Command.command("releaseArtifacts") { state =>
   val extracted = Project extract state
   val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
@@ -64,7 +76,6 @@ val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(sbtUtilsMaven, sbtUtilsBintray)
   .settings(
-    releaseProcess := Nil,
     skip in publish := true,
     publishArtifact := false,
     packagedArtifacts := Map.empty,
