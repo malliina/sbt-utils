@@ -63,6 +63,7 @@ val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(sbtUtilsMaven, sbtUtilsBintray)
   .settings(
+    releaseProcess := Nil,
     skip in publish := true,
     publishArtifact := false,
     packagedArtifacts := Map.empty,
