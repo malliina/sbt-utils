@@ -1,5 +1,6 @@
 package com.malliina.sbtutils
 
+import com.typesafe.sbt.SbtPgp.autoImport.pgpPassphrase
 import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
@@ -27,6 +28,13 @@ object MavenCentralPlugin extends AutoPlugin {
 
   val autoImport = MavenCentralKeys
   import MavenCentralKeys._
+
+  override def buildSettings: Seq[Setting[_]] = Seq(
+    pgpPassphrase := sys.env.get("PGP_PASSPHRASE").orElse {
+      val file = Path.userHome / ".sbt" / ".pgp"
+      if (file.exists()) Option(IO.read(file)) else None
+    }.map(_.toCharArray())
+  )
 
   override def projectSettings: Seq[Setting[_]] = Seq(
     gitProjectName := name.value,

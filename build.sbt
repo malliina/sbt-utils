@@ -33,6 +33,11 @@ val commonSettings = baseSettings ++ pluginSettings ++ Seq(
   )
 )
 
+pgpPassphrase in ThisBuild := sys.env.get("PGP_PASSPHRASE").orElse {
+  val file = Path.userHome / ".sbt" / ".pgp"
+  if (file.exists()) Option(IO.read(file)) else None
+}.map(_.toCharArray)
+
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(

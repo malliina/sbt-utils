@@ -11,6 +11,6 @@ def ivyResolver(name: String, urlStr: String) =
 Seq(
   "org.xerial.sbt" % "sbt-sonatype" % "2.5",
   "com.github.gseitz" % "sbt-release" % "1.0.11",
-  "com.jsuereth" % "sbt-pgp" % "1.1.1",
+  "com.jsuereth" % "sbt-pgp" % "1.1.2",
   "org.foundweekends" % "sbt-bintray" % "0.5.4"
 ) map addSbtPlugin
