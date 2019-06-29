@@ -14,11 +14,7 @@ val pluginSettings = Seq(
   "com.github.gseitz" % "sbt-release" % "1.0.11"
 ) map addSbtPlugin
 
-val commonSettings = baseSettings ++ pluginSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
-  sbtPlugin := true,
-  bintrayOrganization := None,
-  bintrayRepository := "sbt-plugins",
+val releaseSettings = Seq(
   publishMavenStyle := false,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseProcess := Seq[ReleaseStep](
@@ -34,25 +30,22 @@ val commonSettings = baseSettings ++ pluginSettings ++ Seq(
   )
 )
 
-releaseProcess in ThisBuild := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
+val commonSettings = baseSettings ++ pluginSettings ++ releaseSettings ++ Seq(
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  sbtPlugin := true,
+  bintrayOrganization := None,
+  bintrayRepository := "sbt-plugins"
 )
 
 commands in ThisBuild += Command.command("releaseArtifacts") { state =>
   val extracted = Project extract state
-  val ciState = extracted.appendWithoutSession(Seq(releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    runTest,
-    publishArtifacts
-  )), state)
+  val ciState = extracted.appendWithoutSession(Seq(
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      runTest,
+      publishArtifacts
+    )), state)
   Command.process("release with-defaults", ciState)
 }
 
@@ -75,6 +68,7 @@ val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(sbtUtilsMaven, sbtUtilsBintray)
+  .settings(releaseSettings)
   .settings(
     skip in publish := true,
     publishArtifact := false,
