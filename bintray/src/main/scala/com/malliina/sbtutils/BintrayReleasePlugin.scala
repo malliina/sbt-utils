@@ -9,9 +9,12 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.ReleaseStateTransformations._
 
 object BintrayReleaseKeys {
+  val beforeCommitRelease = taskKey[Unit]("Task to run before the release version is committed")
   val beforePublish = taskKey[Unit](
     "Task to run using the release version but before publishing (e.g. generate documentation)")
+  val afterPublish = taskKey[Unit]("Task to run after artifacts have been published")
   val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
+  val fullReleaseProcess = settingKey[Seq[ReleaseStep]]("Runs the entire release process")
 }
 
 object BintrayReleasePlugin extends AutoPlugin {
@@ -19,7 +22,7 @@ object BintrayReleasePlugin extends AutoPlugin {
   import ReleasePlugin.autoImport._
 
   val autoImport = BintrayReleaseKeys
-  import BintrayReleaseKeys.{beforePublish, tagReleaseProcess}
+  import BintrayReleaseKeys._
 
   override def buildSettings: Seq[Setting[_]] = Seq(
     pgpPassphrase := sys.env.get("PGP_PASSPHRASE").orElse {
@@ -31,6 +34,7 @@ object BintrayReleasePlugin extends AutoPlugin {
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
     publishArtifact in Test := false,
     publishMavenStyle := false,
+    afterPublish := {},
     commands += Command.command("releaseArtifacts") { state =>
       val extracted = Project extract state
       val ciState = extracted.appendWithoutSession(Seq(
@@ -38,7 +42,8 @@ object BintrayReleasePlugin extends AutoPlugin {
         releaseProcess := Seq[ReleaseStep](
           checkSnapshotDependencies,
           runTest,
-          publishArtifacts
+          publishArtifacts,
+          releaseStepTask(afterPublish)
         )), state)
       Command.process("release with-defaults", ciState)
     }
@@ -48,8 +53,10 @@ object BintrayReleasePlugin extends AutoPlugin {
     sbtPlugin := true,
     scalaVersion := "2.12.8",
     licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+    beforePublish := {},
+    afterPublish := {},
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    releaseProcess := Seq[ReleaseStep](
+    fullReleaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
       runTest,
@@ -60,6 +67,7 @@ object BintrayReleasePlugin extends AutoPlugin {
       publishArtifacts,
       setNextVersion,
       commitNextVersion,
+      releaseStepTask(afterPublish),
       pushChanges
     ),
     tagReleaseProcess := Seq[ReleaseStep](
@@ -67,11 +75,14 @@ object BintrayReleasePlugin extends AutoPlugin {
       inquireVersions,
       runTest,
       setReleaseVersion,
+      releaseStepTask(beforeCommitRelease),
       commitReleaseVersion,
       tagRelease,
       setNextVersion,
       commitNextVersion,
       pushChanges
-    )
+    ),
+    releaseProcess := tagReleaseProcess.value,
+    releaseCrossBuild := true
   )
 }

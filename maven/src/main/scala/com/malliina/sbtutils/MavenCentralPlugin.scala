@@ -18,9 +18,12 @@ object MavenCentralKeys {
   val gitProjectName = settingKey[String]("Project name on GitHub, defaults to the project name")
   val developerHomePageUrl =
     settingKey[String]("Developer home page URL, defaults to the GitHub project page")
+  val beforeCommitRelease = taskKey[Unit]("Task to run before the release version is committed")
   val beforePublish = taskKey[Unit](
     "Task to run using the release version but before publishing (e.g. generate documentation)")
+  val afterPublish = taskKey[Unit]("Task to run after artifacts have been published")
   val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
+  val fullReleaseProcess = settingKey[Seq[ReleaseStep]]("Runs the entire release process")
 }
 
 object MavenCentralPlugin extends AutoPlugin {
@@ -40,6 +43,7 @@ object MavenCentralPlugin extends AutoPlugin {
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
     publishArtifact in Test := false,
     publishMavenStyle := true,
+    afterPublish := {},
     commands += Command.command("releaseArtifacts") { state =>
       val extracted = Project extract state
       val ciState = extracted.appendWithoutSession(Seq(
@@ -48,7 +52,8 @@ object MavenCentralPlugin extends AutoPlugin {
           checkSnapshotDependencies,
           runTest,
           publishArtifacts,
-          releaseStepCommand("sonatypeReleaseAll")
+          releaseStepCommand("sonatypeReleaseAll"),
+          releaseStepTask(afterPublish)
         )), state)
       Command.process("release with-defaults", ciState)
     }
@@ -65,8 +70,9 @@ object MavenCentralPlugin extends AutoPlugin {
                               developerHomePageUrl.value),
     publishTo := Option(Opts.resolver.sonatypeStaging),
     beforePublish := {},
+    afterPublish := {},
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    releaseProcess := Seq[ReleaseStep](
+    fullReleaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
       runTest,
@@ -78,6 +84,7 @@ object MavenCentralPlugin extends AutoPlugin {
       setNextVersion,
       commitNextVersion,
       releaseStepCommand("sonatypeReleaseAll"),
+      releaseStepTask(afterPublish),
       pushChanges
     ),
     tagReleaseProcess := Seq[ReleaseStep](
@@ -85,12 +92,15 @@ object MavenCentralPlugin extends AutoPlugin {
       inquireVersions,
       runTest,
       setReleaseVersion,
+      releaseStepTask(beforeCommitRelease),
       commitReleaseVersion,
       tagRelease,
       setNextVersion,
       commitNextVersion,
       pushChanges
-    )
+    ),
+    releaseProcess := tagReleaseProcess.value,
+    releaseCrossBuild := true
   )
 
   private def creds(file: File): Seq[DirectCredentials] =
