@@ -1,3 +1,5 @@
+package com.malliina.nodejs
+
 import sbt.Keys._
 import sbt._
 import complete.DefaultParsers._
