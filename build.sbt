@@ -65,8 +65,14 @@ val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
     addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
   )
 
+val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
+  .settings(commonSettings)
+  .settings(
+    addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.14.0")
+  )
+
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(sbtUtilsMaven, sbtUtilsBintray)
+  .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin)
   .settings(releaseSettings)
   .settings(
     skip in publish := true,
