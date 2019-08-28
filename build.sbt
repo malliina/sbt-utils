@@ -23,6 +23,7 @@ val releaseSettings = Seq(
     inquireVersions,
     runTest,
     setReleaseVersion,
+    releaseStepTask(updateDocs in docs),
     commitReleaseVersion,
     tagRelease,
     setNextVersion,
