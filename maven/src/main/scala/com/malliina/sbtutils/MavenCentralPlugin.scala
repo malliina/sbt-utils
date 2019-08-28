@@ -28,6 +28,7 @@ object MavenCentralKeys {
 
 object MavenCentralPlugin extends AutoPlugin {
   override def requires = Sonatype && ReleasePlugin
+
   import ReleasePlugin.autoImport._
 
   val autoImport = MavenCentralKeys
@@ -51,6 +52,7 @@ object MavenCentralPlugin extends AutoPlugin {
         releaseProcess := Seq[ReleaseStep](
           checkSnapshotDependencies,
           runTest,
+          releaseStepTask(beforePublish),
           publishArtifacts,
           releaseStepCommand("sonatypeReleaseAll"),
           releaseStepTask(afterPublish)
@@ -71,6 +73,7 @@ object MavenCentralPlugin extends AutoPlugin {
     publishTo := Option(Opts.resolver.sonatypeStaging),
     beforePublish := {},
     afterPublish := {},
+    beforeCommitRelease := {},
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     fullReleaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,

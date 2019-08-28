@@ -13,11 +13,11 @@ a couple of values to correctly populate the XML, see *Usage*.
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "0.12.1")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "@VERSION@")
     
 To publish to Bintray:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "0.12.1")
+    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "@VERSION@")
 
 ## Usage
 

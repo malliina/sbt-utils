@@ -1,7 +1,9 @@
 import com.typesafe.sbt.pgp.PgpKeys
 import sbtrelease.ReleaseStateTransformations._
+import scala.sys.process.Process
 
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
+val updateDocs = taskKey[Unit]("Updates README.md")
 
 val baseSettings = Seq(
   organization := "com.malliina",
@@ -71,8 +73,31 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
     addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.14.0")
   )
 
+val docs = project
+  .in(file("mdoc"))
+  .settings(
+    organization := "com.malliina",
+    scalaVersion := "2.12.8",
+    crossScalaVersions -= "2.13.0",
+    skip.in(publish) := true,
+    mdocVariables := Map("VERSION" -> version.value),
+    mdocOut := (baseDirectory in ThisBuild).value,
+    updateDocs := {
+      val log = streams.value.log
+      val outFile = mdocOut.value
+      IO.relativize((baseDirectory in ThisBuild).value, outFile)
+        .getOrElse(sys.error(s"Strange directory: $outFile"))
+      val addStatus = Process(s"git add $outFile").run(log).exitValue()
+      if (addStatus != 0) {
+        sys.error(s"Unexpected status code $addStatus for git commit.")
+      }
+    },
+    updateDocs := updateDocs.dependsOn(mdoc.toTask("")).value
+  )
+  .enablePlugins(MdocPlugin)
+
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin)
+  .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin, docs)
   .settings(releaseSettings)
   .settings(
     skip in publish := true,
