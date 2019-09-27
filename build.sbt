@@ -7,7 +7,7 @@ val updateDocs = taskKey[Unit]("Updates README.md")
 
 val baseSettings = Seq(
   organization := "com.malliina",
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.10",
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
 
@@ -59,7 +59,7 @@ pgpPassphrase in Global := sys.env.get("PGP_PASSPHRASE").orElse {
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.5")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.7")
   )
 
 val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
@@ -78,8 +78,8 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.8",
-    crossScalaVersions -= "2.13.0",
+    scalaVersion := "2.12.10",
+    crossScalaVersions -= "2.13.1",
     skip.in(publish) := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := (baseDirectory in ThisBuild).value,

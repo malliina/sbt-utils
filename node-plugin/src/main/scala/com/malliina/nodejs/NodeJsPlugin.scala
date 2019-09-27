@@ -53,14 +53,15 @@ object NodeJsPlugin extends AutoPlugin {
       .getOrElse(sys.error(s"Unable to resolve node version."))
     val validPrefixes = Seq(s"v$preferredVersion")
     if (validPrefixes.exists(p => nodeVersion.startsWith(p))) {
-      log.out(s"Using node $nodeVersion")
+      log.out(s"Using node $nodeVersion.")
     } else {
-      log.out(s"Node $nodeVersion is unlikely to work. Trying to change version using nvm...")
+      val cmd = s"nvm use $preferredVersion"
+      log.out(s"Node $nodeVersion is unlikely to work. Trying to change version using '$cmd'...")
       try {
-        Process(s"nvm use $preferredVersion").run(log).exitValue()
+        Process(cmd).run(log).exitValue()
       } catch {
         case _: Exception if failMode == FailMode.Warn =>
-          log.err(s"Unable to change node version using nvm.")
+          log.err(s"Unable to change node version to '$preferredVersion' using nvm.")
       }
     }
   }
