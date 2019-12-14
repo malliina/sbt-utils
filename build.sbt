@@ -33,10 +33,10 @@ val releaseSettings = Seq(
 )
 
 val commonSettings = baseSettings ++ pluginSettings ++ releaseSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test,
   sbtPlugin := true,
-//  bintrayOrganization := None,
-//  bintrayRepository := "sbt-plugins"
+  bintrayOrganization := None,
+  bintrayRepository := "sbt-plugins"
 )
 
 commands in ThisBuild += Command.command("releaseArtifacts") { state =>
@@ -60,14 +60,14 @@ val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
     addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.7"),
-    publishTo := Some("GitHub malliina Apache Maven Packages" at "https://maven.pkg.github.com/malliina/sbt-utils")
+//    publishTo := Some("GitHub malliina Apache Maven Packages" at "https://maven.pkg.github.com/malliina/sbt-utils")
   )
 
-//val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
-//  .settings(commonSettings)
-//  .settings(
-//    addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
-//  )
+val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
+  .settings(commonSettings)
+  .settings(
+    addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
+  )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
@@ -99,8 +99,8 @@ val docs = project
   .enablePlugins(MdocPlugin)
 
 val sbtUtils = Project("sbt-utils", file("."))
-//  .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin, docs)
-  .aggregate(sbtUtilsMaven, nodePlugin, docs)
+  .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin, docs)
+//  .aggregate(sbtUtilsMaven, nodePlugin, docs)
   .settings(releaseSettings)
   .settings(
     skip in publish := true,

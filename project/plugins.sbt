@@ -12,6 +12,6 @@ Seq(
   "org.xerial.sbt" % "sbt-sonatype" % "3.7",
   "com.github.gseitz" % "sbt-release" % "1.0.11",
   "com.jsuereth" % "sbt-pgp" % "1.1.2",
-//  "org.foundweekends" % "sbt-bintray" % "0.5.4",
+  "org.foundweekends" % "sbt-bintray" % "0.5.4",
   "org.scalameta" % "sbt-mdoc" % "1.3.2"
 ) map addSbtPlugin
