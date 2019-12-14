@@ -33,7 +33,7 @@ val releaseSettings = Seq(
 )
 
 val commonSettings = baseSettings ++ pluginSettings ++ releaseSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test,
   sbtPlugin := true,
   bintrayOrganization := None,
   bintrayRepository := "sbt-plugins"
@@ -59,7 +59,8 @@ pgpPassphrase in Global := sys.env.get("PGP_PASSPHRASE").orElse {
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.7")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.7"),
+//    publishTo := Some("GitHub malliina Apache Maven Packages" at "https://maven.pkg.github.com/malliina/sbt-utils")
   )
 
 val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
@@ -99,6 +100,7 @@ val docs = project
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin, docs)
+//  .aggregate(sbtUtilsMaven, nodePlugin, docs)
   .settings(releaseSettings)
   .settings(
     skip in publish := true,
