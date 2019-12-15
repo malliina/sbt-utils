@@ -34,6 +34,8 @@ object BintrayReleasePlugin extends AutoPlugin {
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
     publishArtifact in Test := false,
     publishMavenStyle := false,
+    beforeCommitRelease := {},
+    beforePublish := {},
     afterPublish := {},
     commands += Command.command("releaseArtifacts") { state =>
       val extracted = Project extract state
