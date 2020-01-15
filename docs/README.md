@@ -2,11 +2,14 @@
 
 # sbt-utils
 
-This repo contains two SBT plugins that make it easier to publish projects on GitHub to 
-[Maven Central](https://search.maven.org/) and [Bintray](https://bintray.com/).
- 
+A repository of sbt plugins that I find useful.
+
+- sbt-utils-maven for publishing GitHub projects to [Maven Central](https://search.maven.org/)
+- sbt-utils-bintray for publishing to [Bintray](https://bintray.com/)
+- sbt-nodejs for working with Scala and Node.js projects
+
 For Maven Central, [sbt-sonatype](https://github.com/xerial/sbt-sonatype) is used, furthermore the
- POM XML required for Maven Central sync is filled on the user's behalf. The user must provide
+POM XML required for Maven Central sync is filled on the user's behalf. The user must provide
 a couple of values to correctly populate the XML, see *Usage*.
 
 ## Installation
@@ -18,6 +21,10 @@ To publish to Maven Central:
 To publish to Bintray:
 
     addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "@VERSION@")
+    
+The Node.js plugin:
+
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "@VERSION@")
 
 ## Usage
 
@@ -53,6 +60,17 @@ Enable the `BintrayReleasePlugin` autoplugin:
 To publish the artifacts, run: 
 
     sbt release
+
+### Node.js
+
+Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.
+
+    val myApp = project.in(file("."))
+      .enablePlugins(NodeJsPlugin)
+
+Then run e.g.
+
+    front ncu
 
 ### Which one should I use?
 
