@@ -1,13 +1,6 @@
 trait SbtGit {
   def gitPom(projectName: String, gitUser: String, realName: String, developerHomePage: String) =
     (<url>https://github.com/{gitUser}/{projectName}</url>
-      <licenses>
-        <license>
-          <name>MIT License</name>
-          <url>https://opensource.org/licenses/MIT</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
       <scm>
         <url>git@github.com:{gitUser}/{projectName}.git</url>
         <connection>scm:git:git@github.com:{gitUser}/{projectName}.git</connection>
