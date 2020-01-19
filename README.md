@@ -16,15 +16,15 @@ a couple of values to correctly populate the XML, see *Usage*.
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "0.15.6")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "0.15.7")
 
 To publish to Bintray:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "0.15.6")
+    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "0.15.7")
 
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "0.15.6")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "0.15.7")
 
 ## Usage
 
