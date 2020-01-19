@@ -1,7 +1,7 @@
 package com.malliina.sbtutils
 
-import com.typesafe.sbt.SbtPgp.autoImport.pgpPassphrase
-import com.typesafe.sbt.pgp.PgpKeys
+import com.jsuereth.sbtpgp.SbtPgp.autoImport.pgpPassphrase
+import com.jsuereth.sbtpgp.PgpKeys
 import sbt.Keys._
 import sbt._
 import sbtrelease.ReleasePlugin
@@ -20,7 +20,8 @@ object MavenCentralKeys {
     settingKey[String]("Developer home page URL, defaults to the GitHub project page")
   val beforeCommitRelease = taskKey[Unit]("Task to run before the release version is committed")
   val beforePublish = taskKey[Unit](
-    "Task to run using the release version but before publishing (e.g. generate documentation)")
+    "Task to run using the release version but before publishing (e.g. generate documentation)"
+  )
   val afterPublish = taskKey[Unit]("Task to run after artifacts have been published")
   val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
   val fullReleaseProcess = settingKey[Seq[ReleaseStep]]("Runs the entire release process")
@@ -35,10 +36,13 @@ object MavenCentralPlugin extends AutoPlugin {
   import MavenCentralKeys._
 
   override def buildSettings: Seq[Setting[_]] = Seq(
-    pgpPassphrase := sys.env.get("PGP_PASSPHRASE").orElse {
-      val file = Path.userHome / ".sbt" / ".pgp"
-      if (file.exists()) Option(IO.read(file)) else None
-    }.map(_.toCharArray())
+    pgpPassphrase := sys.env
+      .get("PGP_PASSPHRASE")
+      .orElse {
+        val file = Path.userHome / ".sbt" / ".pgp"
+        if (file.exists()) Option(IO.read(file)) else None
+      }
+      .map(_.toCharArray())
   )
 
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
@@ -49,16 +53,20 @@ object MavenCentralPlugin extends AutoPlugin {
     afterPublish := {},
     commands += Command.command("releaseArtifacts") { state =>
       val extracted = Project extract state
-      val ciState = extracted.appendWithoutSession(Seq(
-        releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-        releaseProcess := Seq[ReleaseStep](
-          checkSnapshotDependencies,
-          runTest,
-          releaseStepTask(beforePublish),
-          publishArtifacts,
-          releaseStepCommand("sonatypeReleaseAll"),
-          releaseStepTask(afterPublish)
-        )), state)
+      val ciState = extracted.appendWithoutSession(
+        Seq(
+          releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+          releaseProcess := Seq[ReleaseStep](
+            checkSnapshotDependencies,
+            runTest,
+            releaseStepTask(beforePublish),
+            publishArtifacts,
+            releaseStepCommand("sonatypeReleaseAll"),
+            releaseStepTask(afterPublish)
+          )
+        ),
+        state
+      )
       Command.process("release with-defaults", ciState)
     }
   )
@@ -68,10 +76,12 @@ object MavenCentralPlugin extends AutoPlugin {
     developerHomePageUrl := s"https://github.com/${gitUserName.value}/${gitProjectName.value}",
     sonatypeCredentials := Path.userHome / ".ivy2" / "sonatype.txt",
     credentials ++= creds(sonatypeCredentials.value),
-    pomExtra := SbtGit.gitPom(gitProjectName.value,
-                              gitUserName.value,
-                              developerName.value,
-                              developerHomePageUrl.value),
+    pomExtra := SbtGit.gitPom(
+      gitProjectName.value,
+      gitUserName.value,
+      developerName.value,
+      developerHomePageUrl.value
+    ),
     publishTo := Option(Opts.resolver.sonatypeStaging),
     beforePublish := {},
     afterPublish := {},
