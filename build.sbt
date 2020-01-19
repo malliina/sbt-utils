@@ -60,8 +60,13 @@ val releaseSettings = Seq(
 val commonSettings = baseSettings ++ pluginSettings ++ releaseSettings ++ Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
   sbtPlugin := true,
-  bintrayOrganization := None,
-  bintrayRepository := "sbt-plugins"
+  pomExtra := SbtGit.gitPom(
+    "sbt-utils",
+    "malliina",
+    "Michael Skogberg",
+    "https://github.com/malliina/sbt-utils"
+  ),
+  publishTo := Option(Opts.resolver.sonatypeStaging)
 )
 
 commands in ThisBuild += Command.command("releaseArtifacts") { state =>
@@ -116,3 +121,5 @@ val sbtUtils = Project("sbt-utils", file("."))
     publish := {},
     publishLocal := {}
   )
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
