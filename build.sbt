@@ -1,4 +1,4 @@
-import com.typesafe.sbt.pgp.PgpKeys
+import com.jsuereth.sbtpgp.PgpKeys
 import sbtrelease.ReleaseStateTransformations._
 import scala.sys.process.Process
 
