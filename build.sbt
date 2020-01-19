@@ -42,7 +42,7 @@ val docs = project
   .enablePlugins(MdocPlugin)
 
 val releaseSettings = Seq(
-  publishMavenStyle := false,
+  publishMavenStyle := true,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
