@@ -91,7 +91,7 @@ pgpPassphrase in Global := sys.env
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.7")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.8.1")
   )
 
 val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
