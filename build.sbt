@@ -14,8 +14,8 @@ val baseSettings = Seq(
 )
 
 val pluginSettings = Seq(
-  "com.jsuereth" % "sbt-pgp" % "1.1.2",
-  "com.github.gseitz" % "sbt-release" % "1.0.11"
+  "com.jsuereth" % "sbt-pgp" % "2.0.1",
+  "com.github.gseitz" % "sbt-release" % "1.0.13"
 ) map addSbtPlugin
 
 val docs = project
