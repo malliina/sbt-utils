@@ -108,7 +108,7 @@ val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler-sjs06" % "0.16.0")
+    addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.16.0")
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
