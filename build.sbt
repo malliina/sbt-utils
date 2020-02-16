@@ -119,7 +119,8 @@ val sbtUtils = Project("sbt-utils", file("."))
     publishArtifact := false,
     packagedArtifacts := Map.empty,
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
+    sonatypeProfileName := "com.malliina"
   )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
