@@ -35,11 +35,12 @@ object NodeJsPlugin extends AutoPlugin {
     front := {
       val log = streams.value.log
       val cwd = (crossTarget in (Compile, npmUpdate)).value
-      val args: Seq[String] = spaceDelimited("<arg>").parsed
-      log.info(s"Running '${args.mkString(" ")}' in $cwd...")
+      val args: Seq[String] = canonical(spaceDelimited("<arg>").parsed)
+      val stringified = args.mkString(" ")
+      log.info(s"Running '$stringified' in $cwd...")
       val status = Process(args, cwd).run(log).exitValue()
       if (status != 0) {
-        log.error(s"Exited with status $status.")
+        log.error(s"Command '$stringified' exited with status $status.")
       }
       status
     }
@@ -55,8 +56,10 @@ object NodeJsPlugin extends AutoPlugin {
     if (validPrefixes.exists(p => nodeVersion.startsWith(p))) {
       log.out(s"Using node $nodeVersion.")
     } else {
-      val cmd = s"nvm use $preferredVersion"
-      log.out(s"Node $nodeVersion is unlikely to work. Trying to change version using '$cmd'...")
+      val cmd = canonical(Seq("nvm", "use", preferredVersion))
+      log.out(
+        s"Node $nodeVersion is unlikely to work. Trying to change version using '${cmd.mkString(" ")}'..."
+      )
       try {
         Process(cmd).run(log).exitValue()
       } catch {
@@ -64,6 +67,12 @@ object NodeJsPlugin extends AutoPlugin {
           log.err(s"Unable to change node version to '$preferredVersion' using nvm.")
       }
     }
+  }
+
+  def canonical(cmd: Seq[String]): Seq[String] = {
+    val isWindows = sys.props("os.name").toLowerCase().contains("win")
+    val cmdPrefix = if (isWindows) Seq("cmd", "/c") else Nil
+    cmdPrefix ++ cmd
   }
 }
 
