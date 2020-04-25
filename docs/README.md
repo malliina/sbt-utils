@@ -71,9 +71,3 @@ Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.
 Then run e.g.
 
     front ncu
-
-### Which one should I use?
-
-Maven Central is stable and well-known, however I have not been able to successfully publish SBT 
-plugins there, therefore I use Bintray for SBT plugin artifacts and Maven Central for 
-everything else.

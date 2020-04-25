@@ -58,7 +58,6 @@ val releaseSettings = Seq(
 )
 
 val commonSettings = baseSettings ++ pluginSettings ++ releaseSettings ++ Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
   sbtPlugin := true,
   pomExtra := SbtGit.gitPom(
     "sbt-utils",
@@ -96,19 +95,19 @@ pgpPassphrase in Global := sys.env
 val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.8.1")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.2")
   )
 
 val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
+    addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.6")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.16.0")
+    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler-sjs06" % "0.17.0")
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
