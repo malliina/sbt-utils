@@ -71,3 +71,9 @@ Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.
 Then run e.g.
 
     front ncu
+
+## Releases of these plugins
+
+To release a new version, run:
+
+    sbt release
