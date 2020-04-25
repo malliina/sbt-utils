@@ -8,9 +8,9 @@ A repository of sbt plugins that I find useful.
 - sbt-utils-bintray for publishing to [Bintray](https://bintray.com/)
 - sbt-nodejs for working with Scala and Node.js projects
 
-For Maven Central, [sbt-sonatype](https://github.com/xerial/sbt-sonatype) is used, furthermore the
-POM XML required for Maven Central sync is filled on the user's behalf. The user must provide
-a couple of values to correctly populate the XML, see *Usage*.
+The Maven Central plugin populates the required POM XML and delegates publishing to 
+[sbt-sonatype](https://github.com/xerial/sbt-sonatype). The user must provide a couple of values to correctly populate 
+the POM XML, see *Usage*.
 
 ## Installation
 
