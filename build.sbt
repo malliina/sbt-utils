@@ -9,7 +9,7 @@ val updateDocs = taskKey[Unit]("Updates README.md")
 
 val baseSettings = Seq(
   organization := "com.malliina",
-  scalaVersion := "2.12.10",
+  scalaVersion := "2.12.11",
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
 
@@ -107,7 +107,7 @@ val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler-sjs06" % "0.17.0")
+    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.18.0")
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
