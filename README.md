@@ -8,23 +8,23 @@ A repository of sbt plugins that I find useful.
 - sbt-utils-bintray for publishing to [Bintray](https://bintray.com/)
 - sbt-nodejs for working with Scala and Node.js projects
 
-For Maven Central, [sbt-sonatype](https://github.com/xerial/sbt-sonatype) is used, furthermore the
-POM XML required for Maven Central sync is filled on the user's behalf. The user must provide
-a couple of values to correctly populate the XML, see *Usage*.
+The Maven Central plugin populates the required POM XML and delegates publishing to 
+[sbt-sonatype](https://github.com/xerial/sbt-sonatype). The user must provide a couple of values to correctly populate 
+the POM XML, see *Usage*.
 
 ## Installation
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "0.16.1")
-
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.0.0")
+    
 To publish to Bintray:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "0.16.1")
-
+    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "1.0.0")
+    
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "0.16.1")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.0.0")
 
 ## Usage
 
@@ -41,8 +41,8 @@ Define the following SBT settings in order to populate the Maven POM XML correct
 
     gitUserName := "My GitHub Username Here",
     developerName := "My Name Here"
-
-To publish the artifacts, run:
+    
+To publish the artifacts, run: 
 
     sbt release
 
@@ -56,8 +56,8 @@ Enable the `BintrayReleasePlugin` autoplugin:
 
     val myLibrary = Project("my-library", file("."))
       .enablePlugins(BintrayReleasePlugin)
-
-To publish the artifacts, run:
+      
+To publish the artifacts, run: 
 
     sbt release
 
@@ -71,4 +71,3 @@ Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.
 Then run e.g.
 
     front ncu
-
