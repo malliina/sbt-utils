@@ -7,14 +7,16 @@ ThisBuild / pluginCrossBuild / sbtVersion := "1.2.8"
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 val updateDocs = taskKey[Unit]("Updates README.md")
 
-val baseSettings = Seq(
-  organization := "com.malliina",
-  scalaVersion := "2.12.11",
-  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+inThisBuild(
+  Seq(
+    organization := "com.malliina",
+    scalaVersion := "2.12.13",
+    licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+  )
 )
 
 val pluginSettings = Seq(
-  "com.jsuereth" % "sbt-pgp" % "2.0.1",
+  "com.jsuereth" % "sbt-pgp" % "2.1.1",
   "com.github.gseitz" % "sbt-release" % "1.0.13"
 ) map addSbtPlugin
 
@@ -22,8 +24,8 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.10",
-    crossScalaVersions -= "2.13.1",
+    scalaVersion := "2.12.13",
+    crossScalaVersions -= "2.13.5",
     skip.in(publish) := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := (baseDirectory in ThisBuild).value,
@@ -57,7 +59,7 @@ val releaseSettings = Seq(
   )
 )
 
-val commonSettings = baseSettings ++ pluginSettings ++ releaseSettings ++ Seq(
+val commonSettings = pluginSettings ++ releaseSettings ++ Seq(
   sbtPlugin := true,
   pomExtra := SbtGit.gitPom(
     "sbt-utils",
@@ -92,26 +94,20 @@ pgpPassphrase in Global := sys.env
   }
   .map(_.toCharArray)
 
-val sbtUtilsMaven = Project("sbt-utils-maven", file("maven"))
+val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.2")
-  )
-
-val sbtUtilsBintray = Project("sbt-utils-bintray", file("bintray"))
-  .settings(commonSettings)
-  .settings(
-    addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.6")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.7")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.18.0")
+    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.20.0")
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(sbtUtilsMaven, sbtUtilsBintray, nodePlugin, docs)
+  .aggregate(mavenPlugin, nodePlugin, docs)
   .settings(releaseSettings)
   .settings(
     skip in publish := true,
@@ -121,5 +117,3 @@ val sbtUtils = Project("sbt-utils", file("."))
     publishLocal := {},
     sonatypeProfileName := "com.malliina"
   )
-
-Global / onChangedBuildSource := ReloadOnSourceChanges
