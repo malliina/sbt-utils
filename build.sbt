@@ -26,13 +26,13 @@ val docs = project
     organization := "com.malliina",
     scalaVersion := "2.12.13",
     crossScalaVersions -= "2.13.5",
-    skip.in(publish) := true,
+    publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
-    mdocOut := (baseDirectory in ThisBuild).value,
+    mdocOut := (ThisBuild / baseDirectory).value,
     updateDocs := {
       val log = streams.value.log
       val outFile = mdocOut.value
-      IO.relativize((baseDirectory in ThisBuild).value, outFile)
+      IO.relativize((ThisBuild / baseDirectory).value, outFile)
         .getOrElse(sys.error(s"Strange directory: $outFile"))
       val addStatus = Process(s"git add $outFile").run(log).exitValue()
       if (addStatus != 0) {
@@ -50,7 +50,7 @@ val releaseSettings = Seq(
     inquireVersions,
     runTest,
     setReleaseVersion,
-    releaseStepTask(updateDocs in docs),
+    releaseStepTask(docs / updateDocs),
     commitReleaseVersion,
     tagRelease,
     setNextVersion,
@@ -70,7 +70,7 @@ val commonSettings = pluginSettings ++ releaseSettings ++ Seq(
   publishTo := Option(Opts.resolver.sonatypeStaging)
 )
 
-commands in ThisBuild += Command.command("releaseArtifacts") { state =>
+ThisBuild / commands += Command.command("releaseArtifacts") { state =>
   val extracted = Project extract state
   val ciState = extracted.appendWithoutSession(
     Seq(
@@ -86,7 +86,7 @@ commands in ThisBuild += Command.command("releaseArtifacts") { state =>
   Command.process("release with-defaults", ciState)
 }
 
-pgpPassphrase in Global := sys.env
+Global / pgpPassphrase := sys.env
   .get("PGP_PASSPHRASE")
   .orElse {
     val file = Path.userHome / ".sbt" / ".pgp"
@@ -100,17 +100,26 @@ val mavenPlugin = Project("sbt-utils-maven", file("maven"))
     addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.7")
   )
 
+val bundlerVersion = "0.20.0"
+
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.20.0")
+    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion)
+  )
+
+val bundlerPlugin = Project("sbt-bundler", file("bundler"))
+  .settings(commonSettings)
+  .settings(
+    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion),
+    addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(mavenPlugin, nodePlugin, docs)
+  .aggregate(mavenPlugin, nodePlugin, bundlerPlugin, docs)
   .settings(releaseSettings)
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     publishArtifact := false,
     packagedArtifacts := Map.empty,
     publish := {},

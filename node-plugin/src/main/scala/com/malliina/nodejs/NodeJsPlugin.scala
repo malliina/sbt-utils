@@ -24,7 +24,7 @@ object NodeJsPlugin extends AutoPlugin {
     failMode := FailMode.Warn,
     checkNodeOnStartup := false,
     checkNode := runNodeCheck(preferredNodeVersion.value, streams.value.log, failMode.value),
-    onLoad in Global := (onLoad in Global).value andThen { state =>
+    Global / onLoad := (Global / onLoad).value andThen { state =>
       if (checkNodeOnStartup.value) "checkNode" :: state
       else state
     }
@@ -34,7 +34,7 @@ object NodeJsPlugin extends AutoPlugin {
     ncu := front.toTask(" ncu").value,
     front := {
       val log = streams.value.log
-      val cwd = (crossTarget in (Compile, npmUpdate)).value
+      val cwd = (Compile / npmUpdate / crossTarget).value
       val args: Seq[String] = canonical(spaceDelimited("<arg>").parsed)
       val stringified = args.mkString(" ")
       log.info(s"Running '$stringified' in $cwd...")

@@ -46,7 +46,7 @@ object MavenCentralPlugin extends AutoPlugin {
   )
 
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
-    publishArtifact in Test := false,
+    Test / publishArtifact := false,
     publishMavenStyle := true,
     beforeCommitRelease := {},
     beforePublish := {},
