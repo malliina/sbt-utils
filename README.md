@@ -16,15 +16,15 @@ the POM XML, see *Usage*.
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.1.0")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.2.0")
     
 To publish to Bintray:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "1.1.0")
+    addSbtPlugin("com.malliina" % "sbt-utils-bintray" % "1.2.0")
     
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.1.0")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.2.0")
 
 ## Usage
 
