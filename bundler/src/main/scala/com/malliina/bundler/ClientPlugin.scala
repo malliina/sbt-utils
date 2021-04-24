@@ -1,7 +1,6 @@
 package com.malliina.bundler
 
 import org.apache.ivy.util.ChecksumHelper
-import org.scalajs.linker.interface.Report
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import org.scalajs.sbtplugin.Stage
 import sbt.Keys._
@@ -25,17 +24,10 @@ object ClientPlugin extends AutoPlugin {
     val hashAssets = taskKey[Seq[HashedFile]]("Hashed files")
     val allAssets = taskKey[Seq[File]]("Hashed and non-hashed files")
     val writeAssets = taskKey[Seq[File]]("Writes the assets metadata source file")
-    val sjsTask = settingKey[TaskKey[Attributed[Report]]]("fast or full")
   }
   import autoImport._
   override def projectSettings: Seq[Def.Setting[_]] =
     stageSettings(Stage.FastOpt) ++ stageSettings(Stage.FullOpt) ++ Seq(
-      sjsTask := {
-        scalaJSStage.value match {
-          case Stage.FastOpt => fastLinkJS
-          case Stage.FullOpt => fullLinkJS
-        }
-      },
       assetsPackage := "com.malliina.assets",
       assetsDir := (baseDirectory.value / "target" / "assets").toPath,
       assetsPrefix := "public",

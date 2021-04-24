@@ -126,3 +126,5 @@ val sbtUtils = Project("sbt-utils", file("."))
     publishLocal := {},
     sonatypeProfileName := "com.malliina"
   )
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
