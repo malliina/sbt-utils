@@ -28,13 +28,14 @@ val docs = project
     crossScalaVersions -= "2.13.5",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
-    mdocOut := (ThisBuild / baseDirectory).value,
+    mdocOut := target.value / "docs",
+    mdocExtraArguments += "--no-link-hygiene",
     updateDocs := {
       val log = streams.value.log
-      val outFile = mdocOut.value
-      IO.relativize((ThisBuild / baseDirectory).value, outFile)
-        .getOrElse(sys.error(s"Strange directory: $outFile"))
-      val addStatus = Process(s"git add $outFile").run(log).exitValue()
+      val outFile = mdocOut.value / "README.md"
+      val rootReadme = (ThisBuild / baseDirectory).value / "README.md"
+      IO.copyFile(outFile, rootReadme)
+      val addStatus = Process(s"git add $rootReadme").run(log).exitValue()
       if (addStatus != 0) {
         sys.error(s"Unexpected status code $addStatus for git commit.")
       }

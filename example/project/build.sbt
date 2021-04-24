@@ -1,6 +1,5 @@
 Seq(
   "ch.epfl.scala" % "sbt-scalajs-bundler" % "0.20.0",
-  "org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0",
   "org.scala-js" % "sbt-scalajs" % "1.5.0",
   "io.spray" % "sbt-revolver" % "0.9.1"
 ).map(addSbtPlugin)
