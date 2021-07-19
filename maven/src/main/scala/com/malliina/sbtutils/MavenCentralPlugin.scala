@@ -67,7 +67,7 @@ object MavenCentralPlugin extends AutoPlugin {
         ),
         state
       )
-      Command.process("release with-defaults", ciState)
+      Command.process("release cross with-defaults", ciState)
     }
   )
 

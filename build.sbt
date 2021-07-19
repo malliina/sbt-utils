@@ -84,7 +84,7 @@ ThisBuild / commands += Command.command("releaseArtifacts") { state =>
     ),
     state
   )
-  Command.process("release with-defaults", ciState)
+  Command.process("release cross with-defaults", ciState)
 }
 
 Global / pgpPassphrase := sys.env
