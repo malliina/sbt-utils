@@ -117,8 +117,14 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
   )
 
+val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.17.25"
+  )
+
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(mavenPlugin, nodePlugin, bundlerPlugin, docs)
+  .aggregate(mavenPlugin, nodePlugin, bundlerPlugin, codeArtifactPlugin, docs)
   .settings(releaseSettings)
   .settings(
     publish / skip := true,
