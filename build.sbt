@@ -10,22 +10,22 @@ val updateDocs = taskKey[Unit]("Updates README.md")
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := "2.12.13",
+    scalaVersion := "2.12.14",
     licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
   )
 )
 
 val pluginSettings = Seq(
   "com.jsuereth" % "sbt-pgp" % "2.1.1",
-  "com.github.gseitz" % "sbt-release" % "1.0.13"
+  "com.github.sbt" % "sbt-release" % "1.1.0"
 ) map addSbtPlugin
 
 val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.13",
-    crossScalaVersions -= "2.13.5",
+    scalaVersion := "2.12.14",
+    crossScalaVersions -= "2.13.6",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := target.value / "docs",
@@ -99,7 +99,7 @@ Global / pgpPassphrase := sys.env
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.7")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
   )
 
 val bundlerVersion = "0.20.0"
@@ -120,7 +120,7 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.17.25"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.17.38"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
