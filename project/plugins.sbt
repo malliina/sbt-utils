@@ -1,4 +1,4 @@
-scalaVersion := "2.12.14"
+scalaVersion := "2.12.15"
 
 Seq(
   "org.xerial.sbt" % "sbt-sonatype" % "3.9.10",

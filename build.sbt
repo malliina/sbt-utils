@@ -10,7 +10,7 @@ val updateDocs = taskKey[Unit]("Updates README.md")
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := "2.12.14",
+    scalaVersion := "2.12.15",
     licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
   )
 )
