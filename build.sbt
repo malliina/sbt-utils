@@ -2,7 +2,8 @@ import com.jsuereth.sbtpgp.PgpKeys
 import sbtrelease.ReleaseStateTransformations._
 import scala.sys.process.Process
 
-ThisBuild / pluginCrossBuild / sbtVersion := "1.2.8"
+// Uses Def.taskIf which is available only in 1.4.x
+ThisBuild / pluginCrossBuild / sbtVersion := "1.4.9"
 
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 val updateDocs = taskKey[Unit]("Updates README.md")
@@ -24,8 +25,8 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.14",
-    crossScalaVersions -= "2.13.6",
+    scalaVersion := "2.12.15",
+    crossScalaVersions -= "2.13.8",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := target.value / "docs",
@@ -102,7 +103,7 @@ val mavenPlugin = Project("sbt-utils-maven", file("maven"))
     addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
   )
 
-val bundlerVersion = "0.20.0"
+val bundlerVersion = "0.21.0-RC1"
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
@@ -117,14 +118,21 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
   )
 
+val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
+  .dependsOn(bundlerPlugin)
+  .settings(commonSettings)
+  .settings(
+    addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.8.1")
+  )
+
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.17.38"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.17.121"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(mavenPlugin, nodePlugin, bundlerPlugin, codeArtifactPlugin, docs)
+  .aggregate(mavenPlugin, nodePlugin, bundlerPlugin, dockerBundlerPlugin, codeArtifactPlugin, docs)
   .settings(releaseSettings)
   .settings(
     publish / skip := true,

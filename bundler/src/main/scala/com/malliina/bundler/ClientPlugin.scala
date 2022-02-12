@@ -1,13 +1,14 @@
 package com.malliina.bundler
 
 import org.apache.ivy.util.ChecksumHelper
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.Stage
-import sbt.Keys._
-import sbt._
+import sbt.Keys.*
+import sbt.*
+import sbt.nio.Keys._
 import sbt.internal.util.ManagedLogger
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
-import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
+import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport.*
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, StandardCopyOption}
@@ -20,18 +21,32 @@ object ClientPlugin extends AutoPlugin {
     val assetsPackage = settingKey[String]("Package name of generated assets file")
     val assetsDir = settingKey[Path]("Webpack assets dir to serve in server")
     val assetsPrefix = settingKey[String]("Assets prefix")
+    val assetsRoot = settingKey[Path]("Public assets dir")
     val prepTarget = taskKey[Path]("Prep target dir")
     val hashAssets = taskKey[Seq[HashedFile]]("Hashed files")
     val allAssets = taskKey[Seq[File]]("Hashed and non-hashed files")
     val writeAssets = taskKey[Seq[File]]("Writes the assets metadata source file")
   }
+  val start = Keys.start
   import autoImport._
   override def projectSettings: Seq[Def.Setting[_]] =
     stageSettings(Stage.FastOpt) ++ stageSettings(Stage.FullOpt) ++ Seq(
+      start / fileInputs ++=
+        (Compile / sourceDirectories).value.map(_.toGlob / ** / "*.scala") ++
+          (Compile / resourceDirectories).value.map(_.toGlob / **),
       assetsPackage := "com.malliina.assets",
-      assetsDir := (baseDirectory.value / "target" / "assets").toPath,
+      assetsDir := (target.value / "assets").toPath,
       assetsPrefix := "public",
-      prepTarget := Files.createDirectories(assetsDir.value.resolve(assetsPrefix.value))
+      assetsRoot := assetsDir.value.resolve(assetsPrefix.value),
+      prepTarget := Files.createDirectories(assetsRoot.value),
+      start := Def.taskIf {
+        val hasChanges = start.inputFileChanges.hasChanges
+        if (hasChanges) {
+          (Compile / fastOptJS / writeAssets).map(_ => ()).value
+        } else {
+          Def.task(streams.value.log.debug(s"No changes to ${name.value}.")).value
+        }
+      }.value
     )
 
   private def stageSettings(stage: Stage): Seq[Def.Setting[_]] = {
@@ -45,7 +60,7 @@ object ClientPlugin extends AutoPlugin {
         val log = streams.value.log
         files.flatMap {
           file =>
-            val root = assetsDir.value.resolve(assetsPrefix.value)
+            val root = assetsRoot.value
             val relativeFile = file.data.relativeTo(root.toFile).get
             val dest = file.data.toPath
             val extraFiles =
@@ -70,7 +85,7 @@ object ClientPlugin extends AutoPlugin {
         val log = streams.value.log
         files.map { file =>
           val relativeFile = file.data.relativeTo((Compile / npmUpdate / crossTarget).value).get
-          val dest = assetsDir.value.resolve(assetsPrefix.value).resolve(relativeFile.toPath)
+          val dest = assetsRoot.value.resolve(relativeFile.toPath)
           val path = file.data.toPath
           Files.createDirectories(dest.getParent)
           Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING)
