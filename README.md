@@ -75,17 +75,6 @@ You need credentials to publish.
 
 The generated POM XML declares a license of https://opensource.org/licenses/MIT.
 
-### Bintray
-
-Enable the `BintrayReleasePlugin` autoplugin:
-
-    val myLibrary = Project("my-library", file("."))
-      .enablePlugins(BintrayReleasePlugin)
-      
-To publish the artifacts, run: 
-
-    sbt release
-
 ### Node.js
 
 Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.

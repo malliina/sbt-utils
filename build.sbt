@@ -12,7 +12,7 @@ inThisBuild(
   Seq(
     organization := "com.malliina",
     scalaVersion := "2.12.15",
-    licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+    licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
   )
 )
 
@@ -116,7 +116,7 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(
     addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion),
     addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1"),
-    addSbtPlugin("com.malliina" % "live-reload" % "0.3.0")
+    addSbtPlugin("com.malliina" % "live-reload" % "0.3.1")
   )
 
 val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))

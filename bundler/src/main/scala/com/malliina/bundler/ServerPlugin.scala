@@ -1,16 +1,17 @@
 package com.malliina.bundler
 
 import com.malliina.bundler.ClientPlugin.autoImport.writeAssets
+import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
+import com.malliina.live.LiveRevolverPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastOptJS, fullOptJS, scalaJSStage}
 import org.scalajs.sbtplugin.Stage
-import sbt.Keys.*
-import sbt.nio.Keys.*
-import sbt.*
+import sbt.Keys._
+import sbt._
 import spray.revolver.RevolverPlugin.autoImport.reStart
 import spray.revolver.GlobalState
 
 object ServerPlugin extends AutoPlugin {
-  override def requires = LiveRevolverPlugin
+  override def requires: Plugins = LiveRevolverPlugin && FileInputPlugin
   object autoImport {
     val start = Keys.start
     val clientProject = settingKey[Project]("Scala.js project")
@@ -18,9 +19,6 @@ object ServerPlugin extends AutoPlugin {
   import autoImport._
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    start / fileInputs ++=
-      (Compile / sourceDirectories).value.map(_.toGlob / ** / "*.scala") ++
-        (Compile / resourceDirectories).value.map(_.toGlob / **),
     start := Def.taskIf {
       val log = streams.value.log
       val changes = start.inputFileChanges

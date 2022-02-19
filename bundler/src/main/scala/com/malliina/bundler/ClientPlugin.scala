@@ -3,9 +3,8 @@ package com.malliina.bundler
 import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.Stage
-import sbt.Keys.*
-import sbt.*
-import sbt.nio.Keys._
+import sbt.Keys._
+import sbt._
 import sbt.internal.util.ManagedLogger
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport.*
@@ -16,7 +15,7 @@ import java.nio.file.{Files, Path, StandardCopyOption}
 case class HashedFile(path: String, hashedPath: String, originalFile: Path, hashedFile: Path)
 
 object ClientPlugin extends AutoPlugin {
-  override def requires = ScalaJSBundlerPlugin
+  override def requires: Plugins = ScalaJSBundlerPlugin && FileInputPlugin
   object autoImport {
     val assetsPackage = settingKey[String]("Package name of generated assets file")
     val assetsDir = settingKey[Path]("Webpack assets dir to serve in server")
@@ -29,6 +28,7 @@ object ClientPlugin extends AutoPlugin {
   }
   val start = Keys.start
   import autoImport._
+
   override def projectSettings: Seq[Def.Setting[_]] =
     stageSettings(Stage.FastOpt) ++ stageSettings(Stage.FullOpt) ++ Seq(
       webpack / version := "5.65.0",
@@ -40,9 +40,6 @@ object ClientPlugin extends AutoPlugin {
       fullOptJS / webpackConfigFile := Some(baseDirectory.value / "webpack.prod.config.js"),
       Compile / fastOptJS / webpackBundlingMode := BundlingMode.LibraryOnly(),
       Compile / fullOptJS / webpackBundlingMode := BundlingMode.Application,
-      start / fileInputs ++=
-        (Compile / sourceDirectories).value.map(_.toGlob / ** / "*.scala") ++
-          (Compile / resourceDirectories).value.map(_.toGlob / **),
       assetsPackage := "com.malliina.assets",
       assetsDir := (target.value / "assets").toPath,
       assetsPrefix := "public",
