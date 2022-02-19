@@ -6,6 +6,7 @@ A repository of sbt plugins that I find useful.
 
 - sbt-bundler for integrating servers using sbt-revolver with clients built with Scala.js and scalajs-bundler
 - sbt-utils-maven for publishing GitHub projects to [Maven Central](https://search.maven.org/)
+- sbt-utils-bintray for publishing to [Bintray](https://bintray.com/)
 - sbt-nodejs for working with Scala and Node.js projects
 
 The Maven Central plugin populates the required POM XML and delegates publishing to 
@@ -16,15 +17,15 @@ the POM XML, see *Usage*.
 
 To use sbt-bundler:
 
-    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.2.6")
+    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.2.11")
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.2.6")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.2.11")
     
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.2.6")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.2.11")
 
 ## Usage
 
@@ -74,6 +75,17 @@ To publish the artifacts, run:
 You need credentials to publish.
 
 The generated POM XML declares a license of https://opensource.org/licenses/MIT.
+
+### Bintray
+
+Enable the `BintrayReleasePlugin` autoplugin:
+
+    val myLibrary = Project("my-library", file("."))
+      .enablePlugins(BintrayReleasePlugin)
+      
+To publish the artifacts, run: 
+
+    sbt release
 
 ### Node.js
 
