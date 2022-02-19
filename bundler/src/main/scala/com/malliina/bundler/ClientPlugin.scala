@@ -31,6 +31,15 @@ object ClientPlugin extends AutoPlugin {
   import autoImport._
   override def projectSettings: Seq[Def.Setting[_]] =
     stageSettings(Stage.FastOpt) ++ stageSettings(Stage.FullOpt) ++ Seq(
+      webpack / version := "5.65.0",
+      webpackCliVersion := "4.9.1",
+      startWebpackDevServer / version := "4.5.0",
+      webpackEmitSourceMaps := false,
+      scalaJSUseMainModuleInitializer := true,
+      fastOptJS / webpackConfigFile := Some(baseDirectory.value / "webpack.dev.config.js"),
+      fullOptJS / webpackConfigFile := Some(baseDirectory.value / "webpack.prod.config.js"),
+      Compile / fastOptJS / webpackBundlingMode := BundlingMode.LibraryOnly(),
+      Compile / fullOptJS / webpackBundlingMode := BundlingMode.Application,
       start / fileInputs ++=
         (Compile / sourceDirectories).value.map(_.toGlob / ** / "*.scala") ++
           (Compile / resourceDirectories).value.map(_.toGlob / **),

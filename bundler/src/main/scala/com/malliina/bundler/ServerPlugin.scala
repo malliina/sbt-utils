@@ -3,14 +3,14 @@ package com.malliina.bundler
 import com.malliina.bundler.ClientPlugin.autoImport.writeAssets
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastOptJS, fullOptJS, scalaJSStage}
 import org.scalajs.sbtplugin.Stage
-import sbt.Keys._
-import sbt.nio.Keys._
-import sbt._
+import sbt.Keys.*
+import sbt.nio.Keys.*
+import sbt.*
 import spray.revolver.RevolverPlugin.autoImport.reStart
-import spray.revolver.{GlobalState, RevolverPlugin}
+import spray.revolver.GlobalState
 
 object ServerPlugin extends AutoPlugin {
-  override def requires = RevolverPlugin
+  override def requires = LiveRevolverPlugin
   object autoImport {
     val start = Keys.start
     val clientProject = settingKey[Project]("Scala.js project")
@@ -35,6 +35,13 @@ object ServerPlugin extends AutoPlugin {
         Def.task(streams.value.log.info(s"No changes to ${name.value}, no restart.")).value
       }
     }.value,
+    start := Def.taskIf {
+      if (start.inputFileChanges.hasChanges) {
+        refreshBrowsers.value
+      } else {
+        Def.task(streams.value.log.info("No backend changes."))
+      }
+    }.dependsOn(start).value,
     Compile / sourceGenerators := (Compile / sourceGenerators).value :+ Def
       .taskDyn[Seq[File]] {
         val sjsStage = (clientProject / scalaJSStage).value match {

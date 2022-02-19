@@ -115,7 +115,8 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(commonSettings)
   .settings(
     addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion),
-    addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
+    addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1"),
+    addSbtPlugin("com.malliina" % "live-reload" % "0.3.0")
   )
 
 val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
