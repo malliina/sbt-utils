@@ -25,6 +25,7 @@ object ClientPlugin extends AutoPlugin {
     val hashAssets = taskKey[Seq[HashedFile]]("Hashed files")
     val allAssets = taskKey[Seq[File]]("Hashed and non-hashed files")
     val writeAssets = taskKey[Seq[File]]("Writes the assets metadata source file")
+    val isProd = settingKey[Boolean]("True if prod assets are built, false otherwise")
   }
   val start = Keys.start
   import autoImport._
@@ -52,7 +53,8 @@ object ClientPlugin extends AutoPlugin {
         } else {
           Def.task(streams.value.log.debug(s"No changes to ${name.value}.")).value
         }
-      }.value
+      }.value,
+      isProd := (Global / scalaJSStage).value == FullOptStage
     )
 
   private def stageSettings(stage: Stage): Seq[Def.Setting[_]] = {

@@ -1,6 +1,6 @@
 package com.malliina.bundler
 
-import com.malliina.bundler.ClientPlugin.autoImport.assetsRoot
+import com.malliina.bundler.ClientPlugin.autoImport.{assetsPrefix, assetsRoot}
 import com.malliina.bundler.ServerPlugin.autoImport.clientProject
 import com.typesafe.sbt.SbtNativePackager.autoImport.NativePackagerHelper
 import com.typesafe.sbt.packager.Keys.{daemonUser, defaultLinuxInstallLocation, packageName}
@@ -43,6 +43,11 @@ object DockerServerPlugin extends AutoPlugin {
           }
       }
     }.value,
+//    Docker / assetsRoot := {
+//      val dockerDir = (Docker / defaultLinuxInstallLocation).value
+//      val assetsFolder = (clientProject / assetsPrefix).value
+//      s"$dockerDir/$assetsFolder"
+//    },
     Compile / doc / sources := Seq.empty
   )
 
