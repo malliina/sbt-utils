@@ -46,7 +46,7 @@ object ClientPlugin extends AutoPlugin {
       assetsPrefix := "public",
       assetsRoot := assetsDir.value.resolve(assetsPrefix.value),
       prepTarget := Files.createDirectories(assetsRoot.value),
-      start := Def.taskIf {
+      Compile / start := Def.taskIf {
         val hasChanges = start.inputFileChanges.hasChanges
         if (hasChanges) {
           (Compile / fastOptJS / writeAssets).map(_ => ()).value
@@ -91,15 +91,22 @@ object ClientPlugin extends AutoPlugin {
       Compile / stageTask / webpack := {
         val files = (Compile / stageTask / webpack).value
         val log = streams.value.log
-        files.map { file =>
-          val relativeFile = file.data.relativeTo((Compile / npmUpdate / crossTarget).value).get
-          val dest = assetsRoot.value.resolve(relativeFile.toPath)
-          val path = file.data.toPath
-          Files.createDirectories(dest.getParent)
-          Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING)
-          log.debug(s"Wrote '$dest', ${Files.size(path)} bytes.")
-          Files.createDirectories(dest.getParent)
-          file.copy(dest.toFile)(file.metadata)
+        files.map {
+          file =>
+            val relativeFile = file.data.relativeTo((Compile / npmUpdate / crossTarget).value).get
+            val dest = assetsRoot.value.resolve(relativeFile.toPath)
+            val path = file.data.toPath
+            Files.createDirectories(dest.getParent)
+            Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING)
+            log.debug(s"Wrote '$dest', ${Files.size(path)} bytes.")
+            val mapPath = path.resolve(".map")
+            if (Files.exists(mapPath)) {
+              val mapDest = dest.resolve(".map")
+              Files.copy(mapPath, mapDest, StandardCopyOption.REPLACE_EXISTING)
+              log.debug(s"Wrote '$mapDest', ${Files.size(mapDest)} bytes.")
+            }
+            Files.createDirectories(dest.getParent)
+            file.copy(dest.toFile)(file.metadata)
         }
       },
       Compile / stageTask / webpack := (Compile / stageTask / webpack).dependsOn(prepTarget).value,
