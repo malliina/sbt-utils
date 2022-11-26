@@ -11,7 +11,7 @@ val updateDocs = taskKey[Unit]("Updates README.md")
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.12.17",
     licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
   )
 )
@@ -25,8 +25,8 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.15",
-    crossScalaVersions -= "2.13.8",
+    scalaVersion := "2.12.17",
+    crossScalaVersions -= "2.13.10",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := target.value / "docs",
@@ -100,10 +100,10 @@ Global / pgpPassphrase := sys.env
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.15")
   )
 
-val bundlerVersion = "0.21.0-RC1"
+val bundlerVersion = "0.21.1"
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
@@ -116,7 +116,7 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(
     addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion),
     addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1"),
-    addSbtPlugin("com.malliina" % "live-reload" % "0.3.1")
+    addSbtPlugin("com.malliina" % "live-reload" % "0.4.0")
   )
 
 val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
@@ -129,7 +129,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.17.121"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.18.24"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
