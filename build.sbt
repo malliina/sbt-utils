@@ -116,14 +116,14 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(
     addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion),
     addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1"),
-    addSbtPlugin("com.malliina" % "live-reload" % "0.4.0")
+    addSbtPlugin("com.malliina" % "live-reload" % "0.5.0")
   )
 
 val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.8.1")
+    addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.9.7")
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
