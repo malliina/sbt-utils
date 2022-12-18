@@ -123,7 +123,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.9.7")
+    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.7")
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
