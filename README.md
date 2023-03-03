@@ -16,15 +16,15 @@ the POM XML, see *Usage*.
 
 To use sbt-bundler:
 
-    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.4.0")
+    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.5.0")
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.4.0")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.5.0")
     
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.4.0")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.5.0")
 
 ## Usage
 
