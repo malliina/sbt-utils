@@ -30,17 +30,17 @@ object ClientPlugin extends AutoPlugin {
   val start = Keys.start
   import autoImport._
 
-  override def projectSettings: Seq[Def.Setting[_]] =
+  override def projectSettings: Seq[Def.Setting[?]] =
     stageSettings(Stage.FastOpt) ++ stageSettings(Stage.FullOpt) ++ Seq(
       webpack / version := "5.65.0",
       webpackCliVersion := "4.9.1",
       startWebpackDevServer / version := "4.5.0",
       webpackEmitSourceMaps := false,
       scalaJSUseMainModuleInitializer := true,
-      fastOptJS / webpackConfigFile := Some(baseDirectory.value / "webpack.dev.config.js"),
-      fullOptJS / webpackConfigFile := Some(baseDirectory.value / "webpack.prod.config.js"),
-      Compile / fastOptJS / webpackBundlingMode := BundlingMode.LibraryOnly(),
-      Compile / fullOptJS / webpackBundlingMode := BundlingMode.Application,
+      fastLinkJS / webpackConfigFile := Some(baseDirectory.value / "webpack.dev.config.js"),
+      fullLinkJS / webpackConfigFile := Some(baseDirectory.value / "webpack.prod.config.js"),
+      Compile / fastLinkJS / webpackBundlingMode := BundlingMode.LibraryOnly(),
+      Compile / fullLinkJS / webpackBundlingMode := BundlingMode.Application,
       assetsPackage := "com.malliina.assets",
       assetsDir := (target.value / "assets").toPath,
       assetsPrefix := "public",
@@ -49,7 +49,7 @@ object ClientPlugin extends AutoPlugin {
       Compile / start := Def.taskIf {
         val hasChanges = start.inputFileChanges.hasChanges
         if (hasChanges) {
-          (Compile / fastOptJS / writeAssets).map(_ => ()).value
+          (Compile / fastLinkJS / writeAssets).map(_ => ()).value
         } else {
           Def.task(streams.value.log.debug(s"No changes to ${name.value}.")).value
         }
@@ -57,56 +57,54 @@ object ClientPlugin extends AutoPlugin {
       isProd := (Global / scalaJSStage).value == FullOptStage
     )
 
-  private def stageSettings(stage: Stage): Seq[Def.Setting[_]] = {
+  private def stageSettings(stage: Stage): Seq[Def.Setting[?]] = {
     val stageTask = stage match {
-      case Stage.FastOpt => fastOptJS
-      case Stage.FullOpt => fullOptJS
+      case Stage.FastOpt => fastLinkJS
+      case Stage.FullOpt => fullLinkJS
     }
     Seq(
       (Compile / stageTask / hashAssets) := {
         val files = (Compile / stageTask / webpack).value
         val log = streams.value.log
-        files.flatMap {
-          file =>
-            val root = assetsRoot.value
-            val relativeFile = file.data.relativeTo(root.toFile).get
-            val dest = file.data.toPath
-            val extraFiles =
-              if (!relativeFile.toPath.startsWith("static")) {
-                val hashed = prepFile(dest, log)
-                List(
-                  HashedFile(
-                    root.relativize(dest).toString.replace('\\', '/'),
-                    root.relativize(hashed).toString.replace('\\', '/'),
-                    dest,
-                    hashed
-                  )
+        files.flatMap { file =>
+          val root = assetsRoot.value
+          val relativeFile = file.data.relativeTo(root.toFile).get
+          val dest = file.data.toPath
+          val extraFiles =
+            if (!relativeFile.toPath.startsWith("static")) {
+              val hashed = prepFile(dest, log)
+              List(
+                HashedFile(
+                  root.relativize(dest).toString.replace('\\', '/'),
+                  root.relativize(hashed).toString.replace('\\', '/'),
+                  dest,
+                  hashed
                 )
-              } else {
-                Nil
-              }
-            extraFiles
+              )
+            } else {
+              Nil
+            }
+          extraFiles
         }
       },
       Compile / stageTask / webpack := {
         val files = (Compile / stageTask / webpack).value
         val log = streams.value.log
-        files.map {
-          file =>
-            val relativeFile = file.data.relativeTo((Compile / npmUpdate / crossTarget).value).get
-            val dest = assetsRoot.value.resolve(relativeFile.toPath)
-            val path = file.data.toPath
-            Files.createDirectories(dest.getParent)
-            Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING)
-            log.debug(s"Wrote '$dest', ${Files.size(path)} bytes.")
-            val mapPath = path.resolve(".map")
-            if (Files.exists(mapPath)) {
-              val mapDest = dest.resolve(".map")
-              Files.copy(mapPath, mapDest, StandardCopyOption.REPLACE_EXISTING)
-              log.debug(s"Wrote '$mapDest', ${Files.size(mapDest)} bytes.")
-            }
-            Files.createDirectories(dest.getParent)
-            file.copy(dest.toFile)(file.metadata)
+        files.map { file =>
+          val relativeFile = file.data.relativeTo((Compile / npmUpdate / crossTarget).value).get
+          val dest = assetsRoot.value.resolve(relativeFile.toPath)
+          val path = file.data.toPath
+          Files.createDirectories(dest.getParent)
+          Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING)
+          log.debug(s"Wrote '$dest', ${Files.size(path)} bytes.")
+          val mapPath = path.resolve(".map")
+          if (Files.exists(mapPath)) {
+            val mapDest = dest.resolve(".map")
+            Files.copy(mapPath, mapDest, StandardCopyOption.REPLACE_EXISTING)
+            log.debug(s"Wrote '$mapDest', ${Files.size(mapDest)} bytes.")
+          }
+          Files.createDirectories(dest.getParent)
+          file.copy(dest.toFile)(file.metadata)
         }
       },
       Compile / stageTask / webpack := (Compile / stageTask / webpack).dependsOn(prepTarget).value,

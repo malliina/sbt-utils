@@ -35,7 +35,7 @@ object MavenCentralPlugin extends AutoPlugin {
   val autoImport = MavenCentralKeys
   import MavenCentralKeys._
 
-  override def buildSettings: Seq[Setting[_]] = Seq(
+  override def buildSettings: Seq[Setting[?]] = Seq(
     pgpPassphrase := sys.env
       .get("PGP_PASSPHRASE")
       .orElse {
@@ -45,7 +45,7 @@ object MavenCentralPlugin extends AutoPlugin {
       .map(_.toCharArray())
   )
 
-  override def globalSettings: Seq[Def.Setting[_]] = Seq(
+  override def globalSettings: Seq[Def.Setting[?]] = Seq(
     Test / publishArtifact := false,
     publishMavenStyle := true,
     beforeCommitRelease := {},
@@ -71,7 +71,7 @@ object MavenCentralPlugin extends AutoPlugin {
     }
   )
 
-  override def projectSettings: Seq[Setting[_]] = Seq(
+  override def projectSettings: Seq[Setting[?]] = Seq(
     gitProjectName := name.value,
     developerHomePageUrl := s"https://github.com/${gitUserName.value}/${gitProjectName.value}",
     sonatypeCredentials := Path.userHome / ".ivy2" / "sonatype.txt",

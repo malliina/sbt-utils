@@ -100,21 +100,16 @@ Global / pgpPassphrase := sys.env
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.15")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
   )
-
-val bundlerVersion = "0.21.1"
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
-  .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion)
-  )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % bundlerVersion),
+    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1"),
     addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1"),
     addSbtPlugin("com.malliina" % "live-reload" % "0.5.0")
   )
@@ -123,13 +118,13 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.7")
+    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.18.24"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.20.16"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))

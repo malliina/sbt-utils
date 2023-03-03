@@ -6,9 +6,9 @@ import sbt.nio.Keys.fileInputs
 
 object FileInputPlugin extends AutoPlugin {
   val start = Keys.start
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+  override def projectSettings: Seq[Def.Setting[?]] = Seq(
     start / fileInputs ++=
       (Compile / sourceDirectories).value.map(_.toGlob / ** / "*.scala") ++
         (Compile / resourceDirectories).value.map(_.toGlob / **)
-    )
+  )
 }

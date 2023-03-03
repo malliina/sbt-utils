@@ -3,10 +3,10 @@ package com.malliina.bundler
 import com.malliina.bundler.ClientPlugin.autoImport.writeAssets
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastOptJS, fullOptJS, scalaJSStage}
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastLinkJS, fullLinkJS, scalaJSStage}
 import org.scalajs.sbtplugin.Stage
-import sbt.Keys._
-import sbt._
+import sbt.Keys.*
+import sbt.*
 import spray.revolver.RevolverPlugin.autoImport.reStart
 import spray.revolver.GlobalState
 
@@ -18,7 +18,7 @@ object ServerPlugin extends AutoPlugin {
   }
   import autoImport._
 
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+  override def projectSettings: Seq[Def.Setting[?]] = Seq(
     start := Def.taskIf {
       val log = streams.value.log
       val changes = start.inputFileChanges
@@ -43,8 +43,8 @@ object ServerPlugin extends AutoPlugin {
     Compile / sourceGenerators := (Compile / sourceGenerators).value :+ Def
       .taskDyn[Seq[File]] {
         val sjsStage = (clientProject / scalaJSStage).value match {
-          case Stage.FastOpt => fastOptJS
-          case Stage.FullOpt => fullOptJS
+          case Stage.FastOpt => fastLinkJS
+          case Stage.FullOpt => fullLinkJS
         }
         clientProject.value / Compile / sjsStage / writeAssets
       }

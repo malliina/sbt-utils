@@ -3,7 +3,6 @@ package com.malliina.nodejs
 import sbt.Keys._
 import sbt._
 import complete.DefaultParsers._
-import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport.npmUpdate
 
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -15,11 +14,12 @@ object NodeJsPlugin extends AutoPlugin {
       settingKey[FailMode]("Whether to warn or fail hard when the node version is unsupported")
     val ncu = taskKey[Int]("Runs npm-check-updates")
     val front = inputKey[Int]("Runs the input as a command in the frontend working directory")
+    val cwd = settingKey[File]("The frontend working directory")
     val preferredNodeVersion = settingKey[String]("Preferred node version, e.g. '8'")
   }
   import autoImport._
 
-  override val globalSettings: Seq[Def.Setting[_]] = Seq(
+  override val globalSettings: Seq[Def.Setting[?]] = Seq(
     preferredNodeVersion := "10",
     failMode := FailMode.Warn,
     checkNodeOnStartup := false,
@@ -31,16 +31,14 @@ object NodeJsPlugin extends AutoPlugin {
   )
 
   override val projectSettings = Seq(
+    cwd := baseDirectory.value,
     ncu := front.toTask(" ncu").value,
     front := {
       val log = streams.value.log
-      val cwd = (Compile / npmUpdate / crossTarget).value
-      val args: Seq[String] = canonical(spaceDelimited("<arg>").parsed)
-      val stringified = args.mkString(" ")
-      log.info(s"Running '$stringified' in $cwd...")
-      val status = Process(args, cwd).run(log).exitValue()
+      val args: Seq[String] = IO.canonical(spaceDelimited("<arg>").parsed)
+      val status = IO.runProcess(args, cwd.value, log)
       if (status != 0) {
-        log.error(s"Command '$stringified' exited with status $status.")
+        log.error(s"Command '${args.mkString(" ")}' exited with status $status.")
       }
       status
     }
@@ -56,7 +54,7 @@ object NodeJsPlugin extends AutoPlugin {
     if (validPrefixes.exists(p => nodeVersion.startsWith(p))) {
       log.out(s"Using node $nodeVersion.")
     } else {
-      val cmd = canonical(Seq("nvm", "use", preferredVersion))
+      val cmd = IO.canonical(Seq("nvm", "use", preferredVersion))
       log.out(
         s"Node $nodeVersion is unlikely to work. Trying to change version using '${cmd.mkString(" ")}'..."
       )
@@ -69,11 +67,6 @@ object NodeJsPlugin extends AutoPlugin {
     }
   }
 
-  def canonical(cmd: Seq[String]): Seq[String] = {
-    val isWindows = sys.props("os.name").toLowerCase().contains("win")
-    val cmdPrefix = if (isWindows) Seq("cmd", "/c") else Nil
-    cmdPrefix ++ cmd
-  }
 }
 
 sealed trait FailMode

@@ -5,12 +5,7 @@ import com.malliina.bundler.ServerPlugin.autoImport.clientProject
 import com.typesafe.sbt.SbtNativePackager.autoImport.NativePackagerHelper
 import com.typesafe.sbt.packager.Keys.{daemonUser, defaultLinuxInstallLocation, packageName}
 import com.typesafe.sbt.packager.archetypes.JavaServerAppPackaging
-import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.{
-  Docker,
-  dockerBaseImage,
-  dockerExposedPorts,
-  dockerVersion
-}
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.{Docker, dockerBaseImage, dockerExposedPorts, dockerVersion}
 import com.typesafe.sbt.packager.docker.DockerVersion
 import sbt.Keys.*
 import sbt.{AutoPlugin, Compile, Def, Plugins, Project}
@@ -23,7 +18,7 @@ object DockerServerPlugin extends AutoPlugin {
 
   override def requires: Plugins = ServerPlugin && JavaServerAppPackaging
 
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+  override def projectSettings: Seq[Def.Setting[?]] = Seq(
     dockerVersion := Option(DockerVersion(19, 3, 5, None)),
     dockerBaseImage := "openjdk:11",
     dockerExposedPorts ++= Seq(prodPort),
@@ -36,10 +31,9 @@ object DockerServerPlugin extends AutoPlugin {
       Def.task {
         NativePackagerHelper
           .directory((p / Compile / assetsRoot).value.toFile)
-          .map {
-            case (file, path) =>
-              val unixPath = path.replace('\\', '/')
-              (file, s"$dockerInstallDir/$unixPath")
+          .map { case (file, path) =>
+            val unixPath = path.replace('\\', '/')
+            (file, s"$dockerInstallDir/$unixPath")
           }
       }
     }.value,

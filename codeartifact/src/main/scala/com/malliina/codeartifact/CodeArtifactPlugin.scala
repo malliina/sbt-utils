@@ -10,7 +10,9 @@ object CodeArtifactKeys {
   val caDomain = settingKey[String]("CodeArtifact domain")
   val caDomainOwner = settingKey[String]("AWS account ID")
   val caRepo = settingKey[String]("CodeArtifact repository name")
-  val caRepoHost = settingKey[String]("CodeArtifact repo host, e.g. xxx-111.d.codeartifact.eu-west-1.amazonaws.com")
+  val caRepoHost = settingKey[String](
+    "CodeArtifact repo host, e.g. xxx-111.d.codeartifact.eu-west-1.amazonaws.com"
+  )
   val caRepoUrl = settingKey[String]("CodeArtifact repo URL")
 }
 
@@ -21,7 +23,7 @@ object CodeArtifactPlugin extends AutoPlugin {
   val autoImport = CodeArtifactKeys
   import CodeArtifactKeys._
 
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+  override def projectSettings: Seq[Def.Setting[?]] = Seq(
     resolvers += "CodeArtifact" at caRepoUrl.value,
     publishMavenStyle := true,
     publishTo := Some("CodeArtifact" at caRepoUrl.value),
