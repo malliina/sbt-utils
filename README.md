@@ -16,15 +16,15 @@ the POM XML, see *Usage*.
 
 To use sbt-bundler:
 
-    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.5.0")
+    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.6.0")
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.5.0")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.6.0")
     
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.5.0")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.6.0")
 
 ## Usage
 
@@ -85,3 +85,6 @@ Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.
 Then run e.g.
 
     front ncu
+
+Set sbt setting `cwd` to your frontend working directory. (Typically, the directory containing `package.json`.)
+By default, it is `baseDirectory`.
