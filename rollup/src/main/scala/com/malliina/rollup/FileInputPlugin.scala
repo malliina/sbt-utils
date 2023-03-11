@@ -1,11 +1,11 @@
-package com.malliina.bundler
+package com.malliina.rollup
 
 import sbt._
 import sbt.Keys.{resourceDirectories, sourceDirectories}
 import sbt.nio.Keys.fileInputs
 
 object FileInputPlugin extends AutoPlugin {
-  val start = BundlerKeys.start
+  val start = CommonKeys.start
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     start / fileInputs ++=
       (Compile / sourceDirectories).value.map(_.toGlob / ** / "*.scala") ++

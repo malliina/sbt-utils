@@ -4,8 +4,8 @@ import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.Stage
 import sbt.Keys._
-import sbt._
-import sbt.internal.util.ManagedLogger
+import sbt.{Keys => _, _}
+import sbt.util.Logger
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport.*
 
@@ -27,7 +27,7 @@ object ClientPlugin extends AutoPlugin {
     val writeAssets = taskKey[Seq[File]]("Writes the assets metadata source file")
     val isProd = settingKey[Boolean]("True if prod assets are built, false otherwise")
   }
-  val start = Keys.start
+  val start = BundlerKeys.start
   import autoImport._
 
   override def projectSettings: Seq[Def.Setting[?]] =
@@ -95,13 +95,11 @@ object ClientPlugin extends AutoPlugin {
           val dest = assetsRoot.value.resolve(relativeFile.toPath)
           val path = file.data.toPath
           Files.createDirectories(dest.getParent)
-          Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING)
-          log.debug(s"Wrote '$dest', ${Files.size(path)} bytes.")
+          copyFile(path, dest, log)
           val mapPath = path.resolve(".map")
           if (Files.exists(mapPath)) {
             val mapDest = dest.resolve(".map")
-            Files.copy(mapPath, mapDest, StandardCopyOption.REPLACE_EXISTING)
-            log.debug(s"Wrote '$mapDest', ${Files.size(mapDest)} bytes.")
+            copyFile(mapPath, mapDest, log)
           }
           Files.createDirectories(dest.getParent)
           file.copy(dest.toFile)(file.metadata)
@@ -128,7 +126,12 @@ object ClientPlugin extends AutoPlugin {
     )
   }
 
-  def prepFile(file: Path, log: ManagedLogger) = {
+  private def copyFile(from: Path, to: Path, log: Logger): Unit = {
+    Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING)
+    log.debug(s"Wrote '$to', ${Files.size(from)} bytes.")
+  }
+
+  private def prepFile(file: Path, log: Logger) = {
     val algorithm = "md5"
     val checksum = ChecksumHelper.computeAsString(file.toFile, algorithm)
     val checksumFile = file.getParent.resolve(s"${file.getFileName}.$algorithm")
@@ -145,12 +148,12 @@ object ClientPlugin extends AutoPlugin {
     hashedFile
   }
 
-  def makeAssetsFile(
+  private def makeAssetsFile(
     base: File,
     packageName: String,
     prefix: String,
     hashes: Seq[HashedFile],
-    log: ManagedLogger
+    log: Logger
   ): Set[File] = {
     val inlined = hashes.map(h => s""""${h.path}" -> "${h.hashedPath}"""").mkString(", ")
     val objectName = "HashedAssets"
@@ -169,6 +172,6 @@ object ClientPlugin extends AutoPlugin {
     Set(destFile)
   }
 
-  def destDir(base: File, packageName: String): File =
+  private def destDir(base: File, packageName: String): File =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
 }

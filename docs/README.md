@@ -85,3 +85,6 @@ Plugin `NodeJsPlugin` lets you run npm commands from the sbt shell.
 Then run e.g.
 
     front ncu
+
+Set sbt setting `cwd` to your frontend working directory. (Typically, the directory containing `package.json`.)
+By default, it is `baseDirectory`.

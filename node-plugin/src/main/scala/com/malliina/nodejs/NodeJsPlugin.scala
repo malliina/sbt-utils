@@ -1,7 +1,7 @@
 package com.malliina.nodejs
 
 import sbt.Keys._
-import sbt._
+import sbt.{IO => _, _}
 import complete.DefaultParsers._
 
 import scala.sys.process.{Process, ProcessLogger}

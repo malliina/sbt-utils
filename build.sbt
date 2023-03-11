@@ -97,6 +97,8 @@ Global / pgpPassphrase := sys.env
   }
   .map(_.toCharArray)
 
+val common = project.in(file("common"))
+
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
@@ -109,9 +111,21 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1"),
-    addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1"),
-    addSbtPlugin("com.malliina" % "live-reload" % "0.5.0")
+    Seq(
+      "ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1",
+      "com.malliina" % "live-reload" % "0.5.0"
+    ) map addSbtPlugin
+  )
+
+val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
+  .dependsOn(common)
+  .settings(commonSettings)
+  .settings(
+    Seq(
+      "com.malliina" % "live-reload" % "0.5.0",
+      "org.scala-js" % "sbt-scalajs" % "1.13.0",
+      "com.eed3si9n" % "sbt-buildinfo" % "0.11.0"
+    ) map addSbtPlugin
   )
 
 val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
@@ -124,11 +138,19 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.20.16"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.20.17"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
-  .aggregate(mavenPlugin, nodePlugin, bundlerPlugin, dockerBundlerPlugin, codeArtifactPlugin, docs)
+  .aggregate(
+    mavenPlugin,
+    nodePlugin,
+    bundlerPlugin,
+    revolverRollupPlugin,
+    dockerBundlerPlugin,
+    codeArtifactPlugin,
+    docs
+  )
   .settings(releaseSettings)
   .settings(
     publish / skip := true,

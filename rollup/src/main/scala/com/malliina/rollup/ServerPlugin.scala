@@ -1,19 +1,20 @@
-package com.malliina.bundler
+package com.malliina.rollup
 
-import com.malliina.bundler.ClientPlugin.autoImport.writeAssets
+import CommonKeys.build
+import HashPlugin.autoImport.hash
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastLinkJS, fullLinkJS, scalaJSStage}
 import org.scalajs.sbtplugin.Stage
-import sbt.Keys.*
-import sbt.*
-import spray.revolver.RevolverPlugin.autoImport.reStart
+import sbt.Keys._
+import sbt._
 import spray.revolver.GlobalState
+import spray.revolver.RevolverPlugin.autoImport.reStart
 
 object ServerPlugin extends AutoPlugin {
-  override def requires: Plugins = LiveRevolverPlugin && FileInputPlugin
+  override def requires: Plugins = LiveRevolverPlugin && FileInputPlugin && HashPlugin
   object autoImport {
-    val start = BundlerKeys.start
+    val start = CommonKeys.start
     val clientProject = settingKey[Project]("Scala.js project")
   }
   import autoImport._
@@ -28,7 +29,7 @@ object ServerPlugin extends AutoPlugin {
       val fileWord = if (changes.hasChanges) "" else "not"
       log.debug(s"${name.value} ${word}running. Files ${fileWord}changed.")
       if (changes.hasChanges || !isRunning) {
-        reStart.toTask(" ").value
+        reStart.toTask(" ").dependsOn(hash).value
       } else {
         Def.task(streams.value.log.info(s"No changes to ${name.value}, no restart.")).value
       }
@@ -37,17 +38,20 @@ object ServerPlugin extends AutoPlugin {
       if (start.inputFileChanges.hasChanges) {
         refreshBrowsers.value
       } else {
-        Def.task(streams.value.log.info("No backend changes."))
+        Def.task(streams.value.log.info("No backend changes.")).value
       }
     }.dependsOn(start).value,
-    Compile / sourceGenerators := (Compile / sourceGenerators).value :+ Def
-      .taskDyn[Seq[File]] {
-        val sjsStage = (clientProject / scalaJSStage).value match {
+    watchSources := watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value,
+    hash := hash
+      .dependsOn(Def.taskDyn {
+        val jsTask = (clientProject / scalaJSStage).value match {
           case Stage.FastOpt => fastLinkJS
           case Stage.FullOpt => fullLinkJS
         }
-        clientProject.value / Compile / sjsStage / writeAssets
-      }
-      .taskValue
+        clientProject.value / Compile / jsTask / build
+      })
+      .value,
+    Compile / compile := (Compile / compile).dependsOn(hash).value,
+    Compile / sourceGenerators += hash.map(_.map(_.toFile))
   )
 }
