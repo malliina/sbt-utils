@@ -36,5 +36,5 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SonatypePassword }}
           PGP_PASSPHRASE: ${{ secrets.PgpPassphrase }}
         run: |
-          sbt common-build/publishSigned
+          sbt +common-build/publishSigned
           sbt releaseArtifacts

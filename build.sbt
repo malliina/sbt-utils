@@ -150,7 +150,6 @@ val sbtUtils = Project("sbt-utils", file("."))
     nodePlugin,
     bundlerPlugin,
     revolverRollupPlugin,
-//    common,
     dockerBundlerPlugin,
     codeArtifactPlugin,
     docs

@@ -5,3 +5,5 @@ libraryDependencies ++= Seq(
   "com.malliina" %% "primitives" % "3.4.0",
   "commons-codec" % "commons-codec" % "1.15"
 )
+
+releaseCrossBuild := true
