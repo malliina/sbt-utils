@@ -17,7 +17,7 @@ inThisBuild(
 )
 
 val pluginSettings = Seq(
-  "com.jsuereth" % "sbt-pgp" % "2.1.1",
+  "com.github.sbt" % "sbt-pgp" % "2.2.1",
   "com.github.sbt" % "sbt-release" % "1.1.0"
 ) map addSbtPlugin
 
@@ -46,7 +46,6 @@ val docs = project
   .enablePlugins(MdocPlugin)
 
 val releaseSettings = Seq(
-  publishMavenStyle := true,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
