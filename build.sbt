@@ -66,12 +66,12 @@ val baseSettings = releaseSettings ++ Seq(
     "malliina",
     "Michael Skogberg",
     "https://github.com/malliina/sbt-utils"
-  ),
-  publishTo := Option(Opts.resolver.sonatypeStaging)
+  )
 )
 
 val commonSettings = pluginSettings ++ baseSettings ++ Seq(
-  sbtPlugin := true
+  sbtPlugin := true,
+  publishTo := Option(Opts.resolver.sonatypeStaging)
 )
 
 ThisBuild / commands += Command.command("releaseArtifacts") { state =>
