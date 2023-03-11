@@ -1,6 +1,6 @@
 package com.malliina.rollup
 
-import com.malliina.sitegen.FileIO
+import com.malliina.build.FileIO
 import com.malliina.storage.StorageLong
 import org.apache.ivy.util.ChecksumHelper
 import sbt._

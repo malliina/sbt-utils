@@ -1,4 +1,4 @@
-package com.malliina.sitegen
+package com.malliina.build
 
 import io.circe.Encoder
 import io.circe.syntax.EncoderOps

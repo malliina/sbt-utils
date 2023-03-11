@@ -1,12 +1,12 @@
 package com.malliina.rollup
 
+import com.malliina.build.Mode
 import com.malliina.live.LiveReloadPlugin
 import com.malliina.live.LiveReloadPlugin.autoImport.{liveReloadRoot, refreshBrowsers, reloader}
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
 import com.malliina.rollup.HashPlugin.autoImport.{hash, hashRoot}
-import com.malliina.sitegen.Mode
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastLinkJS, fullLinkJS}
-import sbt.*
+import sbt._
 import sbt.Keys.{run, sourceGenerators, watchSources}
 import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
@@ -16,13 +16,13 @@ object GeneratorPlugin extends AutoPlugin {
 
   object autoImport {
     val mode = settingKey[Mode]("Build mode, dev or prod")
-    val clientProject = settingKey[Project]("Scala.js project")
+    val scalajsProject = settingKey[Project]("Scala.js project")
   }
-  import autoImport.*
+  import autoImport._
 
   override def projectSettings: Seq[Setting[?]] = Seq(
     isProd := ((Global / mode).value == Mode.prod),
-    assetsRoot := Def.settingDyn { clientProject.value / assetsRoot }.value,
+    assetsRoot := Def.settingDyn { scalajsProject.value / assetsRoot }.value,
     hashRoot := assetsRoot.value,
     liveReloadRoot := assetsRoot.value,
     buildInfoKeys ++= Seq[BuildInfoKey](
@@ -36,9 +36,9 @@ object GeneratorPlugin extends AutoPlugin {
         .toTask(" ")
         .dependsOn(Def.task(if (isProd.value) () else reloader.value.start()))
         .dependsOn(hash)
-        .dependsOn(clientProject.value / Compile / jsTask / build)
+        .dependsOn(scalajsProject.value / Compile / jsTask / build)
     }.value,
-    watchSources := watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value,
+    watchSources := watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value,
     Compile / sourceGenerators += hash.map(_.map(_.toFile))
   )
 

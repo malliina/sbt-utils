@@ -61,8 +61,7 @@ val releaseSettings = Seq(
   )
 )
 
-val commonSettings = pluginSettings ++ releaseSettings ++ Seq(
-  sbtPlugin := true,
+val baseSettings = releaseSettings ++ Seq(
   pomExtra := SbtGit.gitPom(
     "sbt-utils",
     "malliina",
@@ -70,6 +69,10 @@ val commonSettings = pluginSettings ++ releaseSettings ++ Seq(
     "https://github.com/malliina/sbt-utils"
   ),
   publishTo := Option(Opts.resolver.sonatypeStaging)
+)
+
+val commonSettings = pluginSettings ++ baseSettings ++ Seq(
+  sbtPlugin := true
 )
 
 ThisBuild / commands += Command.command("releaseArtifacts") { state =>
@@ -97,7 +100,8 @@ Global / pgpPassphrase := sys.env
   }
   .map(_.toCharArray)
 
-val common = project.in(file("common"))
+val common = Project("common-build", file("common"))
+  .settings(baseSettings)
 
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)

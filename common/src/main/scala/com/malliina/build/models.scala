@@ -1,4 +1,4 @@
-package com.malliina.sitegen
+package com.malliina.build
 
 import org.slf4j.{Logger, LoggerFactory}
 
