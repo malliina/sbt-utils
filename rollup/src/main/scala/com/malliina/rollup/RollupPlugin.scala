@@ -1,11 +1,11 @@
 package com.malliina.rollup
 
 import scala.sys.process.{Process, ProcessLogger}
-import sbt._
-import sbt.Keys._
+import sbt.*
+import sbt.Keys.*
 import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{ModuleKind, fastLinkJS, fastLinkJSOutput, fullLinkJS, fullLinkJSOutput, scalaJSLinkerConfig, scalaJSStage, scalaJSUseMainModuleInitializer}
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FastOptStage, FullOptStage, ModuleKind, fastLinkJS, fastLinkJSOutput, fullLinkJS, fullLinkJSOutput, scalaJSLinkerConfig, scalaJSStage, scalaJSUseMainModuleInitializer}
 import org.scalajs.sbtplugin.Stage
 import sbt.nio.Keys.fileInputs
 
@@ -43,6 +43,26 @@ object RollupPlugin extends AutoPlugin {
           }
         }.value
       )
+
+  override val globalSettings: Seq[Setting[?]] = Seq(
+    commands += Command.args("mode", "<mode>") { (state, args) =>
+      val newStage = args.toList match {
+        case h :: Nil =>
+          h match {
+            case "prod" => FullOptStage
+            case "dev"  => FastOptStage
+            case other  => sys.error(s"Invalid mode: '$other'.")
+          }
+        case other => sys.error("Specify either dev or prod as the only argument.")
+      }
+      state.appendWithoutSession(
+        Seq(
+          Global / scalaJSStage := newStage
+        ),
+        state
+      )
+    }
+  )
 
   private def stageSettings(stage: Stage): Seq[Def.Setting[?]] = {
     val stageTaskOutput = stage match {
