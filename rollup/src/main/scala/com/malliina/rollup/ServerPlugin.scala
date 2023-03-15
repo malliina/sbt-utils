@@ -16,7 +16,7 @@ object ServerPlugin extends AutoPlugin {
     val clientProject = settingKey[Project]("Scala.js project")
     val start = CommonKeys.start
   }
-  import autoImport.*
+  import autoImport._
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     useHash := scalaJSStage.value == FullOptStage,

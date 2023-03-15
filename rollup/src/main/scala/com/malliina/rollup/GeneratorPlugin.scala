@@ -16,7 +16,7 @@ object GeneratorPlugin extends AutoPlugin {
   object autoImport {
     val scalajsProject = settingKey[Project]("Scala.js project")
   }
-  import autoImport.*
+  import autoImport._
 
   override def projectSettings: Seq[Setting[?]] = Seq(
     isProd := scalaJSStage.value == FullOptStage,

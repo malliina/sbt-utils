@@ -21,7 +21,7 @@ object HashPlugin extends AutoPlugin {
     val copyFolders = settingKey[Seq[Path]]("Copy folders")
     val copy = taskKey[Seq[Path]]("Copies folders")
   }
-  import autoImport.*
+  import autoImport._
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
     useHash := true,
     copyFolders := Nil,
