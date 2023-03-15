@@ -5,9 +5,6 @@ import com.malliina.storage.StorageLong
 import org.apache.ivy.util.ChecksumHelper
 import sbt._
 import sbt.Keys.{streams, target}
-import sbt.internal.util.ManagedLogger
-
-import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters._
 
@@ -20,33 +17,38 @@ object HashPlugin extends AutoPlugin {
     val hashAssets = taskKey[Seq[HashedFile]]("Hashed files")
     val hashPackage = settingKey[String]("Package name for assets file")
     val hash = taskKey[Seq[Path]]("Create hash")
+    val useHash = settingKey[Boolean]("Use hashed paths")
     val copyFolders = settingKey[Seq[Path]]("Copy folders")
     val copy = taskKey[Seq[Path]]("Copies folders")
   }
   import autoImport.*
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
+    useHash := true,
     copyFolders := Nil,
     copy := {
-      val log = streams.value.log
       val root = hashRoot.value
-      copyFolders.value.flatMap { dir =>
-        val dirPath = dir
-        allPaths(dirPath).flatMap { path =>
-          val rel = dirPath.relativize(path)
-          val dest = root.resolve(rel)
-          if (Files.isRegularFile(path)) {
-            FileIO.copyIfChanged(path, dest)
-            Option(dest)
-          } else if (Files.isDirectory(path)) { Option(Files.createDirectories(dest)) }
-          else None
+      copyFolders.value
+        .toSet[Path]
+        .flatMap { dir =>
+          val dirPath = dir
+          allPaths(dirPath).flatMap { path =>
+            val rel = dirPath.relativize(path)
+            val dest = root.resolve(rel)
+            if (Files.isRegularFile(path)) {
+              FileIO.copyIfChanged(path, dest)
+              Option(dest)
+            } else if (Files.isDirectory(path)) { Option(Files.createDirectories(dest)) }
+            else None
+          }
         }
-      }
+        .toList
     },
     hashIncludeExts := Seq(".css", ".js", ".jpg", ".jpeg", ".png", ".svg", ".ico"),
-    hashPackage := "com.malliina.sitegen",
+    hashPackage := "com.malliina.assets",
     hashAssets := {
       val log = streams.value.log
       val root = hashRoot.value
+      val enabled = useHash.value
       val exts = hashIncludeExts.value
       allPaths(root).filter { p =>
         val name = p.getFileName.toString
@@ -54,7 +56,8 @@ object HashPlugin extends AutoPlugin {
         exts.exists(ext => name.endsWith(ext)) &&
         name.count(c => c == '.') < 2
       }.map { file =>
-        HashedFile.from(file, prepFile(file, log), root)
+        val hashed = if (enabled) prepFile(file, log) else file
+        HashedFile.from(file, hashed, root)
       }
     },
     hashAssets := hashAssets
@@ -62,14 +65,14 @@ object HashPlugin extends AutoPlugin {
       .value,
     hash := {
       val hashes = hashAssets.value
-      val log = streams.value.log
+      val hashesEnabled = useHash.value
       val cached = FileFunction.cached(streams.value.cacheDirectory / "assets") { in =>
         val file = makeAssetsFile(
           target.value,
           hashPackage.value,
           "assets",
           hashes,
-          log
+          makeDataUris = hashesEnabled
         )
         Set(file)
       }
@@ -98,16 +101,19 @@ object HashPlugin extends AutoPlugin {
     packageName: String,
     prefix: String,
     hashes: Seq[HashedFile],
-    log: ManagedLogger
+    makeDataUris: Boolean
   ): File = {
     val inlined = hashes.map(h => s""""${h.path}" -> "${h.hashedPath}"""").mkString(", ")
-    val dataUris = hashes
-      .filter(h => h.size < 48.kilos)
-      .map { h =>
-        val dataUri = FileIO.dataUri(h.originalFile)
-        s""""${h.path}" -> "$dataUri""""
-      }
-      .mkString(", ")
+    val dataUris =
+      if (makeDataUris)
+        hashes
+          .filter(h => h.size < 48.kilos)
+          .map { h =>
+            val dataUri = FileIO.dataUri(h.originalFile)
+            s""""${h.path}" -> "$dataUri""""
+          }
+          .mkString(", ")
+      else ""
     val objectName = "HashedAssets"
     val content =
       s"""
@@ -120,13 +126,14 @@ object HashPlugin extends AutoPlugin {
          |}
          |""".stripMargin.trim + IO.Newline
     val destFile = destDir(base, packageName) / s"$objectName.scala"
-    IO.write(destFile, content, StandardCharsets.UTF_8)
-    log.info(s"Wrote $destFile.")
+    FileIO.writeIfChanged(content, destFile.toPath)
     destFile
   }
 
   def destDir(base: File, packageName: String): File =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
 
-  def allPaths(root: Path) = FileIO.using(Files.walk(root))(_.iterator().asScala.toList)
+  def allPaths(root: Path) =
+    if (Files.exists(root)) FileIO.using(Files.walk(root))(_.iterator().asScala.toList)
+    else Nil
 }

@@ -7,7 +7,6 @@ import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{ModuleKind, fastLinkJS, fastLinkJSOutput, fullLinkJS, fullLinkJSOutput, scalaJSLinkerConfig, scalaJSStage, scalaJSUseMainModuleInitializer}
 import org.scalajs.sbtplugin.Stage
-import sbt.Def.spaceDelimited
 import sbt.nio.Keys.fileInputs
 
 import java.nio.charset.StandardCharsets
@@ -23,7 +22,6 @@ object RollupPlugin extends AutoPlugin {
     val prepareRollup = taskKey[Path]("Prepares rollup")
     val assetsRoot = CommonKeys.assetsRoot
     val assetsPrefix = settingKey[String]("I don't know what this is")
-    val front = inputKey[Int]("Runs the input as a command in the frontend working directory")
   }
   import autoImport._
 
@@ -43,14 +41,7 @@ object RollupPlugin extends AutoPlugin {
             }
             stageTask / build
           }
-        }.value,
-        front := {
-          val log = streams.value.log
-          val args: Seq[String] = spaceDelimited("<arg>").parsed
-          val stringified = args.mkString(" ")
-          val cwd = baseDirectory.value
-          process(args, cwd, log)
-        }
+        }.value
       )
 
   private def stageSettings(stage: Stage): Seq[Def.Setting[?]] = {
@@ -62,13 +53,16 @@ object RollupPlugin extends AutoPlugin {
       case Stage.FastOpt => fastLinkJS
       case Stage.FullOpt => fullLinkJS
     }
-    val isProd = stageTask == Stage.FullOpt
     Seq(
       stageTask / prepareRollup := {
         val log = streams.value.log
         val isProd = stage == Stage.FullOpt
         val jsDir = (Compile / stageTaskOutput).value
-        val mainJs = jsDir.relativeTo(baseDirectory.value).get / "main.js"
+        val jsFile = (Compile / stageTask).value.data.publicModules
+          .find(_.moduleID == "main")
+          .getOrElse(sys.error("Main module not found."))
+          .jsFileName
+        val mainJs = jsDir.relativeTo(baseDirectory.value).get / jsFile
         log.info(s"Built $mainJs with prod $isProd.")
         val rollup = (target.value / "scalajs.rollup.config.js").toPath
         makeRollupConfig(mainJs.toPath, assetsRoot.value, rollup, isProd, log)
@@ -95,7 +89,6 @@ object RollupPlugin extends AutoPlugin {
       },
       stageTask / build := (stageTask / build).dependsOn(stageTask / prepareRollup).value,
       stageTask / build := Def.taskIf {
-        val log = streams.value.log
         val hasChanges = build.inputFileChanges.hasChanges
         if (hasChanges) {
           (stageTask / build).value
@@ -140,9 +133,9 @@ object RollupPlugin extends AutoPlugin {
       |export const scalajs = {
       |  input: { frontend: "$input" },
       |  output: {
-      |    dir: "$outputDir",
+      |    dir: outputDir,
       |    format: "iife",
-      |    sourcemap: true,
+      |    sourcemap: !production,
       |    name: "version"
       |  }
       |}""".stripMargin.trim
