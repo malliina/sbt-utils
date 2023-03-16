@@ -2,24 +2,30 @@ package com.malliina.rollup
 
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
-import com.malliina.rollup.CommonKeys.{assetsRoot, build}
+import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
 import com.malliina.rollup.HashPlugin.autoImport.{copyFolders, hash, hashRoot, useHash}
+import com.malliina.rollup.RollupPlugin.autoImport.assetsPrefix
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
-import sbt._
-import sbt.Keys._
+import sbt.*
+import sbt.Keys.*
+import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
+import sbtbuildinfo.BuildInfoPlugin
+import sbtbuildinfo.BuildInfoPlugin.autoImport.BuildInfoKey
 import spray.revolver.GlobalState
 import spray.revolver.RevolverPlugin.autoImport.reStart
 
 object ServerPlugin extends AutoPlugin {
-  override def requires: Plugins = LiveRevolverPlugin && FileInputPlugin && HashPlugin
+  override def requires: Plugins =
+    LiveRevolverPlugin && FileInputPlugin && HashPlugin && BuildInfoPlugin
   object autoImport {
     val clientProject = settingKey[Project]("Scala.js project")
     val start = CommonKeys.start
   }
-  import autoImport._
+  import autoImport.*
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
-    useHash := scalaJSStage.value == FullOptStage,
+    isProd := scalaJSStage.value == FullOptStage,
+    useHash := isProd.value,
     start := Def.taskIf {
       val log = streams.value.log
       val changes = start.inputFileChanges
@@ -39,12 +45,26 @@ object ServerPlugin extends AutoPlugin {
       .triggeredBy(Def.taskDyn(clientProject.value / build), start)
       .value,
     watchSources := watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value,
-    hashRoot := Def.settingDyn { clientProject.value / assetsRoot }.value,
+    hashRoot := Def.settingDyn(clientProject.value / assetsRoot).value,
     hash := hash
       .dependsOn(Def.taskDyn(clientProject.value / build))
       .value,
     Compile / compile := (Compile / compile).dependsOn(hash).value,
     Compile / sourceGenerators += hash.map(_.map(_.toFile)),
-    copyFolders += ((Compile / resourceDirectory).value / "public").toPath
+    copyFolders += ((Compile / resourceDirectory).value / "public").toPath,
+    buildInfoKeys ++= Seq[BuildInfoKey](
+      "gitHash" -> Git.gitHash,
+      "assetsDir" -> Def.settingDyn(clientProject.value / assetsRoot).value.toFile,
+      "publicDir" -> (Compile / resourceDirectory).value.toPath.resolve("public"),
+      "publicFolder" -> Def.settingDyn(clientProject.value / assetsPrefix).value,
+      "mode" -> (if (isProd.value) "prod" else "dev"),
+      "isProd" -> isProd.value
+    ),
+    Compile / unmanagedResourceDirectories ++= {
+      if (isProd.value)
+        List(Def.settingDyn(clientProject.value / assetsRoot).value.getParent.toFile)
+      else
+        Nil
+    }
   )
 }

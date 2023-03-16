@@ -5,7 +5,7 @@ import com.malliina.live.LiveReloadPlugin.autoImport.{liveReloadRoot, refreshBro
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
 import com.malliina.rollup.HashPlugin.autoImport.{hash, hashRoot}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
-import sbt._
+import sbt.*
 import sbt.Keys.{run, sourceGenerators, watchSources}
 import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
@@ -16,7 +16,7 @@ object GeneratorPlugin extends AutoPlugin {
   object autoImport {
     val scalajsProject = settingKey[Project]("Scala.js project")
   }
-  import autoImport._
+  import autoImport.*
 
   override def projectSettings: Seq[Setting[?]] = Seq(
     isProd := scalaJSStage.value == FullOptStage,

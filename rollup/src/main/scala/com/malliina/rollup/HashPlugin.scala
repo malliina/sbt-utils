@@ -3,10 +3,11 @@ package com.malliina.rollup
 import com.malliina.build.FileIO
 import com.malliina.storage.StorageLong
 import org.apache.ivy.util.ChecksumHelper
-import sbt._
+import sbt.*
 import sbt.Keys.{streams, target}
+
 import java.nio.file.{Files, Path}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object HashPlugin extends AutoPlugin {
   val algorithm = "md5"
@@ -21,7 +22,7 @@ object HashPlugin extends AutoPlugin {
     val copyFolders = settingKey[Seq[Path]]("Copy folders")
     val copy = taskKey[Seq[Path]]("Copies folders")
   }
-  import autoImport._
+  import autoImport.*
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
     useHash := true,
     copyFolders := Nil,

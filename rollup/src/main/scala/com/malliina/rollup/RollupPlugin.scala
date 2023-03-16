@@ -1,16 +1,15 @@
 package com.malliina.rollup
 
-import scala.sys.process.{Process, ProcessLogger}
+import org.apache.ivy.util.ChecksumHelper
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
+import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
 import sbt.*
 import sbt.Keys.*
-import org.apache.ivy.util.ChecksumHelper
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FastOptStage, FullOptStage, ModuleKind, fastLinkJS, fastLinkJSOutput, fullLinkJS, fullLinkJSOutput, scalaJSLinkerConfig, scalaJSStage, scalaJSUseMainModuleInitializer}
-import org.scalajs.sbtplugin.Stage
 import sbt.nio.Keys.fileInputs
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import scala.sys.process.{Process, ProcessLogger}
 
 object RollupPlugin extends AutoPlugin {
   override def requires: Plugins = ScalaJSPlugin
@@ -23,7 +22,7 @@ object RollupPlugin extends AutoPlugin {
     val assetsRoot = CommonKeys.assetsRoot
     val assetsPrefix = settingKey[String]("I don't know what this is")
   }
-  import autoImport._
+  import autoImport.*
 
   override val projectSettings: Seq[Def.Setting[?]] =
     stageSettings(Stage.FastOpt) ++
@@ -64,7 +63,7 @@ object RollupPlugin extends AutoPlugin {
     }
   )
 
-  private def stageSettings(stage: Stage): Seq[Def.Setting[?]] = {
+  private def stageSettings(stage: Stage): Seq[Setting[?]] = {
     val stageTaskOutput = stage match {
       case Stage.FastOpt => fastLinkJSOutput
       case Stage.FullOpt => fullLinkJSOutput
@@ -73,14 +72,16 @@ object RollupPlugin extends AutoPlugin {
       case Stage.FastOpt => fastLinkJS
       case Stage.FullOpt => fullLinkJS
     }
+    val isProd = stage == Stage.FullOpt
     Seq(
       stageTask / prepareRollup := {
         val log = streams.value.log
-        val isProd = stage == Stage.FullOpt
         val jsDir = (Compile / stageTaskOutput).value
         val jsFile = (Compile / stageTask).value.data.publicModules
           .find(_.moduleID == "main")
-          .getOrElse(sys.error("Main module not found."))
+          .getOrElse(
+            sys.error("Main module not found. Expected a module ID named 'main' in task output.")
+          )
           .jsFileName
         val mainJs = jsDir.relativeTo(baseDirectory.value).get / jsFile
         log.info(s"Built $mainJs with prod $isProd.")
@@ -103,7 +104,7 @@ object RollupPlugin extends AutoPlugin {
           npmRunBuild(cwd, log)
         } else {
           IO.write(cacheFile, checksum, utf8)
-          npmInstall(cwd, log)
+          if (isProd) npmCi(cwd, log) else npmInstall(cwd, log)
           npmRunBuild(cwd, log)
         }
       },
@@ -124,6 +125,9 @@ object RollupPlugin extends AutoPlugin {
 
   def npmInstall(cwd: File, log: ProcessLogger) =
     process(Seq("npm", "install"), cwd, log)
+
+  def npmCi(cwd: File, log: ProcessLogger) =
+    process(Seq("npm", "ci"), cwd, log)
 
   def process(commands: Seq[String], cwd: File, log: ProcessLogger) = {
     log.out(s"Running '${commands.mkString(" ")}' from '$cwd'...")
