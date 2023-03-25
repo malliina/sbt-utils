@@ -1,5 +1,6 @@
 package com.malliina.build
 
+import com.malliina.storage.{StorageLong, StorageSize}
 import io.circe.Encoder
 import io.circe.syntax.EncoderOps
 import org.apache.commons.codec.digest.DigestUtils
@@ -63,6 +64,19 @@ object FileIO {
     log.info(s"Wrote ${to.toAbsolutePath}.")
     to
   }
+
+  def writeIfNotExists(in: InputStream, to: Path): Option[StorageSize] =
+    if (!Files.exists(to))
+      Option(write(in, to))
+    else
+      None
+
+  def write(in: InputStream, to: Path): StorageSize =
+    using(new FileOutputStream(to.toFile, false)) { out =>
+      val size = in.transferTo(out).bytes
+      log.info(s"Wrote '${to.toAbsolutePath}', $size.")
+      size
+    }
 
   def copy(from: Path, to: Path): Unit = {
     val dir = to.getParent

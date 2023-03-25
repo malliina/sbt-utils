@@ -124,6 +124,9 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .dependsOn(common)
   .settings(commonSettings)
   .settings(
+    libraryDependencies ++= Seq("generic", "parser").map { m =>
+      "io.circe" %% s"circe-$m" % "0.14.5"
+    },
     Seq(
       "com.malliina" % "live-reload" % "0.5.0",
       "org.scala-js" % "sbt-scalajs" % "1.13.0",

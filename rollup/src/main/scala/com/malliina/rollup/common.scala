@@ -1,6 +1,9 @@
 package com.malliina.rollup
 
-import com.malliina.storage.StorageLong
+import com.malliina.storage.{StorageLong, StorageSize}
+import io.circe.generic.semiauto.deriveEncoder
+import io.circe.syntax.EncoderOps
+import io.circe.{Encoder, Json}
 import sbt.{settingKey, taskKey}
 
 import java.nio.file.{Files, Path}
@@ -33,4 +36,24 @@ object HashedFile {
     original,
     hashed
   )
+}
+
+case class UrlOption(filter: String, url: String, maxSize: Option[StorageSize])
+
+object UrlOption {
+  private val basic: Encoder[UrlOption] = deriveEncoder[UrlOption]
+  private val copy = Json.obj(
+    "fallback" -> "copy".asJson,
+    "assetsPath" -> "assets".asJson,
+    "useHash" -> true.asJson,
+    "hashOptions" -> Json.obj("append" -> true.asJson)
+  )
+  implicit val json: Encoder[UrlOption] = (uo: UrlOption) =>
+    uo.maxSize.fold(basic(uo))(_ => basic(uo).deepMerge(copy))
+  val default = exts(Seq("woff", "woff2", "png"), 64.kilos)
+  def exts(es: Seq[String], maxSize: StorageSize) = {
+    val extsStr = es.mkString("|")
+    val minimatch = s"../**/*.+($extsStr)"
+    UrlOption(minimatch, "inline", Option(maxSize))
+  }
 }

@@ -1,5 +1,8 @@
 package com.malliina.rollup
 
+import _root_.io.circe.parser.parse
+import _root_.io.circe.syntax.EncoderOps
+import com.malliina.build.FileIO
 import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
@@ -8,7 +11,8 @@ import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.Path
+import java.nio.file.{Files, Path}
+import scala.jdk.CollectionConverters.asScalaBufferConverter
 import scala.sys.process.{Process, ProcessLogger}
 
 object RollupPlugin extends AutoPlugin {
@@ -21,6 +25,8 @@ object RollupPlugin extends AutoPlugin {
     val prepareRollup = taskKey[Path]("Prepares rollup")
     val assetsRoot = CommonKeys.assetsRoot
     val assetsPrefix = settingKey[String]("I don't know what this is")
+    val npmRoot = settingKey[Path]("Working dir for npm commands")
+    val urlOptions = settingKey[Seq[UrlOption]]("URL options for postcss-url")
   }
   import autoImport.*
 
@@ -28,9 +34,10 @@ object RollupPlugin extends AutoPlugin {
     stageSettings(Stage.FastOpt) ++
       stageSettings(Stage.FullOpt) ++
       Seq(
+        npmRoot := target.value.toPath,
         scalaJSUseMainModuleInitializer := true,
         scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-        assetsRoot := (target.value / "assets").toPath,
+        assetsRoot := target.value.toPath / "assets",
         assetsPrefix := "assets",
         build := {
           Def.settingDyn {
@@ -74,20 +81,38 @@ object RollupPlugin extends AutoPlugin {
     }
     val isProd = stage == Stage.FullOpt
     Seq(
+      stageTask / urlOptions := Seq(UrlOption.default),
       stageTask / prepareRollup := {
         val log = streams.value.log
-        val jsDir = (Compile / stageTaskOutput).value
+        val jsDir = (Compile / stageTaskOutput).value.toPath
         val jsFile = (Compile / stageTask).value.data.publicModules
           .find(_.moduleID == "main")
           .getOrElse(
             sys.error("Main module not found. Expected a module ID named 'main' in task output.")
           )
           .jsFileName
-        val mainJs = jsDir.relativeTo(baseDirectory.value).get / jsFile
+        val root = npmRoot.value
+        val mainJs = root.relativize(jsDir) / jsFile
         log.info(s"Built $mainJs with prod $isProd.")
-        val rollup = (target.value / "scalajs.rollup.config.js").toPath
-        makeRollupConfig(mainJs.toPath, assetsRoot.value, rollup, isProd, log)
-        jsDir.toPath
+        val rollup = npmRoot.value / "scalajs.rollup.config.js"
+        makeRollupConfig(mainJs, assetsRoot.value, rollup, (stageTask / urlOptions).value, isProd)
+        val resDir = (Compile / resourceDirectory).value
+        val userPackageJson = resDir / "package.json"
+        val inbuilt = json(res("package.json"))
+        val packageJson =
+          if (userPackageJson.exists())
+            inbuilt.deepMerge(jsonFile(userPackageJson))
+          else
+            inbuilt
+        val targetPath = npmRoot.value
+        val dest = targetPath / "package.json"
+        val tsFiles =
+          Seq("rollup.config.ts", "rollup-extract-css.ts", "rollup-sourcemaps.ts", "tsconfig.json")
+        tsFiles.foreach { name =>
+          FileIO.writeIfChanged(res(name), targetPath.resolve(name))
+        }
+        FileIO.writeIfChanged(packageJson.spaces2SortKeys, dest)
+        jsDir
       },
       stageTask / build / fileInputs ++=
         (Compile / sourceDirectories).value.map(f => f.toGlob / ** / "*.scala") ++
@@ -96,14 +121,20 @@ object RollupPlugin extends AutoPlugin {
           Seq(baseDirectory.value / "package.json").map(_.toGlob),
       stageTask / build := {
         val log = streams.value.log
-        val cwd = baseDirectory.value
+        val cwd = npmRoot.value
         val packageJson = cwd / "package.json"
-        val cacheFile = target.value / "package.json.sha1"
+        val cacheFile = npmRoot.value / "package.json.sha1"
         val checksum = computeChecksum(packageJson)
-        if (cacheFile.exists() && IO.readLines(cacheFile, utf8).headOption.contains(checksum)) {
+        if (
+          Files.exists(cacheFile) && Files
+            .readAllLines(cacheFile, utf8)
+            .asScala
+            .headOption
+            .contains(checksum)
+        ) {
           npmRunBuild(cwd, log)
         } else {
-          IO.write(cacheFile, checksum, utf8)
+          FileIO.writeIfChanged(checksum, cacheFile)
           if (isProd) npmCi(cwd, log) else npmInstall(cwd, log)
           npmRunBuild(cwd, log)
         }
@@ -120,18 +151,18 @@ object RollupPlugin extends AutoPlugin {
     )
   }
 
-  def npmRunBuild(cwd: File, log: ProcessLogger) =
+  def npmRunBuild(cwd: Path, log: ProcessLogger) =
     process(Seq("npm", "run", "build"), cwd, log)
 
-  def npmInstall(cwd: File, log: ProcessLogger) =
+  def npmInstall(cwd: Path, log: ProcessLogger) =
     process(Seq("npm", "install"), cwd, log)
 
-  def npmCi(cwd: File, log: ProcessLogger) =
+  def npmCi(cwd: Path, log: ProcessLogger) =
     process(Seq("npm", "ci"), cwd, log)
 
-  def process(commands: Seq[String], cwd: File, log: ProcessLogger) = {
+  def process(commands: Seq[String], cwd: Path, log: ProcessLogger) = {
     log.out(s"Running '${commands.mkString(" ")}' from '$cwd'...")
-    Process(canonical(commands), cwd).run(log).exitValue()
+    Process(canonical(commands), cwd.toFile).run(log).exitValue()
   }
 
   def canonical(cmd: Seq[String]): Seq[String] = {
@@ -140,20 +171,22 @@ object RollupPlugin extends AutoPlugin {
     cmdPrefix ++ cmd
   }
 
-  def computeChecksum(file: File) = ChecksumHelper.computeAsString(file, sha1)
+  def computeChecksum(file: Path) = ChecksumHelper.computeAsString(file.toFile, sha1)
 
   def makeRollupConfig(
     input: Path,
     outputDir: Path,
     rollup: Path,
-    isProd: Boolean,
-    log: Logger
+    urlOptions: Seq[UrlOption],
+    isProd: Boolean
   ): Path = {
+    val json = urlOptions.asJson.noSpaces
     val isProdStr = if (isProd) "true" else "false"
     val content = s"""
       |// Generated at build time
       |export const production = $isProdStr
       |export const outputDir = "$outputDir"
+      |export const urlOptions = JSON.parse('$json')
       |export const scalajs = {
       |  input: { frontend: "$input" },
       |  output: {
@@ -163,8 +196,20 @@ object RollupPlugin extends AutoPlugin {
       |    name: "version"
       |  }
       |}""".stripMargin.trim
-    IO.write(rollup.toFile, content, utf8)
-    log.info(s"Wrote $rollup.")
+    FileIO.writeIfChanged(content, rollup)
     rollup
   }
+
+  def jsonFile(f: File) = json(IO.read(f, utf8))
+
+  def json(str: String) = parse(str).fold(err => fail(err.message), identity)
+
+  def res(name: String): String = {
+    val path = s"com/malliina/rollup/$name"
+    Option(getClass.getClassLoader.getResourceAsStream(path))
+      .map(inStream => FileIO.using(inStream)(in => IO.readStream(in, utf8)))
+      .getOrElse(fail(s"Resource not found: '$path'."))
+  }
+
+  def fail(message: String) = sys.error(message)
 }

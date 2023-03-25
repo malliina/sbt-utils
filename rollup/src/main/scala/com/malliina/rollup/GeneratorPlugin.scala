@@ -25,7 +25,8 @@ object GeneratorPlugin extends AutoPlugin {
     liveReloadRoot := assetsRoot.value,
     buildInfoKeys ++= Seq[BuildInfoKey](
       "siteDir" -> assetsRoot.value.toFile,
-      "isProd" -> isProd.value
+      "isProd" -> isProd.value,
+      "gitHash" -> Git.gitHash
     ),
     refreshBrowsers := refreshBrowsers.triggeredBy(build).value,
     build := Def.taskDyn {
