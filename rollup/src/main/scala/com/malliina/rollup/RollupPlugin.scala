@@ -112,6 +112,11 @@ object RollupPlugin extends AutoPlugin {
           FileIO.writeIfChanged(res(name), targetPath.resolve(name))
         }
         FileIO.writeIfChanged(packageJson.spaces2SortKeys, dest)
+        val lockFile = (Compile / resourceDirectory).value.toPath.resolve("package-lock.json")
+        val lockFileDest = npmRoot.value / "package-lock.json"
+        if (Files.exists(lockFile)) {
+          FileIO.copyIfChanged(lockFile, lockFileDest)
+        }
         jsDir
       },
       stageTask / build / fileInputs ++=
