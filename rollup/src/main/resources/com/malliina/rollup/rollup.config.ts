@@ -1,5 +1,6 @@
 import resolve from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
+import replace from "@rollup/plugin-replace"
 import terser from "@rollup/plugin-terser"
 import {scalajs, production, outputDir, urlOptions} from "./scalajs.rollup.config.js"
 import path from "path"
@@ -23,6 +24,10 @@ const config: RollupOptions[] = [
     input: scalajs.input,
     plugins: [
       sourcemaps(),
+      replace({
+        "process.env.NODE_ENV": JSON.stringify(production ? "production" : "development"),
+        preventAssignment: true
+      }),
       css(),
       resolve({browser: true, preferBuiltins: false}),
       commonjs(),
