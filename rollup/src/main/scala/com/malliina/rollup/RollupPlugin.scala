@@ -81,7 +81,7 @@ object RollupPlugin extends AutoPlugin {
     }
     val isProd = stage == Stage.FullOpt
     Seq(
-      stageTask / urlOptions := Seq(UrlOption.default),
+      stageTask / urlOptions := UrlOption.defaults,
       stageTask / prepareRollup := {
         val log = streams.value.log
         val jsDir = (Compile / stageTaskOutput).value.toPath

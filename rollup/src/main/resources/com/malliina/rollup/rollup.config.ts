@@ -22,9 +22,13 @@ const config: RollupOptions[] = [
   {
     input: scalajs.input,
     plugins: [
+      // replace({
+      //   "process.env.NODE_ENV": JSON.stringify(production ? "production" : "development"),
+      //   preventAssignment: true
+      // }),
       sourcemaps(),
       css(),
-      resolve(),
+      resolve({browser: true, preferBuiltins: false}),
       commonjs(),
       production && terser()
     ],

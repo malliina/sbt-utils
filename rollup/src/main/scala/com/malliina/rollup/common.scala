@@ -50,8 +50,11 @@ object UrlOption {
   )
   implicit val json: Encoder[UrlOption] = (uo: UrlOption) =>
     uo.maxSize.fold(basic(uo))(_ => basic(uo).deepMerge(copy))
-  val default = exts(Seq("woff", "woff2", "png"), 64.kilos)
-  def exts(es: Seq[String], maxSize: StorageSize) = {
+  val defaults =
+    Seq(exts(Seq("woff", "woff2", "png", "svg"), 64.kilos), inlineOrCopy(Option(16.kilos)))
+  def inlineOrCopy(maxSize: Option[StorageSize]): UrlOption =
+    UrlOption("../**/*", "inline", maxSize)
+  def exts(es: Seq[String], maxSize: StorageSize): UrlOption = {
     val extsStr = es.mkString("|")
     val minimatch = s"../**/*.+($extsStr)"
     UrlOption(minimatch, "inline", Option(maxSize))
