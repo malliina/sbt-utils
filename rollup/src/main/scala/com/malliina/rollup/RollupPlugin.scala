@@ -166,8 +166,13 @@ object RollupPlugin extends AutoPlugin {
     process(Seq("npm", "ci"), cwd, log)
 
   def process(commands: Seq[String], cwd: Path, log: ProcessLogger) = {
-    log.out(s"Running '${commands.mkString(" ")}' from '$cwd'...")
-    Process(canonical(commands), cwd.toFile).run(log).exitValue()
+    val canon = canonical(commands)
+    val cmdStr = canon.mkString(" ")
+    log.out(s"Running '$cmdStr' from '$cwd'...")
+    val exitValue = Process(canon, cwd.toFile).run(log).exitValue()
+    if (exitValue != 0) {
+      fail(s"Command '$cmdStr' failed with exit value $exitValue.")
+    }
   }
 
   def canonical(cmd: Seq[String]): Seq[String] = {

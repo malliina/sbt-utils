@@ -6,7 +6,7 @@ import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
 import com.malliina.rollup.HashPlugin.autoImport.{hash, hashRoot}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
 import sbt.*
-import sbt.Keys.{run, sourceGenerators, watchSources}
+import sbt.Keys.{compile, run, sourceGenerators, watchSources}
 import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
 
@@ -33,10 +33,12 @@ object GeneratorPlugin extends AutoPlugin {
       (Compile / run)
         .toTask(" ")
         .dependsOn(Def.task(if (isProd.value) () else reloader.value.start()))
-        .dependsOn(hash)
-        .dependsOn(scalajsProject.value / build)
     }.value,
     watchSources := watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value,
-    Compile / sourceGenerators += hash.map(_.map(_.toFile))
+    Compile / sourceGenerators += hash.map(_.map(_.toFile)),
+    Compile / compile := (Compile / compile)
+      .dependsOn(hash)
+      .dependsOn(Def.taskDyn(scalajsProject.value / build))
+      .value
   )
 }
