@@ -20,12 +20,14 @@ export interface ExtractOptions {
   include?: string
   exclude?: string
   minimize?: boolean
+  sourcemap?: boolean
   urlOptions: any
 }
 
 export default function extractcss(options: ExtractOptions): Plugin {
   const filter = createFilter(options.include || "**/*.css", options.exclude)
   const minimize = options.minimize || false
+  const sourcemap = options.sourcemap || true
   const basicPlugins = [postcssNesting(), autoprefixer, postcssUrl(options.urlOptions)]
   const extraPlugins = minimize ? [cssnano()] : []
   const plugins = basicPlugins.concat(extraPlugins)
@@ -35,7 +37,7 @@ export default function extractcss(options: ExtractOptions): Plugin {
     async transform(code, id) {
       if (!filter(id)) return
       const result = await postcss(plugins)
-        .process(code, {from: id, to: path.resolve(options.outDir, "unused.css")})
+        .process(code, {from: id, to: path.resolve(options.outDir, "unused.css"), map: sourcemap})
       processed.set(id, result.css)
       return {code: "", map: undefined}
     },

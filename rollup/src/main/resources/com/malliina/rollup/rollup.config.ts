@@ -16,6 +16,7 @@ const entryNames = "[name].js"
 const css = () => extractcss({
   outDir: outputDir,
   minimize: production,
+  sourcemap: !production,
   urlOptions: urlOptions
 })
 
