@@ -27,6 +27,7 @@ object RollupPlugin extends AutoPlugin {
     val assetsPrefix = settingKey[String]("I don't know what this is")
     val npmRoot = settingKey[Path]("Working dir for npm commands")
     val urlOptions = settingKey[Seq[UrlOption]]("URL options for postcss-url")
+    val resourceLockFile = settingKey[Path]("Path to saved package-lock.json")
   }
   import autoImport.*
 
@@ -35,6 +36,7 @@ object RollupPlugin extends AutoPlugin {
       stageSettings(Stage.FullOpt) ++
       Seq(
         npmRoot := target.value.toPath,
+        resourceLockFile := (Compile / resourceDirectory).value.toPath.resolve("package-lock.json"),
         scalaJSUseMainModuleInitializer := true,
         scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
         assetsRoot := target.value.toPath / "assets",
@@ -112,7 +114,7 @@ object RollupPlugin extends AutoPlugin {
           FileIO.writeIfChanged(res(name), targetPath.resolve(name))
         }
         FileIO.writeIfChanged(packageJson.spaces2SortKeys, dest)
-        val lockFile = (Compile / resourceDirectory).value.toPath.resolve("package-lock.json")
+        val lockFile = resourceLockFile.value
         val lockFileDest = npmRoot.value / "package-lock.json"
         if (Files.exists(lockFile)) {
           FileIO.copyIfChanged(lockFile, lockFileDest)
@@ -140,7 +142,15 @@ object RollupPlugin extends AutoPlugin {
           npmRunBuild(cwd, log)
         } else {
           FileIO.writeIfChanged(checksum, cacheFile)
-          if (isProd) npmCi(cwd, log) else npmInstall(cwd, log)
+          if (isProd) npmCi(cwd, log)
+          else {
+            npmInstall(cwd, log)
+            val lockFile = resourceLockFile.value
+            val newestLockFile = npmRoot.value / "package-lock.json"
+            if (Files.exists(newestLockFile)) {
+              FileIO.copyIfChanged(newestLockFile, lockFile)
+            }
+          }
           npmRunBuild(cwd, log)
         }
       },
