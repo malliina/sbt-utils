@@ -105,7 +105,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.21")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
