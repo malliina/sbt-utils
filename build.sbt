@@ -105,7 +105,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.21")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
@@ -129,7 +129,7 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
     },
     Seq(
       "com.malliina" % "live-reload" % "0.5.0",
-      "org.scala-js" % "sbt-scalajs" % "1.13.0",
+      "org.scala-js" % "sbt-scalajs" % "1.13.2",
       "com.eed3si9n" % "sbt-buildinfo" % "0.11.0"
     ) map addSbtPlugin
   )

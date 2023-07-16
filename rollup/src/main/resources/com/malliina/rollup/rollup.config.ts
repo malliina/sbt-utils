@@ -39,6 +39,7 @@ const config: RollupOptions[] = [
       format: "iife",
       name: "version",
       entryFileNames: entryNames,
+      inlineDynamicImports: true,
       sourcemap: !production,
       sourcemapPathTransform: (relativeSourcePath, sourcemapPath) =>
         defaultSourcemapFix(relativeSourcePath)
