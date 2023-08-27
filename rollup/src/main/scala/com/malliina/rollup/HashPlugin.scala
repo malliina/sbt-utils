@@ -1,7 +1,7 @@
 package com.malliina.rollup
 
 import com.malliina.build.FileIO
-import com.malliina.storage.StorageLong
+import com.malliina.storage.{StorageLong, StorageSize}
 import org.apache.ivy.util.ChecksumHelper
 import sbt.*
 import sbt.Keys.{streams, target}
@@ -21,6 +21,7 @@ object HashPlugin extends AutoPlugin {
     val useHash = settingKey[Boolean]("Use hashed paths")
     val copyFolders = settingKey[Seq[Path]]("Copy folders")
     val copy = taskKey[Seq[Path]]("Copies folders")
+    val dataUriLimit = settingKey[StorageSize]("Maximum asset size for data URI inlining")
   }
   import autoImport.*
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
@@ -44,6 +45,7 @@ object HashPlugin extends AutoPlugin {
         }
         .toList
     },
+    dataUriLimit := 48.kilos,
     hashIncludeExts := Seq(".css", ".js", ".jpg", ".jpeg", ".png", ".svg", ".ico"),
     hashPackage := "com.malliina.assets",
     hashAssets := {
@@ -73,7 +75,8 @@ object HashPlugin extends AutoPlugin {
           hashPackage.value,
           "assets",
           hashes,
-          makeDataUris = hashesEnabled
+          makeDataUris = hashesEnabled,
+          dataUriLimit = dataUriLimit.value
         )
         Set(file)
       }
@@ -102,13 +105,14 @@ object HashPlugin extends AutoPlugin {
     packageName: String,
     prefix: String,
     hashes: Seq[HashedFile],
-    makeDataUris: Boolean
+    makeDataUris: Boolean,
+    dataUriLimit: StorageSize
   ): File = {
     val inlined = hashes.map(h => s""""${h.path}" -> "${h.hashedPath}"""").mkString(", ")
     val dataUris =
       if (makeDataUris)
         hashes
-          .filter(h => h.size < 48.kilos)
+          .filter(h => h.size <= dataUriLimit)
           .map { h =>
             val dataUri = FileIO.dataUri(h.originalFile)
             s""""${h.path}" -> "$dataUri""""

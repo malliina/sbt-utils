@@ -68,7 +68,7 @@ export default function extractcss(options: ExtractOptions): Plugin {
             type: "asset",
             source: content
           })
-          console.log(`Created ${this.getFileName(ref)} from ${b.name}`)
+          console.log(`Created ${this.getFileName(ref)} from ${b.name} minimized ${minimize} sourcemap ${sourcemap}`)
         }
       })
     }
