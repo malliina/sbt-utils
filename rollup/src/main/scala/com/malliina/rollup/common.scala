@@ -3,7 +3,7 @@ package com.malliina.rollup
 import com.malliina.storage.{StorageLong, StorageSize}
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax.EncoderOps
-import io.circe.{Codec, Decoder, Encoder, Json}
+import io.circe.{Encoder, Json}
 import sbt.{settingKey, taskKey}
 
 import java.nio.file.{Files, Path}

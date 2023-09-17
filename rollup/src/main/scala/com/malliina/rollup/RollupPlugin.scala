@@ -1,19 +1,18 @@
 package com.malliina.rollup
 
-import _root_.io.circe.parser.parse
-import _root_.io.circe.syntax.EncoderOps
 import com.malliina.build.FileIO
+import io.circe.parser.parse
+import io.circe.syntax.EncoderOps
 import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
-import sbt.*
 import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
+import sbt.{IO => _, *}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.asScalaBufferConverter
-import scala.sys.process.{Process, ProcessLogger}
 
 object RollupPlugin extends AutoPlugin {
   override def requires: Plugins = ScalaJSPlugin
@@ -166,30 +165,17 @@ object RollupPlugin extends AutoPlugin {
     )
   }
 
-  def npmRunBuild(cwd: Path, log: ProcessLogger) =
+  def npmRunBuild(cwd: Path, log: Logger) =
     process(Seq("npm", "run", "build"), cwd, log)
 
-  def npmInstall(cwd: Path, log: ProcessLogger) =
+  def npmInstall(cwd: Path, log: Logger) =
     process(Seq("npm", "install"), cwd, log)
 
-  def npmCi(cwd: Path, log: ProcessLogger) =
+  def npmCi(cwd: Path, log: Logger) =
     process(Seq("npm", "ci"), cwd, log)
 
-  def process(commands: Seq[String], cwd: Path, log: ProcessLogger) = {
-    val canon = canonical(commands)
-    val cmdStr = canon.mkString(" ")
-    log.out(s"Running '$cmdStr' from '$cwd'...")
-    val exitValue = Process(canon, cwd.toFile).run(log).exitValue()
-    if (exitValue != 0) {
-      fail(s"Command '$cmdStr' failed with exit value $exitValue.")
-    }
-  }
-
-  def canonical(cmd: Seq[String]): Seq[String] = {
-    val isWindows = sys.props("os.name").toLowerCase().contains("win")
-    val cmdPrefix = if (isWindows) Seq("cmd", "/c") else Nil
-    cmdPrefix ++ cmd
-  }
+  def process(commands: Seq[String], cwd: Path, log: Logger) =
+    IO.runProcessSync(commands, cwd, log)
 
   def computeChecksum(file: Path) = ChecksumHelper.computeAsString(file.toFile, sha1)
 
@@ -220,14 +206,14 @@ object RollupPlugin extends AutoPlugin {
     rollup
   }
 
-  def jsonFile(f: File) = json(IO.read(f, utf8))
+  def jsonFile(f: File) = json(sbt.io.IO.read(f, utf8))
 
   def json(str: String) = parse(str).fold(err => fail(err.message), identity)
 
   def res(name: String): String = {
     val path = s"com/malliina/rollup/$name"
     Option(getClass.getClassLoader.getResourceAsStream(path))
-      .map(inStream => FileIO.using(inStream)(in => IO.readStream(in, utf8)))
+      .map(inStream => FileIO.using(inStream)(in => sbt.io.IO.readStream(in, utf8)))
       .getOrElse(fail(s"Resource not found: '$path'."))
   }
 

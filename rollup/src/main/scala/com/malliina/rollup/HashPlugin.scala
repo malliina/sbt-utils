@@ -129,7 +129,7 @@ object HashPlugin extends AutoPlugin {
          |  val assets: Map[String, String] = Map($inlined)
          |  val dataUris: Map[String, String] = Map($dataUris)
          |}
-         |""".stripMargin.trim + IO.Newline
+         |""".stripMargin.trim + sbt.io.IO.Newline
     val destFile = destDir(base, packageName) / s"$objectName.scala"
     FileIO.writeIfChanged(content, destFile.toPath)
     destFile
