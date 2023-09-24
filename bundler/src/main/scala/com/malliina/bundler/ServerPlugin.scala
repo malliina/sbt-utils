@@ -3,7 +3,7 @@ package com.malliina.bundler
 import com.malliina.bundler.ClientPlugin.autoImport.writeAssets
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastLinkJS, fullLinkJS, scalaJSStage}
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastLinkJS, fastOptJS, fullLinkJS, fullOptJS, scalaJSStage}
 import org.scalajs.sbtplugin.Stage
 import sbt.Keys.*
 import sbt.*
@@ -43,8 +43,8 @@ object ServerPlugin extends AutoPlugin {
     Compile / sourceGenerators := (Compile / sourceGenerators).value :+ Def
       .taskDyn[Seq[File]] {
         val sjsStage = (clientProject / scalaJSStage).value match {
-          case Stage.FastOpt => fastLinkJS
-          case Stage.FullOpt => fullLinkJS
+          case Stage.FastOpt => fastOptJS
+          case Stage.FullOpt => fullOptJS
         }
         clientProject.value / Compile / sjsStage / writeAssets
       }

@@ -49,7 +49,7 @@ object ClientPlugin extends AutoPlugin {
       Compile / start := Def.taskIf {
         val hasChanges = start.inputFileChanges.hasChanges
         if (hasChanges) {
-          (Compile / fastLinkJS / writeAssets).map(_ => ()).value
+          (Compile / fastOptJS / writeAssets).map(_ => ()).value
         } else {
           Def.task(streams.value.log.debug(s"No changes to ${name.value}.")).value
         }
@@ -59,8 +59,8 @@ object ClientPlugin extends AutoPlugin {
 
   private def stageSettings(stage: Stage): Seq[Def.Setting[?]] = {
     val stageTask = stage match {
-      case Stage.FastOpt => fastLinkJS
-      case Stage.FullOpt => fullLinkJS
+      case Stage.FastOpt => fastOptJS
+      case Stage.FullOpt => fullOptJS
     }
     Seq(
       (Compile / stageTask / hashAssets) := {

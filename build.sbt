@@ -25,7 +25,7 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.17",
+    scalaVersion := "2.12.18",
     crossScalaVersions -= "2.13.10",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
@@ -105,7 +105,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.21")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
