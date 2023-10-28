@@ -60,7 +60,7 @@ object MavenCentralPlugin extends AutoPlugin {
             checkSnapshotDependencies,
             runTest,
             releaseStepTask(beforePublish),
-            publishArtifacts,
+            releaseStepCommandAndRemaining("+publishSigned"),
             releaseStepCommand("sonatypeReleaseAll"),
             releaseStepTask(afterPublish)
           )
@@ -95,7 +95,7 @@ object MavenCentralPlugin extends AutoPlugin {
       releaseStepTask(beforePublish),
       commitReleaseVersion,
       tagRelease,
-      publishArtifacts,
+      releaseStepCommandAndRemaining("+publishSigned"),
       setNextVersion,
       commitNextVersion,
       releaseStepCommand("sonatypeReleaseAll"),

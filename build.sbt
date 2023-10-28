@@ -129,11 +129,11 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
-      "io.circe" %% s"circe-$m" % "0.14.5"
+      "io.circe" %% s"circe-$m" % "0.14.6"
     },
     Seq(
       "com.malliina" % "live-reload" % "0.5.0",
-      "org.scala-js" % "sbt-scalajs" % "1.13.2",
+      "org.scala-js" % "sbt-scalajs" % "1.14.0",
       "com.eed3si9n" % "sbt-buildinfo" % "0.11.0"
     ) map addSbtPlugin
   )
@@ -148,7 +148,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.20.17"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.21.10"
   )
 
 val filetreePlugin = Project("sbt-filetree", file("filetree"))
