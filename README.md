@@ -17,23 +17,23 @@ the POM XML, see *Usage*.
 
 To use sbt-revolver-rollup:
 
-    addSbtPlugin("com.malliina" % "sbt-revolver-rollup" % "1.6.26")
+    addSbtPlugin("com.malliina" % "sbt-revolver-rollup" % "1.6.27")
 
 To use sbt-bundler:
 
-    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.6.26")
+    addSbtPlugin("com.malliina" % "sbt-bundler" % "1.6.27")
 
 To publish to Maven Central:
 
-    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.6.26")
+    addSbtPlugin("com.malliina" % "sbt-utils-maven" % "1.6.27")
     
 The Node.js plugin:
 
-    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.6.26")
+    addSbtPlugin("com.malliina" % "sbt-nodejs" % "1.6.27")
 
 To use sbt-filetree:
 
-    addSbtPlugin("com.malliina" % "sbt-filetree" % "1.6.26")
+    addSbtPlugin("com.malliina" % "sbt-filetree" % "1.6.27")
 
 ## Usage
 
@@ -62,8 +62,6 @@ The following rollup inputs are available:
 and
 
     src/main/resources/css/fonts.js
-
-You must create those files.
 
 #### Generator
 
@@ -181,7 +179,7 @@ references the file will no longer compile.
 
 Add the following settings in `plugins.sbt`:
 
-    addSbtPlugin("com.malliina" % "sbt-filetree" % "1.6.26")
+    addSbtPlugin("com.malliina" % "sbt-filetree" % "1.6.27")
 
 Enable `FileTreePlugin` in your project:
 
