@@ -86,7 +86,7 @@ ThisBuild / commands += Command.command("releaseArtifacts") { state =>
       releaseProcess := Seq[ReleaseStep](
         checkSnapshotDependencies,
         runTest,
-        publishArtifacts,
+        releaseStepCommandAndRemaining("+publishSigned"),
         releaseStepCommand("sonatypeReleaseAll")
       )
     ),
