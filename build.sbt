@@ -124,8 +124,11 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     ) map addSbtPlugin
   )
 
+val filetreePlugin = Project("sbt-filetree", file("filetree"))
+  .settings(commonSettings)
+
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
-  .dependsOn(common)
+  .dependsOn(common, filetreePlugin)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
@@ -150,9 +153,6 @@ val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(
     libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.21.10"
   )
-
-val filetreePlugin = Project("sbt-filetree", file("filetree"))
-  .settings(commonSettings)
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(

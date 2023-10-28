@@ -1,9 +1,12 @@
 package com.malliina.rollup
 
+import com.malliina.filetree.FileTreePlugin
+import com.malliina.filetree.FileTreeKeys.fileTreeSources
+import com.malliina.filetree.DirMap
 import com.malliina.live.LiveReloadPlugin
 import com.malliina.live.LiveReloadPlugin.autoImport.{liveReloadRoot, refreshBrowsers, reloader}
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
-import com.malliina.rollup.HashPlugin.autoImport.{hash, hashRoot}
+import com.malliina.rollup.HashPlugin.autoImport.{hash, hashPackage, hashRoot}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
 import sbt.*
 import sbt.Keys.{compile, run, sourceGenerators, watchSources}
@@ -11,7 +14,7 @@ import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
 
 object GeneratorPlugin extends AutoPlugin {
-  override def requires = BuildInfoPlugin && LiveReloadPlugin && HashPlugin
+  override def requires = BuildInfoPlugin && LiveReloadPlugin && HashPlugin && FileTreePlugin
 
   object autoImport {
     val scalajsProject = settingKey[Project]("Scala.js project")
@@ -39,6 +42,7 @@ object GeneratorPlugin extends AutoPlugin {
     Compile / compile := (Compile / compile)
       .dependsOn(hash)
       .dependsOn(Def.taskDyn(scalajsProject.value / build))
-      .value
+      .value,
+    fileTreeSources += DirMap(assetsRoot.value, s"${hashPackage.value}.FileAssets")
   )
 }

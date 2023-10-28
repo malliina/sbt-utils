@@ -23,3 +23,7 @@ jobs:
           cache: sbt
       - name: Run tests
         run: sbt test
+      - name: Run example tests
+        run: |
+          cd example
+          sbt test

@@ -1,12 +1,14 @@
-package com.malliina.sbt.filetree
+package com.malliina.filetree
+
+import com.malliina.filetree.FileTreeKeys.fileTreeSources
+import com.malliina.filetree.ScalaIdentifiers.legalName
+import sbt.*
+import sbt.Keys.{sourceGenerators, sourceManaged}
+import sbt.plugins.JvmPlugin
 
 import java.nio.charset.StandardCharsets
-
-import com.malliina.sbt.filetree.FileTreeKeys.fileTreeSources
-import com.malliina.sbt.filetree.ScalaIdentifiers.legalName
-import sbt.Keys.{sourceGenerators, sourceManaged}
-import sbt._
-import sbt.plugins.JvmPlugin
+import java.nio.file.{Files, Path}
+import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
 
 object FileTreePlugin extends AutoPlugin {
   override def requires: Plugins = JvmPlugin
@@ -14,14 +16,14 @@ object FileTreePlugin extends AutoPlugin {
   override def projectSettings: Seq[Setting[?]] = Seq(
     fileTreeSources := Nil,
     Compile / sourceGenerators += Def.task {
-      val dest = (Compile / sourceManaged).value
-      fileTreeSources.value.flatMap(mapping => makeSources(mapping, dest))
+      val dest = (Compile / sourceManaged).value.toPath
+      fileTreeSources.value.flatMap(mapping => makeSources(mapping, dest).map(_.toFile))
     }.taskValue
   )
 
   val autoImport = FileTreeKeys
 
-  def makeSources(mapping: DirMap, destBase: File): Seq[File] = {
+  def makeSources(mapping: DirMap, destBase: Path): Seq[Path] = {
     val packageName = mapping.packageName
     val className = mapping.className
     val mapFunc = mapping.mapFunc
@@ -39,21 +41,22 @@ object FileTreePlugin extends AutoPlugin {
          |}
       """.stripMargin.trim + IO.Newline
     val destFile = destDir(destBase, packageName) / s"$className.scala"
-    IO.write(destFile, content, StandardCharsets.UTF_8)
+    IO.write(destFile.toFile, content, StandardCharsets.UTF_8)
     Seq(destFile)
   }
 
-  def members(dir: File, parent: String): String = {
-    val paths = IO.listFiles(dir)
-    val dirs = paths.filter(_.isDirectory).map(dir => makeDir(dir, parent)).mkString("")
-    val defs = makeDefs(paths.filter(_.isFile))
+  def members(dir: Path, parent: String): String = {
+    val paths = Files.list(dir).toList.asScala.toList
+    val dirs = paths.filter(Files.isDirectory(_)).map(dir => makeDir(dir, parent)).mkString("")
+    val defs = makeDefs(paths.filter(Files.isRegularFile(_)))
     Seq(dirs, defs).mkString(IO.Newline)
   }
 
-  def makeDir(dir: File, parent: String): String = {
-    val newParent = s"$parent${dir.base}/"
+  def makeDir(dir: Path, parent: String): String = {
+    val base = dir.toFile.base
+    val newParent = s"$parent$base/"
     val inner = members(dir, newParent)
-    val objName = legalName(dir.base)
+    val objName = legalName(base)
     s"""
        |object $objName extends Dir("$newParent") {
        |$inner
@@ -61,14 +64,14 @@ object FileTreePlugin extends AutoPlugin {
     """.stripMargin.trim + IO.Newline
   }
 
-  def makeDefs(files: Seq[File]) =
+  def makeDefs(files: Seq[Path]) =
     files.map(makeFile).mkString(IO.Newline)
 
-  def makeFile(file: File) = {
-    val defName = legalName(file.name)
-    s"""def $defName: T = map(prefix + "${file.getName}")"""
+  def makeFile(file: Path) = {
+    val defName = legalName(file.toFile.name)
+    s"""def $defName: T = map(prefix + "${file.toFile.getName}")"""
   }
 
-  def destDir(base: File, packageName: String): File =
+  def destDir(base: Path, packageName: String): Path =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
 }

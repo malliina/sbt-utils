@@ -1,4 +1,4 @@
-package com.malliina.sbt.filetree
+package com.malliina.filetree
 
 class IdentifierTests extends munit.FunSuite with ScalaIdentifiers {
   test("camelCase") {

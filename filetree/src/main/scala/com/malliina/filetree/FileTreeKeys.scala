@@ -1,13 +1,15 @@
-package com.malliina.sbt.filetree
+package com.malliina.filetree
 
-import sbt.{File, settingKey}
+import sbt.settingKey
+
+import java.nio.file.Path
 
 object FileTreeKeys {
   val fileTreeSources =
     settingKey[Seq[DirMap]]("File tree source directories and generated objects")
 }
 
-case class DirMap(source: File, destination: String, mapFunc: String = "identity") {
+case class DirMap(source: Path, destination: String, mapFunc: String = "identity") {
   val (packageName, className) = DirMap.splitAtLastDot(destination)
 }
 

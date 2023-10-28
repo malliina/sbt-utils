@@ -1,12 +1,12 @@
-package com.malliina.sbt.filetree
+package com.malliina.filetree
 
 object ScalaIdentifiers extends ScalaIdentifiers
 
 trait ScalaIdentifiers {
   // TODO get a better reference
-  val illegalChars = ".-åäö".toCharArray.toList
+  private val illegalChars = ".-åäö".toCharArray.toList
   // SLS 1.1
-  val reservedWords: List[String] =
+  private val reservedWords: List[String] =
     ("abstract case catch class def do else extends " +
       "false final finally for forSome if implicit import lazy match new" +
       " null object override package private protected return sealed super" +
@@ -15,7 +15,7 @@ trait ScalaIdentifiers {
   def legalName(base: String): String = sanitize(replaced(base, illegalChars, '_'))
 
   def sanitize(word: String) =
-    if (reservedWords contains word) s"`$word`"
+    if (reservedWords.contains(word)) s"`$word`"
     else word
 
   def camelCase(in: String): String = camelCase(in, List('-', '_'))
