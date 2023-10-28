@@ -63,6 +63,8 @@ and
 
     src/main/resources/css/fonts.js
 
+You must create those files.
+
 #### Generator
 
 Enable the generator plugin and connect the frontend module:
