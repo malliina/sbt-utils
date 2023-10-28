@@ -179,7 +179,7 @@ references the file will no longer compile.
 
 Add the following settings in `plugins.sbt`:
 
-    addSbtPlugin("com.malliina" % "sbt-filetree" % "0.4.1")
+    addSbtPlugin("com.malliina" % "sbt-filetree" % "@VERSION@")
 
 Enable `FileTreePlugin` in your project:
 
