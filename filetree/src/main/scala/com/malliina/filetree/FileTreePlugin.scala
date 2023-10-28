@@ -1,29 +1,35 @@
 package com.malliina.filetree
 
-import com.malliina.filetree.FileTreeKeys.fileTreeSources
+import com.malliina.filetree.FileTreeKeys.{fileTreeSources, scalafmtConf}
 import com.malliina.filetree.ScalaIdentifiers.legalName
 import sbt.*
 import sbt.Keys.{sourceGenerators, sourceManaged}
 import sbt.plugins.JvmPlugin
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Path}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
+import org.scalafmt.interfaces.Scalafmt
 
 object FileTreePlugin extends AutoPlugin {
+  val scalafmt = Scalafmt.create(this.getClass.getClassLoader)
+
   override def requires: Plugins = JvmPlugin
 
   override def projectSettings: Seq[Setting[?]] = Seq(
     fileTreeSources := Nil,
+    scalafmtConf := Option(Paths.get(".scalafmt.conf")),
     Compile / sourceGenerators += Def.task {
       val dest = (Compile / sourceManaged).value.toPath
-      fileTreeSources.value.flatMap(mapping => makeSources(mapping, dest).map(_.toFile))
+      fileTreeSources.value.flatMap { mapping =>
+        makeSources(mapping, dest, scalafmtConf.value).map(_.toFile)
+      }
     }.taskValue
   )
 
   val autoImport = FileTreeKeys
 
-  def makeSources(mapping: DirMap, destBase: Path): Seq[Path] = {
+  def makeSources(mapping: DirMap, destBase: Path, scalafmtConfFile: Option[Path]): Seq[Path] = {
     val packageName = mapping.packageName
     val className = mapping.className
     val mapFunc = mapping.mapFunc
@@ -41,7 +47,12 @@ object FileTreePlugin extends AutoPlugin {
          |}
       """.stripMargin.trim + IO.Newline
     val destFile = destDir(destBase, packageName) / s"$className.scala"
-    IO.write(destFile.toFile, content, StandardCharsets.UTF_8)
+    val formatted =
+      scalafmtConfFile
+        .filter(p => Files.exists(p))
+        .map(conf => scalafmt.format(conf, destFile, content))
+        .getOrElse(content)
+    IO.write(destFile.toFile, formatted, StandardCharsets.UTF_8)
     Seq(destFile)
   }
 

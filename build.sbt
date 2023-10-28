@@ -117,6 +117,9 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
+  .settings(
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.7.15"
+  )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(commonSettings)
