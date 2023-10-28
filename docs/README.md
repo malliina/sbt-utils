@@ -7,6 +7,7 @@ A repository of sbt plugins that I find useful.
 - sbt-bundler for integrating servers using sbt-revolver with clients built with Scala.js and scalajs-bundler
 - sbt-utils-maven for publishing GitHub projects to [Maven Central](https://search.maven.org/)
 - sbt-nodejs for working with Scala and Node.js projects
+- sbt-filetree creates a data structure of your files
 
 The Maven Central plugin populates the required POM XML and delegates publishing to 
 [sbt-sonatype](https://github.com/xerial/sbt-sonatype). The user must provide a couple of values to correctly populate 
@@ -29,6 +30,10 @@ To publish to Maven Central:
 The Node.js plugin:
 
     addSbtPlugin("com.malliina" % "sbt-nodejs" % "@VERSION@")
+
+To use sbt-filetree:
+
+    addSbtPlugin("com.malliina" % "sbt-filetree" % "@VERSION@")
 
 ## Usage
 
@@ -139,3 +144,59 @@ Then run e.g.
 
 Set sbt setting `cwd` to your frontend working directory. (Typically, the directory containing `package.json`.)
 By default, it is `baseDirectory`.
+
+### sbt-filetree
+
+This SBT plugin generates a Scala source file that represents the
+directory structure of a given file system directory.
+
+For example, given a directory with the following structure:
+
+    base/
+      file1.jpg
+      file2.jpg
+      sub/
+        file3.jpg
+
+The plugin generates (roughly) the following Scala object:
+
+    object AppAssets {
+      def file1_jpg: String = "file1.jpg"
+      def file2_jpg: String = "file2.jpg"
+      object sub {
+        def file3_jpg: String = "sub/file3.jpg"
+      }
+    }
+
+Now you can refer to a given file path without writing the string literal by hand:
+
+    AppAssets.sub.file3_jpg // returns "sub/file3.jpg"
+
+Furthermore, if the file is deleted or moved from the file system, any code that
+references the file will no longer compile.
+
+#### Installation
+
+Add the following settings in `plugins.sbt`:
+
+    addSbtPlugin("com.malliina" % "sbt-filetree" % "0.4.1")
+
+Enable `FileTreePlugin` in your project:
+
+    val myProject = Project("demo", file("."))
+      .enablePlugins(com.malliina.sbt.filetree.FileTreePlugin)
+
+Specify the source directories for the file tree traversal and corresponding destination objects to write:
+
+    import com.malliina.sbt.filetree.DirMap
+    fileTreeSources += DirMap(baseDirectory.value / "appfiles", "com.malliina.filetree.AppFiles")
+
+Now when you `compile`, the build generates source code that defines an object `com.malliina.filetree.AppFiles`,
+where each member is a file or directory under `baseDirectory / appfiles`.
+
+By default, each file path is represented as a `String`. You can supply a function as a third paramater to a
+`DirMap` that transforms each file path:
+
+    DirMap(baseDirectory.value / "appfiles", "com.malliina.filetree.AppFiles", "com.malliina.Code.transform")
+
+Where `transform` is a unary function of type `String => T`.

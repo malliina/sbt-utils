@@ -12,7 +12,11 @@ inThisBuild(
   Seq(
     organization := "com.malliina",
     scalaVersion := "2.12.18",
-    licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
+    licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
+    libraryDependencies ++= Seq(
+      "org.scalameta" %% "munit" % "0.7.29" % Test
+    ),
+    testFrameworks += new TestFramework("munit.Framework")
   )
 )
 
@@ -147,6 +151,9 @@ val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
     libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.20.17"
   )
 
+val filetreePlugin = Project("sbt-filetree", file("filetree"))
+  .settings(commonSettings)
+
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(
     mavenPlugin,
@@ -155,6 +162,7 @@ val sbtUtils = Project("sbt-utils", file("."))
     revolverRollupPlugin,
     dockerBundlerPlugin,
     codeArtifactPlugin,
+    filetreePlugin,
     docs
   )
   .settings(releaseSettings)
