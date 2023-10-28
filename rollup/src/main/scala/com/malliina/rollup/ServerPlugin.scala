@@ -1,9 +1,11 @@
 package com.malliina.rollup
 
+import com.malliina.filetree.FileTreeKeys.fileTreeSources
+import com.malliina.filetree.{DirMap, FileTreePlugin}
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
-import com.malliina.rollup.HashPlugin.autoImport.{copyFolders, hash, hashRoot, useHash}
+import com.malliina.rollup.HashPlugin.autoImport.{copyFolders, hash, hashPackage, hashRoot, useHash}
 import com.malliina.rollup.RollupPlugin.autoImport.assetsPrefix
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
 import sbt.*
@@ -16,7 +18,7 @@ import spray.revolver.RevolverPlugin.autoImport.reStart
 
 object ServerPlugin extends AutoPlugin {
   override def requires: Plugins =
-    LiveRevolverPlugin && FileInputPlugin && HashPlugin && BuildInfoPlugin
+    LiveRevolverPlugin && FileInputPlugin && HashPlugin && BuildInfoPlugin && FileTreePlugin
   object autoImport {
     val clientProject = settingKey[Project]("Scala.js project")
     val start = CommonKeys.start
@@ -65,6 +67,7 @@ object ServerPlugin extends AutoPlugin {
         List(Def.settingDyn(clientProject.value / assetsRoot).value.getParent.toFile)
       else
         Nil
-    }
+    },
+    fileTreeSources += DirMap(hashRoot.value, s"${hashPackage.value}.FileAssets")
   )
 }

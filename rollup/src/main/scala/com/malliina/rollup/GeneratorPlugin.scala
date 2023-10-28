@@ -1,8 +1,7 @@
 package com.malliina.rollup
 
-import com.malliina.filetree.FileTreePlugin
 import com.malliina.filetree.FileTreeKeys.fileTreeSources
-import com.malliina.filetree.DirMap
+import com.malliina.filetree.{DirMap, FileTreePlugin}
 import com.malliina.live.LiveReloadPlugin
 import com.malliina.live.LiveReloadPlugin.autoImport.{liveReloadRoot, refreshBrowsers, reloader}
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}

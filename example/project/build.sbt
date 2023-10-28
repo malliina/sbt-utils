@@ -4,5 +4,5 @@ Seq(
   "io.spray" % "sbt-revolver" % "0.10.0"
 ).map(addSbtPlugin)
 
-val bundler = ProjectRef(file("../.."), "sbt-bundler")
-val root = project.in(file(".")).dependsOn(bundler)
+val rollup = ProjectRef(file("../.."), "sbt-revolver-rollup")
+val root = project.in(file(".")).dependsOn(rollup)

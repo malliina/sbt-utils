@@ -115,6 +115,9 @@ val mavenPlugin = Project("sbt-utils-maven", file("maven"))
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
 
+val fileTreePlugin = Project("sbt-filetree", file("filetree"))
+  .settings(commonSettings)
+
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(commonSettings)
   .settings(
@@ -124,11 +127,8 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     ) map addSbtPlugin
   )
 
-val filetreePlugin = Project("sbt-filetree", file("filetree"))
-  .settings(commonSettings)
-
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
-  .dependsOn(common, filetreePlugin)
+  .dependsOn(common, fileTreePlugin)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
@@ -158,11 +158,11 @@ val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(
     mavenPlugin,
     nodePlugin,
+    fileTreePlugin,
     bundlerPlugin,
     revolverRollupPlugin,
     dockerBundlerPlugin,
     codeArtifactPlugin,
-    filetreePlugin,
     docs
   )
   .settings(releaseSettings)
