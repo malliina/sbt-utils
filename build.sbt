@@ -126,7 +126,7 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(
     Seq(
       "ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1",
-      "com.malliina" % "live-reload" % "0.5.0"
+      "com.malliina" % "live-reload" % "0.6.0"
     ) map addSbtPlugin
   )
 
@@ -138,7 +138,7 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
       "io.circe" %% s"circe-$m" % "0.14.6"
     },
     Seq(
-      "com.malliina" % "live-reload" % "0.5.0",
+      "com.malliina" % "live-reload" % "0.6.0",
       "org.scala-js" % "sbt-scalajs" % "1.14.0",
       "com.eed3si9n" % "sbt-buildinfo" % "0.11.0"
     ) map addSbtPlugin
