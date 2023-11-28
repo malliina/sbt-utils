@@ -107,7 +107,6 @@ object RollupPlugin extends AutoPlugin {
         val resDir = (Compile / resourceDirectory).value
         val userPackageJson = resDir / "package.json"
         val inbuilt = json(res("package.json"))
-        log.info(s"Inbuilt $inbuilt")
         val packageJson =
           if (userPackageJson.exists())
             inbuilt.deepMerge(jsonFile(userPackageJson))
