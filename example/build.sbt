@@ -1,3 +1,11 @@
+inThisBuild(
+  Seq(
+    scalaVersion := "3.3.1",
+    organization := "com.malliina",
+    version := "0.0.1"
+  )
+)
+
 val shared = project.in(file("shared"))
 
 val client = project

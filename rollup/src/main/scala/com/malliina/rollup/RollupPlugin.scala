@@ -96,10 +96,18 @@ object RollupPlugin extends AutoPlugin {
         val mainJs = root.relativize(jsDir) / jsFile
         log.info(s"Built $mainJs with prod $isProd.")
         val rollup = npmRoot.value / "scalajs.rollup.config.js"
-        makeRollupConfig(mainJs, assetsRoot.value, rollup, (stageTask / urlOptions).value, isProd)
+        makeRollupConfig(
+          mainJs,
+          assetsRoot.value,
+          rollup,
+          (stageTask / urlOptions).value,
+          isProd,
+          log
+        )
         val resDir = (Compile / resourceDirectory).value
         val userPackageJson = resDir / "package.json"
         val inbuilt = json(res("package.json"))
+        log.info(s"Inbuilt $inbuilt")
         val packageJson =
           if (userPackageJson.exists())
             inbuilt.deepMerge(jsonFile(userPackageJson))
@@ -145,7 +153,7 @@ object RollupPlugin extends AutoPlugin {
           else {
             npmInstall(cwd, log)
             val lockFile = resourceLockFile.value
-            val newestLockFile = npmRoot.value / "package-lock.json"
+            val newestLockFile = cwd / "package-lock.json"
             if (Files.exists(newestLockFile)) {
               FileIO.copyIfChanged(newestLockFile, lockFile)
             }
@@ -184,7 +192,8 @@ object RollupPlugin extends AutoPlugin {
     outputDir: Path,
     rollup: Path,
     urlOptions: Seq[UrlOption],
-    isProd: Boolean
+    isProd: Boolean,
+    log: Logger
   ): Path = {
     val json = urlOptions.asJson.noSpaces
     val isProdStr = if (isProd) "true" else "false"
