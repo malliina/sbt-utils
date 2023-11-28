@@ -27,6 +27,7 @@ object RollupPlugin extends AutoPlugin {
     val npmRoot = settingKey[Path]("Working dir for npm commands")
     val urlOptions = settingKey[Seq[UrlOption]]("URL options for postcss-url")
     val resourceLockFile = settingKey[Path]("Path to saved package-lock.json")
+    val initChecksums = taskKey[Path]("Initializes")
   }
   import autoImport.*
 
@@ -49,9 +50,16 @@ object RollupPlugin extends AutoPlugin {
             stageTask / build
           }
         }.value
+//        initChecksums := {
+//          streams.value.log.info("Init checksums")
+//          (Compile / resourceDirectory).value.toPath.resolve("checksum.sha1")
+//        }
       )
 
   override val globalSettings: Seq[Setting[?]] = Seq(
+//    Global / onLoad := (Global / onLoad).value.andThen { state =>
+//      "initChecksums" :: state
+//    },
     commands += Command.args("mode", "<mode>") { (state, args) =>
       val newStage = args.toList match {
         case h :: Nil =>
@@ -104,22 +112,13 @@ object RollupPlugin extends AutoPlugin {
           isProd,
           log
         )
-        val resDir = (Compile / resourceDirectory).value
-        val userPackageJson = resDir / "package.json"
-        val inbuilt = json(res("package.json"))
-        val packageJson =
-          if (userPackageJson.exists())
-            inbuilt.deepMerge(jsonFile(userPackageJson))
-          else
-            inbuilt
         val targetPath = npmRoot.value
-        val dest = targetPath / "package.json"
+        writePackageJsonIfChanged((Compile / resourceDirectory).value, targetPath)
         val tsFiles =
           Seq("rollup.config.ts", "rollup-extract-css.ts", "rollup-sourcemaps.ts", "tsconfig.json")
         tsFiles.foreach { name =>
           FileIO.writeIfChanged(res(name), targetPath.resolve(name))
         }
-        FileIO.writeIfChanged(packageJson.spaces2SortKeys, dest)
         val lockFile = resourceLockFile.value
         val lockFileDest = npmRoot.value / "package-lock.json"
         if (Files.exists(lockFile)) {
@@ -162,7 +161,10 @@ object RollupPlugin extends AutoPlugin {
       },
       stageTask / build := (stageTask / build).dependsOn(stageTask / prepareRollup).value,
       stageTask / build := Def.taskIf {
-        val hasChanges = build.inputFileChanges.hasChanges
+        val hasChanges = build.inputFileChanges.hasChanges || writePackageJsonIfChanged(
+          (Compile / resourceDirectory).value,
+          npmRoot.value
+        )
         if (hasChanges) {
           (stageTask / build).value
         } else {
@@ -170,6 +172,17 @@ object RollupPlugin extends AutoPlugin {
         }
       }.value
     )
+  }
+
+  def writePackageJsonIfChanged(resDir: File, destDir: Path): Boolean = {
+    val userPackageJson = resDir / "package.json"
+    val inbuilt = json(res("package.json"))
+    val packageJson =
+      if (userPackageJson.exists())
+        inbuilt.deepMerge(jsonFile(userPackageJson))
+      else
+        inbuilt
+    FileIO.writeIfChanged(packageJson.spaces2SortKeys, destDir.resolve("package.json"))
   }
 
   def npmRunBuild(cwd: Path, log: Logger) =
