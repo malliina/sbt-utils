@@ -27,7 +27,6 @@ object RollupPlugin extends AutoPlugin {
     val npmRoot = settingKey[Path]("Working dir for npm commands")
     val urlOptions = settingKey[Seq[UrlOption]]("URL options for postcss-url")
     val resourceLockFile = settingKey[Path]("Path to saved package-lock.json")
-    val initChecksums = taskKey[Path]("Initializes")
   }
   import autoImport.*
 
@@ -50,16 +49,9 @@ object RollupPlugin extends AutoPlugin {
             stageTask / build
           }
         }.value
-//        initChecksums := {
-//          streams.value.log.info("Init checksums")
-//          (Compile / resourceDirectory).value.toPath.resolve("checksum.sha1")
-//        }
       )
 
   override val globalSettings: Seq[Setting[?]] = Seq(
-//    Global / onLoad := (Global / onLoad).value.andThen { state =>
-//      "initChecksums" :: state
-//    },
     commands += Command.args("mode", "<mode>") { (state, args) =>
       val newStage = args.toList match {
         case h :: Nil =>
@@ -109,8 +101,7 @@ object RollupPlugin extends AutoPlugin {
           assetsRoot.value,
           rollup,
           (stageTask / urlOptions).value,
-          isProd,
-          log
+          isProd
         )
         val targetPath = npmRoot.value
         writePackageJsonIfChanged((Compile / resourceDirectory).value, targetPath)
@@ -204,8 +195,7 @@ object RollupPlugin extends AutoPlugin {
     outputDir: Path,
     rollup: Path,
     urlOptions: Seq[UrlOption],
-    isProd: Boolean,
-    log: Logger
+    isProd: Boolean
   ): Path = {
     val json = urlOptions.asJson.noSpaces
     val isProdStr = if (isProd) "true" else "false"
