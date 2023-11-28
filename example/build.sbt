@@ -10,7 +10,7 @@ val shared = project.in(file("shared"))
 
 val client = project
   .in(file("client"))
-  .enablePlugins(RollupPlugin)
+  .enablePlugins(RollupPlugin, NodeJsPlugin)
   .disablePlugins(RevolverPlugin)
 
 val server = project

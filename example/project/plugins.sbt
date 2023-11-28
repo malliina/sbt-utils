@@ -4,4 +4,5 @@ Seq(
 ).map(addSbtPlugin)
 
 val rollup = ProjectRef(file("../.."), "sbt-revolver-rollup")
-val root = project.in(file(".")).dependsOn(rollup)
+val node = ProjectRef(file("../.."), "sbt-nodejs")
+val root = project.in(file(".")).dependsOn(rollup, node)

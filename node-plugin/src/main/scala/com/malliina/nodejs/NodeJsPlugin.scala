@@ -31,7 +31,7 @@ object NodeJsPlugin extends AutoPlugin {
   )
 
   override val projectSettings = Seq(
-    cwd := baseDirectory.value,
+    cwd := target.value,
     ncu := front.toTask(" ncu").value,
     front := {
       val log = streams.value.log
