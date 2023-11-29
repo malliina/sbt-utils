@@ -1,6 +1,7 @@
 package com.malliina.rollup
 
 import com.malliina.build.FileIO
+import com.malliina.nodejs.NodeJsPlugin
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
 import org.apache.ivy.util.ChecksumHelper
@@ -8,14 +9,14 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
 import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
-import sbt.{IO => _, *}
+import sbt.{IO as _, *}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.asScalaBufferConverter
 
 object RollupPlugin extends AutoPlugin {
-  override def requires: Plugins = ScalaJSPlugin
+  override def requires: Plugins = ScalaJSPlugin && NodeJsPlugin
   val utf8 = StandardCharsets.UTF_8
   val sha1 = "sha1"
 

@@ -41,7 +41,7 @@ object ServerPlugin extends AutoPlugin {
       } else {
         Def.task(streams.value.log.info(s"No changes to ${name.value}, no restart.")).value
       }
-    }.value,
+    }.value, // sbt warns about pure statement, but without .value this does not work at all
     start := start.dependsOn(Def.taskDyn(clientProject.value / build)).value,
     refreshBrowsers := refreshBrowsers
       .triggeredBy(Def.taskDyn(clientProject.value / build), start)

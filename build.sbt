@@ -20,6 +20,31 @@ inThisBuild(
   )
 )
 
+ThisBuild / commands += Command.command("releaseArtifacts") { state =>
+  val extracted = Project extract state
+  val ciState = extracted.appendWithoutSession(
+    Seq(
+      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+      releaseProcess := Seq[ReleaseStep](
+        checkSnapshotDependencies,
+        runTest,
+        releaseStepCommandAndRemaining("+publishSigned"),
+        releaseStepCommand("sonatypeReleaseAll")
+      )
+    ),
+    state
+  )
+  Command.process("release cross with-defaults", ciState)
+}
+
+Global / pgpPassphrase := sys.env
+  .get("PGP_PASSPHRASE")
+  .orElse {
+    val file = Path.userHome / ".sbt" / ".pgp"
+    if (file.exists()) Option(IO.read(file)) else None
+  }
+  .map(_.toCharArray)
+
 val pluginSettings = Seq(
   "com.github.sbt" % "sbt-pgp" % "2.2.1",
   "com.github.sbt" % "sbt-release" % "1.1.0"
@@ -78,31 +103,6 @@ val commonSettings = pluginSettings ++ baseSettings ++ Seq(
   sbtPlugin := true
 )
 
-ThisBuild / commands += Command.command("releaseArtifacts") { state =>
-  val extracted = Project extract state
-  val ciState = extracted.appendWithoutSession(
-    Seq(
-      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-      releaseProcess := Seq[ReleaseStep](
-        checkSnapshotDependencies,
-        runTest,
-        releaseStepCommandAndRemaining("+publishSigned"),
-        releaseStepCommand("sonatypeReleaseAll")
-      )
-    ),
-    state
-  )
-  Command.process("release cross with-defaults", ciState)
-}
-
-Global / pgpPassphrase := sys.env
-  .get("PGP_PASSPHRASE")
-  .orElse {
-    val file = Path.userHome / ".sbt" / ".pgp"
-    if (file.exists()) Option(IO.read(file)) else None
-  }
-  .map(_.toCharArray)
-
 val common = Project("common-build", file("common"))
   .settings(baseSettings)
 
@@ -131,7 +131,7 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   )
 
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
-  .dependsOn(common, fileTreePlugin)
+  .dependsOn(common, fileTreePlugin, nodePlugin)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
