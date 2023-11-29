@@ -140,7 +140,8 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
     Seq(
       "com.malliina" % "live-reload" % "0.6.0",
       "org.scala-js" % "sbt-scalajs" % "1.14.0",
-      "com.eed3si9n" % "sbt-buildinfo" % "0.11.0"
+      "com.eed3si9n" % "sbt-buildinfo" % "0.11.0",
+      "org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2"
     ) map addSbtPlugin
   )
 

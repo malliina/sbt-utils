@@ -9,7 +9,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
 import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
-import sbt.{IO as _, *}
+import sbt.{IO => _, *}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
@@ -41,14 +41,12 @@ object RollupPlugin extends AutoPlugin {
         scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
         assetsRoot := target.value.toPath / "assets",
         assetsPrefix := "assets",
-        build := {
-          Def.settingDyn {
-            val stageTask = scalaJSStage.value match {
-              case Stage.FastOpt => fastLinkJS
-              case Stage.FullOpt => fullLinkJS
-            }
-            stageTask / build
+        build := Def.settingDyn {
+          val stageTask = scalaJSStage.value match {
+            case Stage.FastOpt => fastLinkJS
+            case Stage.FullOpt => fullLinkJS
           }
+          stageTask / build
         }.value
       )
 
