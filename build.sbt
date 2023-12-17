@@ -130,16 +130,20 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     ) map addSbtPlugin
   )
 
+val scalaJSVersion = "1.14.0"
+
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .dependsOn(common, fileTreePlugin, nodePlugin)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
       "io.circe" %% s"circe-$m" % "0.14.6"
-    },
+    } ++ Seq(
+      "org.scala-js" %% "scalajs-linker" % scalaJSVersion
+    ),
     Seq(
       "com.malliina" % "live-reload" % "0.6.0",
-      "org.scala-js" % "sbt-scalajs" % "1.14.0",
+      "org.scala-js" % "sbt-scalajs" % scalaJSVersion,
       "com.eed3si9n" % "sbt-buildinfo" % "0.11.0",
       "org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2"
     ) map addSbtPlugin
