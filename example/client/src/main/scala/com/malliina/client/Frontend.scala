@@ -17,7 +17,7 @@ object Frontend:
     val popovers = document
       .querySelectorAll("[data-bs-toggle='popover']")
       .map { e =>
-        new Popover(e, PopoverOptions.manual)
+        new Popover(e, PopoverOptions.click)
       }
     println(s"Hi, got ${popovers.size} popover(s)...")
 
