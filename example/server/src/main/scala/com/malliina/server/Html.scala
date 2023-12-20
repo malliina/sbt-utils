@@ -1,5 +1,6 @@
 package com.malliina.server
 
+import com.malliina.live.LiveReload
 import org.http4s.Uri
 import scalatags.Text.all.*
 import scalatags.text.Builder
@@ -22,7 +23,8 @@ class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
     head(
       meta(charset := "utf-8"),
       cssFiles.map(file => cssLink(assets.at(file))),
-      scripts.map(js => deferredJsPath(js))
+      scripts.map(js => deferredJsPath(js)),
+      script(src := LiveReload.script)
     ),
     body(
       p("Hi!"),
