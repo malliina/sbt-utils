@@ -9,7 +9,8 @@ import com.malliina.server.Html.given
 object Html:
   val default =
     Html(
-      Seq("frontend.js", "client-loader.js", "main.js"),
+      if BuildInfo.isProd then Seq("frontend.js")
+      else Seq("frontend.js", "client-loader.js", "main.js"),
       Seq("frontend.css", "styles.css"),
       DirectAssets
     )
