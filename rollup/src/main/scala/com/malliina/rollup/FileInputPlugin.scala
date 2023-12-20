@@ -1,6 +1,6 @@
 package com.malliina.rollup
 
-import sbt._
+import sbt.*
 import sbt.Keys.{resourceDirectories, sourceDirectories}
 import sbt.nio.Keys.fileInputs
 

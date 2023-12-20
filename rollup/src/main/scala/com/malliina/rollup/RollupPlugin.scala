@@ -5,11 +5,12 @@ import com.malliina.nodejs.NodeJsPlugin
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
 import org.apache.ivy.util.ChecksumHelper
+import org.scalajs.linker.interface.Report
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
-import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
+import org.scalajs.sbtplugin.{LinkerImpl, ScalaJSPlugin, Stage}
 import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
-import sbt.{IO => _, *}
+import sbt.{IO as _, *}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
@@ -28,12 +29,19 @@ object RollupPlugin extends AutoPlugin {
     val npmRoot = settingKey[Path]("Working dir for npm commands")
     val urlOptions = settingKey[Seq[UrlOption]]("URL options for postcss-url")
     val resourceLockFile = settingKey[Path]("Path to saved package-lock.json")
+    val entryPointFile = settingKey[Path]("Entrypoint file")
+    val entryPointJsFile = settingKey[Path]("Entrypoint JS file")
+    val libraryRollupFile = settingKey[Path]("Rollup config for libraries only")
+    val importedModules = taskKey[List[String]]("Links stuff")
+    val link = taskKey[Unit]("Links")
   }
   import autoImport.*
 
   override val projectSettings: Seq[Def.Setting[?]] =
     stageSettings(Stage.FastOpt) ++
       stageSettings(Stage.FullOpt) ++
+      localDevSettings(fastLinkJS) ++
+      localDevSettings(fullLinkJS) ++
       Seq(
         npmRoot := target.value.toPath,
         resourceLockFile := (Compile / resourceDirectory).value.toPath.resolve("package-lock.json"),
@@ -49,6 +57,58 @@ object RollupPlugin extends AutoPlugin {
           stageTask / build
         }.value
       )
+
+  private def localDevSettings(stage: TaskKey[Attributed[Report]]) = Seq(
+    stage / build := (stage / build).dependsOn(stage / link).value,
+    stage / entryPointFile := (crossTarget.value / "entrypoints.txt").toPath,
+    stage / entryPointJsFile := (crossTarget.value / "entrypoints.js").toPath,
+    stage / libraryRollupFile := (crossTarget.value / "library.rollup.config.js").toPath,
+    Compile / stage / scalaJSLinker := {
+      val out = (stage / entryPointFile).value
+      val config = (stage / scalaJSLinkerConfig).value
+      val linkerImpl = (stage / scalaJSLinkerImpl).value
+      val box = (Compile / stage / scalaJSLinkerBox).value
+      box.ensure {
+        linkerImpl.asInstanceOf[ForwardingLinker].bundlerLinker(config, out)
+      }
+    },
+    stage / importedModules := {
+      val lines = Files.readAllLines((stage / entryPointFile).value)
+      lines.asScala.toList
+    },
+    stage / importedModules := (stage / importedModules).dependsOn(Compile / stage).value,
+    stage / link := {
+      val appName = name.value
+      writeLoaderScript("version", assetsRoot.value / s"$appName-loader.js")
+    }
+  )
+
+  private def writeEntryPoint(modules: Seq[String], to: Path): Path = {
+    val map = modules.map { module =>
+      s""""$module": require("$module")"""
+    }.mkString(",\n")
+    val content =
+      s"""
+        |module.exports = {
+        |  "require": (function(x0) {
+        |    return {
+        |      $map
+        |    }[x0]
+        |  })
+        |}
+        |""".stripMargin
+    FileIO.writeIfChanged(content, to)
+    to
+  }
+
+  private def writeLoaderScript(bundleName: String, to: Path): Boolean = {
+    val content =
+      s"""
+         |var exports = window;
+         |exports.require = window["$bundleName"].require;
+    """.stripMargin
+    FileIO.writeIfChanged(content, to)
+  }
 
   override val globalSettings: Seq[Setting[?]] = Seq(
     commands += Command.args("mode", "<mode>") { (state, args) =>
@@ -67,6 +127,26 @@ object RollupPlugin extends AutoPlugin {
         ),
         state
       )
+    },
+    scalaJSLinkerImpl / fullClasspath := {
+      val s = streams.value
+      val log = s.log
+      val retrieveDir = s.cacheDirectory / "scalajs-bundler-linker"
+      val lm = (scalaJSLinkerImpl / dependencyResolution).value
+      val dependencies = Vector(
+        "org.scala-js" % "scalajs-linker_2.12" % scalaJSVersion
+      )
+      val dummyModuleID =
+        "com.malliina" % "scalajs-rollup-linker-and-scalajs-linker_2.12" % s"$scalaJSVersion"
+      val moduleDescriptor = lm.moduleDescriptor(dummyModuleID, dependencies, scalaModuleInfo = None)
+      lm.retrieve(moduleDescriptor, retrieveDir, log)
+        .fold(w => throw w.resolveException, Attributed.blankSeq(_))
+    },
+    scalaJSLinkerImpl := {
+      val cp = (scalaJSLinkerImpl / fullClasspath).value
+      scalaJSLinkerImplBox.value.ensure {
+        new ForwardingLinker(LinkerImpl.reflect(Attributed.data(cp)))
+      }
     }
   )
 
@@ -83,8 +163,8 @@ object RollupPlugin extends AutoPlugin {
     Seq(
       stageTask / urlOptions := UrlOption.defaults,
       stageTask / prepareRollup := {
-        val log = streams.value.log
         val jsDir = (Compile / stageTaskOutput).value.toPath
+        FileIO.copyIfChanged(jsDir.resolve("main.js"), assetsRoot.value.resolve("main.js"))
         val jsFile = (Compile / stageTask).value.data.publicModules
           .find(_.moduleID == "main")
           .getOrElse(
@@ -93,24 +173,27 @@ object RollupPlugin extends AutoPlugin {
           .jsFileName
         val root = npmRoot.value
         val mainJs = root.relativize(jsDir) / jsFile
-        log.info(s"Built $mainJs with prod $isProd.")
-        val rollup = npmRoot.value / "scalajs.rollup.config.js"
+        val modules = (stageTask / importedModules).value
+        val libraryEntryPointJs = (stageTask / entryPointJsFile).value
+        val rollupEntry =
+          if (isProd) mainJs
+          else writeEntryPoint(modules, libraryEntryPointJs)
+        val rollup = root / "scalajs.rollup.config.js"
         makeRollupConfig(
-          mainJs,
+          rollupEntry,
           assetsRoot.value,
           rollup,
           (stageTask / urlOptions).value,
           isProd
         )
-        val targetPath = npmRoot.value
-        writePackageJsonIfChanged((Compile / resourceDirectory).value, targetPath)
+        writePackageJsonIfChanged((Compile / resourceDirectory).value, root)
         val tsFiles =
           Seq("rollup.config.ts", "rollup-extract-css.ts", "rollup-sourcemaps.ts", "tsconfig.json")
         tsFiles.foreach { name =>
-          FileIO.writeIfChanged(res(name), targetPath.resolve(name))
+          FileIO.writeIfChanged(res(name), root.resolve(name))
         }
         val lockFile = resourceLockFile.value
-        val lockFileDest = npmRoot.value / "package-lock.json"
+        val lockFileDest = root / "package-lock.json"
         if (Files.exists(lockFile)) {
           FileIO.copyIfChanged(lockFile, lockFileDest)
         }
