@@ -163,7 +163,6 @@ object RollupPlugin extends AutoPlugin {
     Seq(
       stageTask / urlOptions := UrlOption.defaults,
       stageTask / prepareRollup := {
-        val log = streams.value.log
         val jsDir = (Compile / stageTaskOutput).value.toPath
         FileIO.copyIfChanged(jsDir.resolve("main.js"), assetsRoot.value.resolve("main.js"))
         val jsFile = (Compile / stageTask).value.data.publicModules
@@ -174,10 +173,6 @@ object RollupPlugin extends AutoPlugin {
           .jsFileName
         val root = npmRoot.value
         val mainJs = root.relativize(jsDir) / jsFile
-//        log.info(s"Built $mainJs with prod $isProd exists ${Files.exists(mainJs)}.")
-        //        if (!isProd) {
-        //          FileIO.copyIfChanged(mainJs, assetsRoot.value.resolve(mainJs.getFileName))
-        //        }
         val modules = (stageTask / importedModules).value
         val libraryEntryPointJs = (stageTask / entryPointJsFile).value
         val rollupEntry =
