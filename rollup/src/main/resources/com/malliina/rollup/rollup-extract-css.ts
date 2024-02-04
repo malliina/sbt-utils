@@ -19,15 +19,15 @@ export interface ExtractOptions {
   outDir: string
   include?: string
   exclude?: string
-  minimize?: boolean
-  sourcemap?: boolean
+  minimize: boolean
+  sourcemap: boolean
   urlOptions: any
 }
 
 export default function extractcss(options: ExtractOptions): Plugin {
-  const filter = createFilter(options.include || "**/*.css", options.exclude)
-  const minimize = options.minimize || false
-  const sourcemap = options.sourcemap || true
+  const filter = createFilter(options.include ?? "**/*.css", options.exclude)
+  const minimize = options.minimize
+  const sourcemap = options.sourcemap
   const basicPlugins = [postcssNesting(), autoprefixer, postcssUrl(options.urlOptions)]
   const extraPlugins = minimize ? [cssnano()] : []
   const plugins = basicPlugins.concat(extraPlugins)

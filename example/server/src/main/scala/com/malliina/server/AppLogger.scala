@@ -32,7 +32,7 @@ object AppLogger:
     }
     lc
 
-  def installAppender(
+  private def installAppender(
     appender: Appender[ILoggingEvent],
     loggerName: String = SLF4JLogger.ROOT_LOGGER_NAME
   ): Unit =

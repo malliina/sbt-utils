@@ -2,7 +2,11 @@ inThisBuild(
   Seq(
     scalaVersion := "3.3.1",
     organization := "com.malliina",
-    version := "0.0.1"
+    version := "0.0.1",
+    Compile / fastLinkJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
+    Compile / fastOptJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
+    Compile / fullLinkJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
+    Compile / fullOptJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
   )
 )
 
@@ -27,7 +31,7 @@ val server = project
     buildInfoPackage := "com.malliina.server",
     libraryDependencies ++=
       Seq("ember-server", "ember-client", "dsl", "circe").map { m =>
-        "org.http4s" %% s"http4s-$m" % "0.23.24"
+        "org.http4s" %% s"http4s-$m" % "0.23.25"
       } ++ Seq("classic", "core").map { m =>
         "ch.qos.logback" % s"logback-$m" % "1.4.14"
       } ++ Seq(

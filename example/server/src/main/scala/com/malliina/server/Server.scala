@@ -1,15 +1,12 @@
 package com.malliina.server
 
-import cats.Monad
 import cats.data.{Kleisli, NonEmptyList}
 import cats.effect.kernel.Async
 import cats.effect.{ExitCode, IO, IOApp}
 import com.comcast.ip4s.{host, port}
 import com.malliina.server.WebSyntax.noCache
-import io.circe.Json
 import io.circe.syntax.EncoderOps
 import org.http4s.CacheDirective.{`must-revalidate`, `no-cache`, `no-store`}
-import org.http4s.circe.CirceEntityEncoder.circeEntityEncoder
 import org.http4s.circe.CirceInstances
 import org.http4s.dsl.Http4sDsl
 import org.http4s.ember.server.EmberServerBuilder
@@ -34,19 +31,15 @@ class Server[F[_]: Async] extends WebSyntax[F] with ScalatagsEncoders:
   log.info("Starting app...")
   val html: Html = Html.default
 
-  val routes = HttpRoutes.of[F] {
+  private val routes = HttpRoutes.of[F]:
     case GET -> Root =>
       Ok(IndexResponse.default.asJson)
     case GET -> Root / "html" =>
       Ok(html.index)
-  }
-  val httpApp = GZip {
-    HSTS {
-      orNotFound {
+  private val httpApp = GZip:
+    HSTS:
+      orNotFound:
         Router("/" -> routes, "/assets" -> StaticService[F].routes)
-      }
-    }
-  }
   val server =
     EmberServerBuilder
       .default[F]
@@ -59,9 +52,8 @@ class Server[F[_]: Async] extends WebSyntax[F] with ScalatagsEncoders:
       .build
 
   def orNotFound(rs: HttpRoutes[F]): Kleisli[F, Request[F], Response[F]] =
-    Kleisli { req =>
+    Kleisli: req =>
       rs.run(req).getOrElseF(notFound(req))
-    }
 
 object Server extends IOApp:
   override def run(args: List[String]): IO[ExitCode] =

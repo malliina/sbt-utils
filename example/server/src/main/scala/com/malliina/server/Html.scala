@@ -1,5 +1,6 @@
 package com.malliina.server
 
+import com.malliina.assets.{FileAssets, HashedAssets}
 import com.malliina.live.LiveReload
 import org.http4s.Uri
 import scalatags.Text.all.*
@@ -24,6 +25,12 @@ class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
     head(
       meta(charset := "utf-8"),
       tag("title")("Example"),
+      meta(name := "viewport", content := "width=device-width, initial-scale=1.0"),
+      link(
+        rel := "shortcut icon",
+        `type` := "image/png",
+        href := inlineOrAsset(FileAssets.img.jag_16x16_png)
+      ),
       cssFiles.map(file => cssLink(assets.at(file))),
       scripts.map(js => deferredJsPath(js)),
       script(src := LiveReload.script)
@@ -45,3 +52,6 @@ class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
 
   private def cssLink[V: AttrValue](url: V, more: Modifier*) =
     link(rel := "stylesheet", href := url, more)
+
+  private def inlineOrAsset(path: String) =
+    HashedAssets.dataUris.getOrElse(path, assets.at(path).toString)
