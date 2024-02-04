@@ -2,11 +2,7 @@ inThisBuild(
   Seq(
     scalaVersion := "3.3.1",
     organization := "com.malliina",
-    version := "0.0.1",
-    Compile / fastLinkJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
-    Compile / fastOptJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
-    Compile / fullLinkJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
-    Compile / fullOptJS / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
+    version := "0.0.1"
   )
 )
 

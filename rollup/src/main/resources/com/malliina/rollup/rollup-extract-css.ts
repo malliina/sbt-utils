@@ -37,7 +37,7 @@ export default function extractcss(options: ExtractOptions): Plugin {
     async transform(code, id) {
       if (!filter(id)) return
       const result = await postcss(plugins)
-        .process(code, {from: id, to: path.resolve(options.outDir, "unused.css"), map: sourcemap})
+        .process(code, {from: id, to: path.resolve(options.outDir, "unused.css"), map: {inline: sourcemap}})
       processed.set(id, result.css)
       return {code: "", map: undefined}
     },

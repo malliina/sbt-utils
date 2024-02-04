@@ -164,7 +164,12 @@ object RollupPlugin extends AutoPlugin {
       stageTask / urlOptions := UrlOption.defaults,
       stageTask / prepareRollup := {
         val jsDir = (Compile / stageTaskOutput).value.toPath
-        FileIO.copyIfChanged(jsDir.resolve("main.js"), assetsRoot.value.resolve("main.js"))
+        val jsFilename = "main.js"
+        FileIO.copyIfChanged(jsDir.resolve(jsFilename), assetsRoot.value.resolve(jsFilename))
+        val sourceMap = jsDir.resolve(s"$jsFilename.map")
+        if (Files.exists(sourceMap)) {
+          FileIO.copyIfChanged(sourceMap, assetsRoot.value.resolve(s"$jsFilename.map"))
+        }
         val jsFile = (Compile / stageTask).value.data.publicModules
           .find(_.moduleID == "main")
           .getOrElse(
