@@ -47,7 +47,7 @@ Global / pgpPassphrase := sys.env
 
 val pluginSettings = Seq(
   "com.github.sbt" % "sbt-pgp" % "2.2.1",
-  "com.github.sbt" % "sbt-release" % "1.1.0"
+  "com.github.sbt" % "sbt-release" % "1.4.0"
 ) map addSbtPlugin
 
 val docs = project
@@ -109,7 +109,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.21")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.10.0")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
@@ -118,7 +118,7 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.7.15"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.7.17"
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
@@ -130,7 +130,7 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     ) map addSbtPlugin
   )
 
-val scalaJSVersion = "1.14.0"
+val scalaJSVersion = "1.15.0"
 
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .dependsOn(common, fileTreePlugin, nodePlugin)
@@ -159,7 +159,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.21.10"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.23.17"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))

@@ -27,7 +27,7 @@ val server = project
     buildInfoPackage := "com.malliina.server",
     libraryDependencies ++=
       Seq("ember-server", "ember-client", "dsl", "circe").map { m =>
-        "org.http4s" %% s"http4s-$m" % "0.23.24"
+        "org.http4s" %% s"http4s-$m" % "0.23.25"
       } ++ Seq("classic", "core").map { m =>
         "ch.qos.logback" % s"logback-$m" % "1.4.14"
       } ++ Seq(
