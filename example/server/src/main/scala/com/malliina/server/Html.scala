@@ -20,7 +20,7 @@ object Html:
       t.setAttr(a.name, Builder.GenericAttrValueSource(v.renderString))
 
 class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
-  def index = html(
+  def index = html(lang := "en")(
     head(
       meta(charset := "utf-8"),
       cssFiles.map(file => cssLink(assets.at(file))),
