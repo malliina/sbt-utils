@@ -35,7 +35,7 @@ object NodeJsPlugin extends AutoPlugin {
     ncu := front.toTask(" ncu").value,
     front := {
       val log = streams.value.log
-      val args: Seq[String] = IO.canonical(spaceDelimited("<arg>").parsed)
+      val args: Seq[String] = spaceDelimited("<arg>").parsed
       val status = IO.runProcess(args, cwd.value, log)
       if (status != 0) {
         log.error(s"Command '${args.mkString(" ")}' exited with status $status.")

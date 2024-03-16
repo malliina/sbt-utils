@@ -10,7 +10,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 import org.scalajs.sbtplugin.{LinkerImpl, ScalaJSPlugin, Stage}
 import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
-import sbt.{IO as _, *}
+import sbt.{IO => _, *}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
@@ -138,7 +138,8 @@ object RollupPlugin extends AutoPlugin {
       )
       val dummyModuleID =
         "com.malliina" % "scalajs-rollup-linker-and-scalajs-linker_2.12" % s"$scalaJSVersion"
-      val moduleDescriptor = lm.moduleDescriptor(dummyModuleID, dependencies, scalaModuleInfo = None)
+      val moduleDescriptor =
+        lm.moduleDescriptor(dummyModuleID, dependencies, scalaModuleInfo = None)
       lm.retrieve(moduleDescriptor, retrieveDir, log)
         .fold(w => throw w.resolveException, Attributed.blankSeq(_))
     },
@@ -289,10 +290,10 @@ object RollupPlugin extends AutoPlugin {
     val content = s"""
       |// Generated at build time
       |export const production = $isProdStr
-      |export const outputDir = "$outputDir"
+      |export const outputDir = "${IO.render(outputDir)}"
       |export const urlOptions = JSON.parse('$json')
       |export const scalajs = {
-      |  input: { frontend: "$input" },
+      |  input: { frontend: "${IO.render(input)}" },
       |  output: {
       |    dir: outputDir,
       |    format: "iife",

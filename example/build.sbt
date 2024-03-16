@@ -18,6 +18,8 @@ val client = project
     )
   )
 
+val t = taskKey[String]("Joo")
+
 val server = project
   .in(file("server"))
   .enablePlugins(ServerPlugin)
@@ -25,6 +27,13 @@ val server = project
     clientProject := client,
     dependentModule := shared,
     buildInfoPackage := "com.malliina.server",
+    t := {
+      val str = "/a/b/c"
+      val str1 = str.replaceAll("/", "\\\\\\\\")
+      val str2 = str.replace('/', java.io.File.separatorChar)
+      IO.write(baseDirectory.value / "out.txt", str1)
+      s"$str1 - $str2"
+    },
     libraryDependencies ++=
       Seq("ember-server", "ember-client", "dsl", "circe").map { m =>
         "org.http4s" %% s"http4s-$m" % "0.23.25"

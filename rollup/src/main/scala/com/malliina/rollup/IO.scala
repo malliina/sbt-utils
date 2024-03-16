@@ -24,4 +24,10 @@ object IO {
     log.info(s"Running '$cmdString' in $cwd...")
     Process(actualCommand, cwd.toFile).run(log).exitValue()
   }
+
+  def render(path: Path): String = {
+    val str = path.toString
+    if (isWindows) str.replaceAll("\\\\", "\\\\\\\\")
+    else str
+  }
 }
