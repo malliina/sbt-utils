@@ -5,13 +5,15 @@ import scala.sys.process.Process
 // Uses Def.taskIf which is available only in 1.4.x
 ThisBuild / pluginCrossBuild / sbtVersion := "1.4.9"
 
+val liveReloadVersion = "0.6.0"
+
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 val updateDocs = taskKey[Unit]("Updates README.md")
 
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := "2.12.18",
+    scalaVersion := "2.12.19",
     licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "0.7.29" % Test
@@ -118,7 +120,7 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.7.17"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.1"
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
@@ -126,11 +128,11 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(
     Seq(
       "ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1",
-      "com.malliina" % "live-reload" % "0.6.0"
+      "com.malliina" % "live-reload" % liveReloadVersion
     ) map addSbtPlugin
   )
 
-val scalaJSVersion = "1.15.0"
+val scalaJSVersion = "1.16.0"
 
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .dependsOn(common, fileTreePlugin, nodePlugin)
@@ -142,9 +144,9 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
       "org.scala-js" %% "scalajs-linker" % scalaJSVersion
     ),
     Seq(
-      "com.malliina" % "live-reload" % "0.6.0",
+      "com.malliina" % "live-reload" % liveReloadVersion,
       "org.scala-js" % "sbt-scalajs" % scalaJSVersion,
-      "com.eed3si9n" % "sbt-buildinfo" % "0.11.0",
+      "com.eed3si9n" % "sbt-buildinfo" % "0.12.0",
       "org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2"
     ) map addSbtPlugin
   )
@@ -153,13 +155,13 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
+    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.10.0")
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.23.17"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.25.31"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
