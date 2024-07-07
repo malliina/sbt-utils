@@ -16,7 +16,7 @@ inThisBuild(
     scalaVersion := "2.12.19",
     licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "0.7.29" % Test
+      "org.scalameta" %% "munit" % "1.0.0" % Test
     ),
     testFrameworks += new TestFramework("munit.Framework")
   )
@@ -56,7 +56,7 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.18",
+    scalaVersion := "2.12.19",
     crossScalaVersions -= "2.13.10",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
@@ -111,7 +111,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.10.0")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.0")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
@@ -120,7 +120,7 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.1"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.2"
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
@@ -139,7 +139,7 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
-      "io.circe" %% s"circe-$m" % "0.14.6"
+      "io.circe" %% s"circe-$m" % "0.14.9"
     } ++ Seq(
       "org.scala-js" %% "scalajs-linker" % scalaJSVersion
     ),
@@ -161,7 +161,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.25.31"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.26.16"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
