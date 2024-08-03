@@ -111,7 +111,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.0")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.1")
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
@@ -120,7 +120,7 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.2"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.3"
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
@@ -155,7 +155,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.10.0")
+    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.10.4")
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))

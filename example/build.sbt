@@ -1,6 +1,6 @@
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.1",
+    scalaVersion := "3.4.2",
     organization := "com.malliina",
     version := "0.0.1"
   )
@@ -18,8 +18,6 @@ val client = project
     )
   )
 
-val t = taskKey[String]("Joo")
-
 val server = project
   .in(file("server"))
   .enablePlugins(ServerPlugin)
@@ -27,19 +25,11 @@ val server = project
     clientProject := client,
     dependentModule := shared,
     buildInfoPackage := "com.malliina.server",
-    t := {
-      val str = "/a/b/c"
-      val str1 = str.replaceAll("/", "\\\\\\\\")
-      val str2 = str.replace('/', java.io.File.separatorChar)
-      IO.write(baseDirectory.value / "out.txt", str1)
-      s"$str1 - $str2"
-    },
     libraryDependencies ++=
       Seq("ember-server", "ember-client", "dsl", "circe").map { m =>
-        "org.http4s" %% s"http4s-$m" % "0.23.25"
-      } ++ Seq("classic", "core").map { m =>
-        "ch.qos.logback" % s"logback-$m" % "1.4.14"
+        "org.http4s" %% s"http4s-$m" % "0.23.27"
       } ++ Seq(
-        "com.lihaoyi" %% "scalatags" % "0.12.0"
+        "ch.qos.logback" % "logback-classic" % "1.5.6",
+        "com.lihaoyi" %% "scalatags" % "0.13.1"
       )
   )
