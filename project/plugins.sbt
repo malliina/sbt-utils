@@ -1,4 +1,4 @@
-scalaVersion := "2.12.19"
+scalaVersion := "2.12.20"
 
 lazy val commonRef = RootProject(file("../common"))
 
@@ -7,14 +7,14 @@ lazy val root = project
   .dependsOn(commonRef)
   .settings(
     libraryDependencies ++= Seq(
-      "com.malliina" %% "primitives" % "3.7.3",
+      "com.malliina" %% "primitives" % "3.7.4",
       "commons-codec" % "commons-codec" % "1.17.1"
     ),
     Seq(
-      "org.xerial.sbt" % "sbt-sonatype" % "3.11.1",
+      "org.xerial.sbt" % "sbt-sonatype" % "3.12.2",
       "com.github.sbt" % "sbt-release" % "1.4.0",
-      "com.github.sbt" % "sbt-pgp" % "2.2.1",
-      "org.scalameta" % "sbt-mdoc" % "2.5.4",
+      "com.github.sbt" % "sbt-pgp" % "2.3.1",
+      "org.scalameta" % "sbt-mdoc" % "2.6.2",
       "org.scalameta" % "sbt-scalafmt" % "2.5.2"
     ) map addSbtPlugin
   )
