@@ -8,7 +8,7 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       "com.malliina" %% "primitives" % "3.7.4",
-      "commons-codec" % "commons-codec" % "1.17.1"
+      "commons-codec" % "commons-codec" % "1.17.2"
     ),
     Seq(
       "org.xerial.sbt" % "sbt-sonatype" % "3.12.2",

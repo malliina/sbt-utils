@@ -16,9 +16,8 @@ inThisBuild(
     scalaVersion := "2.12.20",
     licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "1.0.3" % Test
-    ),
-    testFrameworks += new TestFramework("munit.Framework")
+      "org.scalameta" %% "munit" % "1.0.4" % Test
+    )
   )
 )
 
@@ -56,8 +55,8 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.19",
-    crossScalaVersions -= "2.13.10",
+    scalaVersion := "2.12.20",
+    crossScalaVersions -= "2.13.16",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := target.value / "docs",
@@ -132,7 +131,8 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     ) map addSbtPlugin
   )
 
-val scalaJSVersion = "1.17.0"
+val scalaJSVersion = "1.18.1"
+val nativePackagerVersion = "1.11.0"
 
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .dependsOn(common, fileTreePlugin, nodePlugin)
@@ -148,7 +148,7 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
       "org.scala-js" % "sbt-scalajs" % scalaJSVersion,
       "com.eed3si9n" % "sbt-buildinfo" % "0.13.1",
       "org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2",
-      "com.github.sbt" % "sbt-native-packager" % "1.10.4"
+      "com.github.sbt" % "sbt-native-packager" % nativePackagerVersion
     ) map addSbtPlugin
   )
 
@@ -156,13 +156,13 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.10.4")
+    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % nativePackagerVersion)
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.29.34"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.29.50"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
