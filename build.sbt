@@ -10,13 +10,15 @@ val liveReloadVersion = "0.6.0"
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 val updateDocs = taskKey[Unit]("Updates README.md")
 
+val scala212 = "2.12.20"
+
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := "2.12.20",
+    scalaVersion := scala212,
     licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "1.0.4" % Test
+      "org.scalameta" %% "munit" % "1.1.0" % Test
     )
   )
 )
@@ -119,7 +121,7 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.3"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.6"
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
@@ -131,11 +133,23 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
     ) map addSbtPlugin
   )
 
-val scalaJSVersion = "1.18.1"
+val scalaJSVersion = "1.18.2"
 val nativePackagerVersion = "1.11.0"
 
+val netlify = project
+  .in(file("netlify"))
+  .settings(
+    crossScalaVersions := Seq("3.4.2", scala212),
+    libraryDependencies ++= Seq(
+      "org.slf4j" % "slf4j-api" % "2.0.16",
+      "co.fs2" %% "fs2-io" % "3.11.0",
+      "com.malliina" %% "okclient-io" % "3.7.6",
+      "commons-codec" % "commons-codec" % "1.18.0"
+    )
+  )
+
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
-  .dependsOn(common, fileTreePlugin, nodePlugin)
+  .dependsOn(common, fileTreePlugin, nodePlugin, netlify)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
@@ -162,7 +176,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.29.50"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.30.11"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
