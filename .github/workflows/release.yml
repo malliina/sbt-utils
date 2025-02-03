@@ -38,4 +38,5 @@ jobs:
           PGP_PASSPHRASE: ${{ secrets.PgpPassphrase }}
         run: |
           sbt +common-build/publishSigned
+          sbt +netlify/publishSigned
           sbt releaseArtifacts

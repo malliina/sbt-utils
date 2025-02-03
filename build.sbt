@@ -138,6 +138,7 @@ val nativePackagerVersion = "1.11.0"
 
 val netlify = project
   .in(file("netlify"))
+  .settings(baseSettings)
   .settings(
     crossScalaVersions := Seq("3.4.2", scala212),
     libraryDependencies ++= Seq(
@@ -181,6 +182,7 @@ val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(
+    netlify,
     mavenPlugin,
     nodePlugin,
     fileTreePlugin,
