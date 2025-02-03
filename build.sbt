@@ -182,7 +182,6 @@ val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(
-    netlify,
     mavenPlugin,
     nodePlugin,
     fileTreePlugin,
