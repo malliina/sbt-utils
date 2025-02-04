@@ -1,21 +1,24 @@
 import com.jsuereth.sbtpgp.PgpKeys
-import sbtrelease.ReleaseStateTransformations._
+import sbtrelease.ReleaseStateTransformations.*
 import scala.sys.process.Process
 
 // Uses Def.taskIf which is available only in 1.4.x
 ThisBuild / pluginCrossBuild / sbtVersion := "1.4.9"
 
-val liveReloadVersion = "0.6.0"
+val versions = new {
+  val liveReload = "0.6.0"
+  val scala212 = "2.12.20"
+  val scalaJS = "1.18.2"
+  val nativePackager = "1.11.0"
+}
 
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 val updateDocs = taskKey[Unit]("Updates README.md")
 
-val scala212 = "2.12.20"
-
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := scala212,
+    scalaVersion := versions.scala212,
     licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "1.1.0" % Test
@@ -129,22 +132,19 @@ val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(
     Seq(
       "ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1",
-      "com.malliina" % "live-reload" % liveReloadVersion
+      "com.malliina" % "live-reload" % versions.liveReload
     ) map addSbtPlugin
   )
-
-val scalaJSVersion = "1.18.2"
-val nativePackagerVersion = "1.11.0"
 
 val netlify = project
   .in(file("netlify"))
   .settings(baseSettings)
   .settings(
-    crossScalaVersions := Seq("3.4.2", scala212),
+    crossScalaVersions := Seq("3.4.2", versions.scala212),
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-api" % "2.0.16",
       "co.fs2" %% "fs2-io" % "3.11.0",
-      "com.malliina" %% "okclient-io" % "3.7.6",
+      "com.malliina" %% "okclient-io" % "3.7.7",
       "commons-codec" % "commons-codec" % "1.18.0"
     )
   )
@@ -156,14 +156,14 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
     libraryDependencies ++= Seq("generic", "parser").map { m =>
       "io.circe" %% s"circe-$m" % "0.14.10"
     } ++ Seq(
-      "org.scala-js" %% "scalajs-linker" % scalaJSVersion
+      "org.scala-js" %% "scalajs-linker" % versions.scalaJS
     ),
     Seq(
-      "com.malliina" % "live-reload" % liveReloadVersion,
-      "org.scala-js" % "sbt-scalajs" % scalaJSVersion,
+      "com.malliina" % "live-reload" % versions.liveReload,
+      "org.scala-js" % "sbt-scalajs" % versions.scalaJS,
       "com.eed3si9n" % "sbt-buildinfo" % "0.13.1",
       "org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2",
-      "com.github.sbt" % "sbt-native-packager" % nativePackagerVersion
+      "com.github.sbt" % "sbt-native-packager" % versions.nativePackager
     ) map addSbtPlugin
   )
 
@@ -171,13 +171,13 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
   .dependsOn(bundlerPlugin)
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % nativePackagerVersion)
+    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % versions.nativePackager)
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.30.11"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.30.12"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))

@@ -6,9 +6,11 @@ import com.malliina.netlify.Netlify.SiteId
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, deploy}
 import com.malliina.values.{AccessToken, ErrorMessage}
 import sbt.Keys.streams
-import sbt.{AutoPlugin, Setting}
+import sbt.{AutoPlugin, Plugins, Setting}
 
 object NetlifyApiPlugin extends AutoPlugin {
+  override def requires: Plugins = LoggingPlugin
+
   override def projectSettings: Seq[Setting[?]] = Seq(
     deploy := {
       val io = Netlify

@@ -13,7 +13,8 @@ import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
 
 object GeneratorPlugin extends AutoPlugin {
-  override def requires = BuildInfoPlugin && LiveReloadPlugin && HashPlugin && FileTreePlugin
+  override def requires: Plugins =
+    BuildInfoPlugin && LiveReloadPlugin && HashPlugin && FileTreePlugin
 
   object autoImport {
     val scalajsProject = settingKey[Project]("Scala.js project")

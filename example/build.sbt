@@ -10,7 +10,7 @@ val shared = project.in(file("shared"))
 
 val client = project
   .in(file("client"))
-  .enablePlugins(RollupPlugin, NodeJsPlugin)
+  .enablePlugins(RollupPlugin, NodeJsPlugin, LoggingPlugin)
   .disablePlugins(RevolverPlugin)
   .settings(
     libraryDependencies ++= Seq(
