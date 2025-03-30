@@ -27,9 +27,8 @@ object AppLogger:
     installAppender(console)
     val root = lc.getLogger(SLF4JLogger.ROOT_LOGGER_NAME)
     root.setLevel(rootLevel)
-    levelsByLogger.foreach { (loggerName, level) =>
+    levelsByLogger.foreach: (loggerName, level) =>
       lc.getLogger(loggerName).setLevel(level)
-    }
     lc
 
   private def installAppender(

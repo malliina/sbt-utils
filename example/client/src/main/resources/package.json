@@ -3,7 +3,11 @@
     "@popperjs/core": "2.11.8",
     "bootstrap": "5.3.3"
   },
+  "devDependencies": {
+    "npm-check-updates": "17.1.16"
+  },
   "scripts": {
-    "build": "rollup --config rollup.config.ts --bundleConfigAsCjs --configPlugin typescript"
+    "build": "rollup --config rollup.config.ts --bundleConfigAsCjs --configPlugin typescript",
+    "ncu": "ncu"
   }
 }

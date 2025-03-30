@@ -13,12 +13,10 @@ object Frontend:
   val popperJs = Popper
 
   def main(args: Array[String]): Unit =
-    val e = dom.document.getElementById("pop")
     val popovers = document
       .querySelectorAll("[data-bs-toggle='popover']")
-      .map { e =>
+      .map: e =>
         new Popover(e, PopoverOptions.click)
-      }
     println(s"Hi, got ${popovers.size} popover(s)...")
 
 @js.native

@@ -124,7 +124,7 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.8.6"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.9.4"
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
@@ -142,7 +142,7 @@ val netlify = project
   .settings(
     crossScalaVersions := Seq("3.4.2", versions.scala212),
     libraryDependencies ++= Seq(
-      "org.slf4j" % "slf4j-api" % "2.0.16",
+      "org.slf4j" % "slf4j-api" % "2.0.17",
       "co.fs2" %% "fs2-io" % "3.11.0",
       "com.malliina" %% "okclient-io" % "3.7.7",
       "commons-codec" % "commons-codec" % "1.18.0"
@@ -154,7 +154,7 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
-      "io.circe" %% s"circe-$m" % "0.14.10"
+      "io.circe" %% s"circe-$m" % "0.14.11"
     } ++ Seq(
       "org.scala-js" %% "scalajs-linker" % versions.scalaJS
     ),
@@ -177,7 +177,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.30.12"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.31.11"
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
