@@ -32,7 +32,7 @@ object NodeJsPlugin extends AutoPlugin {
 
   override val projectSettings = Seq(
     cwd := target.value,
-    ncu := front.toTask(" ncu").value,
+    ncu := front.toTask(s" npm run ncu").value,
     front := {
       val log = streams.value.log
       val args: Seq[String] = spaceDelimited("<arg>").parsed

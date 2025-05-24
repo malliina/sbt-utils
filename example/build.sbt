@@ -1,10 +1,17 @@
 inThisBuild(
   Seq(
-    scalaVersion := "3.6.2",
+    scalaVersion := "3.7.0",
     organization := "com.malliina",
     version := "0.0.1"
   )
 )
+
+val versions = new {
+  val http4s = "0.23.30"
+  val logback = "1.5.18"
+  val scalaJsDom = "2.8.0"
+  val scalatags = "0.13.1"
+}
 
 val shared = project.in(file("shared"))
 
@@ -14,7 +21,7 @@ val client = project
   .disablePlugins(RevolverPlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.8.0"
+      "org.scala-js" %%% "scalajs-dom" % versions.scalaJsDom
     )
   )
 
@@ -27,9 +34,9 @@ val server = project
     buildInfoPackage := "com.malliina.server",
     libraryDependencies ++=
       Seq("ember-server", "ember-client", "dsl", "circe").map { m =>
-        "org.http4s" %% s"http4s-$m" % "0.23.30"
+        "org.http4s" %% s"http4s-$m" % versions.http4s
       } ++ Seq(
-        "ch.qos.logback" % "logback-classic" % "1.5.18",
-        "com.lihaoyi" %% "scalatags" % "0.13.1"
+        "ch.qos.logback" % "logback-classic" % versions.logback,
+        "com.lihaoyi" %% "scalatags" % versions.scalatags
       )
   )
