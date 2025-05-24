@@ -6,9 +6,23 @@ import scala.sys.process.Process
 ThisBuild / pluginCrossBuild / sbtVersion := "1.4.9"
 
 val versions = new {
+  val circe = "0.14.11"
+  val codeArtifact = "2.31.50"
+  val commonsCodec = "1.18.0"
+  val fs2 = "3.11.0"
   val liveReload = "0.6.0"
+  val munit = "1.1.1"
+  val primitives = "3.7.10"
+  val sbtBuildInfo = "0.13.1"
+  val sbtPgp = "2.3.1"
+  val sbtRelease = "1.4.0"
+  val sbtSonatype = "3.12.2"
   val scala212 = "2.12.20"
-  val scalaJS = "1.18.2"
+  val scalaFmt = "3.9.6"
+  val scalaJs = "1.19.0"
+  val scalaJsBundler = "0.21.1"
+  val scalaJsCross = "1.3.2"
+  val slf4j = "2.0.17"
   val nativePackager = "1.11.0"
 }
 
@@ -21,7 +35,7 @@ inThisBuild(
     scalaVersion := versions.scala212,
     licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "1.1.0" % Test
+      "org.scalameta" %% "munit" % versions.munit % Test
     )
   )
 )
@@ -52,8 +66,8 @@ Global / pgpPassphrase := sys.env
   .map(_.toCharArray)
 
 val pluginSettings = Seq(
-  "com.github.sbt" % "sbt-pgp" % "2.3.1",
-  "com.github.sbt" % "sbt-release" % "1.4.0"
+  "com.github.sbt" % "sbt-pgp" % versions.sbtPgp,
+  "com.github.sbt" % "sbt-release" % versions.sbtRelease
 ) map addSbtPlugin
 
 val docs = project
@@ -115,7 +129,7 @@ val common = Project("common-build", file("common"))
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
   .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.12.2")
+    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % versions.sbtSonatype)
   )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
@@ -124,14 +138,14 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % "3.9.4"
+    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % versions.scalaFmt
   )
 
 val bundlerPlugin = Project("sbt-bundler", file("bundler"))
   .settings(commonSettings)
   .settings(
     Seq(
-      "ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1",
+      "ch.epfl.scala" % "sbt-scalajs-bundler" % versions.scalaJsBundler,
       "com.malliina" % "live-reload" % versions.liveReload
     ) map addSbtPlugin
   )
@@ -142,10 +156,10 @@ val netlify = project
   .settings(
     crossScalaVersions := Seq("3.4.2", versions.scala212),
     libraryDependencies ++= Seq(
-      "org.slf4j" % "slf4j-api" % "2.0.17",
-      "co.fs2" %% "fs2-io" % "3.11.0",
-      "com.malliina" %% "okclient-io" % "3.7.7",
-      "commons-codec" % "commons-codec" % "1.18.0"
+      "org.slf4j" % "slf4j-api" % versions.slf4j,
+      "co.fs2" %% "fs2-io" % versions.fs2,
+      "com.malliina" %% "okclient-io" % versions.primitives,
+      "commons-codec" % "commons-codec" % versions.commonsCodec
     )
   )
 
@@ -154,15 +168,15 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
-      "io.circe" %% s"circe-$m" % "0.14.11"
+      "io.circe" %% s"circe-$m" % versions.circe
     } ++ Seq(
-      "org.scala-js" %% "scalajs-linker" % versions.scalaJS
+      "org.scala-js" %% "scalajs-linker" % versions.scalaJs
     ),
     Seq(
       "com.malliina" % "live-reload" % versions.liveReload,
-      "org.scala-js" % "sbt-scalajs" % versions.scalaJS,
-      "com.eed3si9n" % "sbt-buildinfo" % "0.13.1",
-      "org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2",
+      "org.scala-js" % "sbt-scalajs" % versions.scalaJs,
+      "com.eed3si9n" % "sbt-buildinfo" % versions.sbtBuildInfo,
+      "org.portable-scala" % "sbt-scalajs-crossproject" % versions.scalaJsCross,
       "com.github.sbt" % "sbt-native-packager" % versions.nativePackager
     ) map addSbtPlugin
   )
@@ -177,7 +191,7 @@ val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % "2.31.11"
+    libraryDependencies += "software.amazon.awssdk" % "codeartifact" % versions.codeArtifact
   )
 
 val sbtUtils = Project("sbt-utils", file("."))
