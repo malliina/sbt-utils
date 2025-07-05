@@ -6,24 +6,25 @@ import scala.sys.process.Process
 ThisBuild / pluginCrossBuild / sbtVersion := "1.4.9"
 
 val versions = new {
-  val circe = "0.14.11"
+  val circe = "0.14.14"
   val codeArtifact = "2.31.50"
   val commonsCodec = "1.18.0"
   val fs2 = "3.11.0"
   val liveReload = "0.6.0"
   val munit = "1.1.1"
+  val nativePackager = "1.11.1"
   val primitives = "3.7.10"
   val sbtBuildInfo = "0.13.1"
   val sbtPgp = "2.3.1"
   val sbtRelease = "1.4.0"
   val sbtSonatype = "3.12.2"
+  val scala3 = "3.4.2"
   val scala212 = "2.12.20"
-  val scalaFmt = "3.9.6"
+  val scalaFmt = "3.9.8"
   val scalaJs = "1.19.0"
   val scalaJsBundler = "0.21.1"
   val scalaJsCross = "1.3.2"
   val slf4j = "2.0.17"
-  val nativePackager = "1.11.0"
 }
 
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
@@ -74,7 +75,7 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := "2.12.20",
+    scalaVersion := versions.scala212,
     crossScalaVersions -= "2.13.16",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
@@ -154,7 +155,7 @@ val netlify = project
   .in(file("netlify"))
   .settings(baseSettings)
   .settings(
-    crossScalaVersions := Seq("3.4.2", versions.scala212),
+    crossScalaVersions := Seq(versions.scala3, versions.scala212),
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-api" % versions.slf4j,
       "co.fs2" %% "fs2-io" % versions.fs2,
