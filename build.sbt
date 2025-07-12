@@ -119,7 +119,7 @@ val baseSettings = releaseSettings ++ Seq(
     "Michael Skogberg",
     "https://github.com/malliina/sbt-utils"
   ),
-  publishTo := sonatypePublishToBundle.value
+  publishTo := localStaging.value
 )
 
 val commonSettings = pluginSettings ++ baseSettings ++ Seq(
