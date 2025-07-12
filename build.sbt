@@ -52,7 +52,7 @@ ThisBuild / commands += Command.command("releaseArtifacts") { state =>
         checkSnapshotDependencies,
         runTest,
         releaseStepCommandAndRemaining("+publishSigned"),
-        releaseStepCommand("sonatypeBundleRelease")
+        releaseStepCommand("sonaRelease")
       )
     ),
     state
