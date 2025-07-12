@@ -52,7 +52,7 @@ ThisBuild / commands += Command.command("releaseArtifacts") { state =>
         checkSnapshotDependencies,
         runTest,
         releaseStepCommandAndRemaining("+publishSigned"),
-        releaseStepCommand("sonatypeReleaseAll")
+        releaseStepCommand("sonatypeBundleRelease")
       )
     ),
     state
@@ -119,10 +119,7 @@ val baseSettings = releaseSettings ++ Seq(
     "Michael Skogberg",
     "https://github.com/malliina/sbt-utils"
   ),
-  publishTo := {
-    if (isSnapshot.value) Some(Resolver.sonatypeCentralSnapshots)
-    else localStaging.value
-  }
+  publishTo := sonatypePublishToBundle.value
 )
 
 val commonSettings = pluginSettings ++ baseSettings ++ Seq(
