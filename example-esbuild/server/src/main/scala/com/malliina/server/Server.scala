@@ -39,7 +39,7 @@ class Server[F[_]: Async] extends WebSyntax[F] with ScalatagsEncoders:
   private val httpApp = GZip:
     HSTS:
       orNotFound:
-        Router("/" -> routes, "/assets" -> StaticService[F].routes)
+        Router("/" -> routes, StaticService.assetsPrefix.renderString -> StaticService[F].routes)
   val server =
     EmberServerBuilder
       .default[F]

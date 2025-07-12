@@ -11,6 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file._
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
+import scala.collection.JavaConverters.asScalaIteratorConverter
 
 object FileIO {
   val log = AppLogger(getClass)
@@ -86,6 +87,17 @@ object FileIO {
     log.info(s"Copied ${from.toAbsolutePath} to ${to.toAbsolutePath}.")
   }
 
+  def copyDir(from: Path, to: Path) =
+    FileIO.allPaths(from).flatMap { path =>
+      val rel = from.relativize(path)
+      val dest = to.resolve(rel)
+      if (Files.isRegularFile(path)) {
+        FileIO.copyIfChanged(path, dest)
+        Option(dest)
+      } else if (Files.isDirectory(path)) { Option(Files.createDirectories(dest)) }
+      else None
+    }
+
   def gzip(src: Path, dest: Path): Unit =
     using(new FileInputStream(src.toFile)) { in =>
       using(new FileOutputStream(dest.toFile)) { out =>
@@ -132,6 +144,10 @@ object FileIO {
       dir
     }
   }
+
+  def allPaths(root: Path): List[Path] =
+    if (Files.exists(root)) FileIO.using(Files.walk(root))(_.iterator().asScala.toList)
+    else Nil
 
   def using[T <: AutoCloseable, U](res: T)(code: T => U): U =
     try code(res)

@@ -6,12 +6,14 @@ import cats.implicits.*
 import com.malliina.server.StaticService.log
 import org.http4s.CacheDirective.*
 import org.http4s.headers.`Cache-Control`
+import org.http4s.implicits.uri
 import org.http4s.{Header, HttpRoutes, Request, StaticFile}
 import org.typelevel.ci.CIStringSyntax
 
 import scala.concurrent.duration.DurationInt
 
 object StaticService:
+  val assetsPrefix = uri"/assets"
   private val log = AppLogger(getClass)
 
 class StaticService[F[_]: Async] extends WebSyntax[F]:

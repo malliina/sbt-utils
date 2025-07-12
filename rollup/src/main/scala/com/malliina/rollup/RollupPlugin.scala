@@ -2,6 +2,7 @@ package com.malliina.rollup
 
 import com.malliina.build.FileIO
 import com.malliina.nodejs.NodeJsPlugin
+import com.malliina.rollup.CommonKeys.assetsPrefix
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
 import org.apache.ivy.util.ChecksumHelper
@@ -25,7 +26,6 @@ object RollupPlugin extends AutoPlugin {
     val build = CommonKeys.build
     val prepareRollup = taskKey[Path]("Prepares rollup")
     val assetsRoot = CommonKeys.assetsRoot
-    val assetsPrefix = settingKey[String]("I don't know what this is")
     val npmRoot = settingKey[Path]("Working dir for npm commands")
     val urlOptions = settingKey[Seq[UrlOption]]("URL options for postcss-url")
     val resourceLockFile = settingKey[Path]("Path to saved package-lock.json")
@@ -214,7 +214,7 @@ object RollupPlugin extends AutoPlugin {
         val log = streams.value.log
         val cwd = npmRoot.value
         val packageJson = cwd / "package.json"
-        val cacheFile = npmRoot.value / "package.json.sha1"
+        val cacheFile = cwd / "package.json.sha1"
         val checksum = computeChecksum(packageJson)
         if (
           Files.exists(cacheFile) && Files

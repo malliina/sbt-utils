@@ -1,3 +1,5 @@
+import com.malliina.rollup.CommonKeys.isProd
+
 inThisBuild(
   Seq(
     scalaVersion := "3.7.1",
@@ -13,16 +15,13 @@ val versions = new {
   val scalatags = "0.13.1"
 }
 
-val start = taskKey[Unit]("Starts the project")
+val shared = project.in(file("shared"))
 
-val client = project
-  .in(file("client"))
-  .enablePlugins(ScalaJSEsbuildPlugin)
+val frontend = project
+  .in(file("frontend"))
+  .enablePlugins(EsbuildPlugin)
   .disablePlugins(RevolverPlugin)
   .settings(
-    scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-    esbuildResourcesDirectory := (Compile / resourceDirectory).value,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % versions.scalaJsDom
     )
@@ -30,26 +29,18 @@ val client = project
 
 val server = project
   .in(file("server"))
-  .enablePlugins(BuildInfoPlugin, LiveRevolverPlugin)
+  .enablePlugins(ServerPlugin)
   .settings(
-    Compile / compile := (Compile / compile).dependsOn(client / Compile / esbuildBundle).value,
+    clientProject := frontend,
+    dependentModule := shared,
     buildInfoPackage := "com.malliina.server",
-    buildInfoKeys ++= Seq[BuildInfoKey](
-      "assetsDir" -> (client / Compile / esbuildStage / crossTarget).value,
-      "publicFolder" -> "todo",
-      "isProd" -> false,
-      "mode" -> "dev",
-      "gitHash" -> "todo"
-    ),
     libraryDependencies ++=
       Seq("ember-server", "ember-client", "dsl", "circe").map { m =>
         "org.http4s" %% s"http4s-$m" % versions.http4s
       } ++ Seq(
         "ch.qos.logback" % "logback-classic" % versions.logback,
         "com.lihaoyi" %% "scalatags" % versions.scalatags
-      ),
-    start := reStart.toTask(" ").value,
-    refreshBrowsers := refreshBrowsers.triggeredBy(start).value
+      )
   )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges

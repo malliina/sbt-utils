@@ -11,7 +11,7 @@ object Html:
     Html(
       Seq("main.js"),
       Seq("main.css"),
-      DirectAssets
+      HashedAssetsSource
     )
 
   given AttrValue[Uri] =
@@ -26,7 +26,7 @@ class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
       meta(name := "viewport", content := "width=device-width, initial-scale=1.0"),
       link(
         rel := "shortcut icon",
-        `type` := "image/png"
+        tpe := "image/png"
 //        href := inlineOrAsset(FileAssets.img.jag_16x16_png)
       ),
       cssFiles.map(file => cssLink(file)),
@@ -36,13 +36,14 @@ class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
     body(
       p("Hi!"),
       button(
-        `type` := "button",
-        `class` := "btn btn-lg btn-danger",
+        tpe := "button",
+        cls := "btn btn-lg btn-danger",
         data("bs-toggle") := "popover",
         data("bs-title") := "Popover title",
         data("bs-content") := "Content here."
       )("Click to toggle popover"),
-      div(cls := "demo")("Hmm")
+      div(cls := "demo")("Hmm"),
+      div(cls := "pic")("")
     )
   )
 

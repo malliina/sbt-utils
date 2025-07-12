@@ -4,9 +4,8 @@ import com.malliina.filetree.FileTreeKeys.fileTreeSources
 import com.malliina.filetree.{DirMap, FileTreePlugin}
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
-import com.malliina.rollup.CommonKeys.{assetsRoot, build, isProd}
+import com.malliina.rollup.CommonKeys.{assetsPrefix, assetsRoot, build, isProd}
 import com.malliina.rollup.HashPlugin.autoImport.{copyFolders, hash, hashPackage, hashRoot, useHash}
-import com.malliina.rollup.RollupPlugin.autoImport.assetsPrefix
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
 import sbt.*
 import sbt.Keys.*

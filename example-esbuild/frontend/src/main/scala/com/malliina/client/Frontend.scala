@@ -12,6 +12,7 @@ object Frontend:
   val bootstrapJs = Bootstrap
   val popperJs = Popper
   val css = AppCss
+  val fonts = FontsCss
 
   def main(args: Array[String]): Unit =
     val popovers = document
@@ -53,3 +54,7 @@ object BootstrapCss extends js.Object
 @js.native
 @JSImport("./css/styles.css", JSImport.Namespace)
 object AppCss extends js.Object
+
+@js.native
+@JSImport("./css/fonts.css", JSImport.Namespace)
+object FontsCss extends js.Object

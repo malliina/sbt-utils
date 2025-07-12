@@ -11,6 +11,7 @@ import scala.sys.process.Process
 import scala.util.Try
 
 object CommonKeys {
+  val assetsPrefix = settingKey[String]("I don't know what this is")
   val assetsRoot = settingKey[Path]("Assets root directory")
   val build = taskKey[Unit]("Builds app") // Consider replacing with compile
   val deploy = taskKey[Unit]("Deploys the site")

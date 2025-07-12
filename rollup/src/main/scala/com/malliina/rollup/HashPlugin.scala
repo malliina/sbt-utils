@@ -7,7 +7,6 @@ import sbt.*
 import sbt.Keys.{streams, target}
 
 import java.nio.file.{Files, Path}
-import scala.jdk.CollectionConverters.*
 
 object HashPlugin extends AutoPlugin {
   val algorithm = "md5"
@@ -32,16 +31,7 @@ object HashPlugin extends AutoPlugin {
       copyFolders.value
         .toSet[Path]
         .flatMap { dir =>
-          val dirPath = dir
-          allPaths(dirPath).flatMap { path =>
-            val rel = dirPath.relativize(path)
-            val dest = root.resolve(rel)
-            if (Files.isRegularFile(path)) {
-              FileIO.copyIfChanged(path, dest)
-              Option(dest)
-            } else if (Files.isDirectory(path)) { Option(Files.createDirectories(dest)) }
-            else None
-          }
+          FileIO.copyDir(dir, root)
         }
         .toList
     },
@@ -53,15 +43,18 @@ object HashPlugin extends AutoPlugin {
       val root = hashRoot.value
       val enabled = useHash.value
       val exts = hashIncludeExts.value
-      allPaths(root).filter { p =>
-        val name = p.getFileName.toString
-        Files.isRegularFile(p) &&
-        exts.exists(ext => name.endsWith(ext)) &&
-        name.count(c => c == '.') < 2
-      }.map { file =>
-        val hashed = if (enabled) prepFile(file, log) else file
-        HashedFile.from(file, hashed, root)
-      }
+      FileIO
+        .allPaths(root)
+        .filter { p =>
+          val name = p.getFileName.toString
+          Files.isRegularFile(p) &&
+          exts.exists(ext => name.endsWith(ext)) &&
+          name.count(c => c == '.') < 2
+        }
+        .map { file =>
+          val hashed = if (enabled) prepFile(file, log) else file
+          HashedFile.from(file, hashed, root)
+        }
     },
     hashAssets := hashAssets
       .dependsOn(copy, Def.task(Files.createDirectories(hashRoot.value)))
@@ -137,8 +130,4 @@ object HashPlugin extends AutoPlugin {
 
   def destDir(base: File, packageName: String): File =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
-
-  def allPaths(root: Path) =
-    if (Files.exists(root)) FileIO.using(Files.walk(root))(_.iterator().asScala.toList)
-    else Nil
 }
