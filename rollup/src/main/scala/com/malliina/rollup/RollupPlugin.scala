@@ -13,13 +13,11 @@ import sbt.Keys.*
 import sbt.nio.Keys.fileInputs
 import sbt.{IO => _, *}
 
-import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.asScalaBufferConverter
 
 object RollupPlugin extends AutoPlugin {
   override def requires: Plugins = ScalaJSPlugin && NodeJsPlugin
-  val utf8 = StandardCharsets.UTF_8
   val sha1 = "sha1"
 
   object autoImport {
@@ -192,11 +190,15 @@ object RollupPlugin extends AutoPlugin {
           (stageTask / urlOptions).value,
           isProd
         )
-        writePackageJsonIfChanged((Compile / resourceDirectory).value, root)
+        IO.writePackageJsonIfChanged(
+          (Compile / resourceDirectory).value.toPath,
+          root,
+          "package.rollup.json"
+        )
         val tsFiles =
           Seq("rollup.config.ts", "rollup-extract-css.ts", "rollup-sourcemaps.ts", "tsconfig.json")
         tsFiles.foreach { name =>
-          FileIO.writeIfChanged(res(name), root.resolve(name))
+          FileIO.writeIfChanged(IO.res(name), root.resolve(name))
         }
         val lockFile = resourceLockFile.value
         val lockFileDest = root / "package-lock.json"
@@ -218,7 +220,7 @@ object RollupPlugin extends AutoPlugin {
         val checksum = computeChecksum(packageJson)
         if (
           Files.exists(cacheFile) && Files
-            .readAllLines(cacheFile, utf8)
+            .readAllLines(cacheFile, IO.utf8)
             .asScala
             .headOption
             .contains(checksum)
@@ -240,9 +242,10 @@ object RollupPlugin extends AutoPlugin {
       },
       stageTask / build := (stageTask / build).dependsOn(stageTask / prepareRollup).value,
       stageTask / build := Def.taskIf {
-        val hasChanges = build.inputFileChanges.hasChanges || writePackageJsonIfChanged(
-          (Compile / resourceDirectory).value,
-          npmRoot.value
+        val hasChanges = build.inputFileChanges.hasChanges || IO.writePackageJsonIfChanged(
+          (Compile / resourceDirectory).value.toPath,
+          npmRoot.value,
+          "package.rollup.json"
         )
         if (hasChanges) {
           (stageTask / build).value
@@ -251,17 +254,6 @@ object RollupPlugin extends AutoPlugin {
         }
       }.value
     )
-  }
-
-  def writePackageJsonIfChanged(resDir: File, destDir: Path): Boolean = {
-    val userPackageJson = resDir / "package.json"
-    val inbuilt = json(res("package.json"))
-    val packageJson =
-      if (userPackageJson.exists())
-        inbuilt.deepMerge(jsonFile(userPackageJson))
-      else
-        inbuilt
-    FileIO.writeIfChanged(packageJson.spaces2SortKeys, destDir.resolve("package.json"))
   }
 
   def npmRunBuild(cwd: Path, log: Logger) =
@@ -304,17 +296,4 @@ object RollupPlugin extends AutoPlugin {
     FileIO.writeIfChanged(content, rollup)
     rollup
   }
-
-  def jsonFile(f: File) = json(sbt.io.IO.read(f, utf8))
-
-  def json(str: String) = parse(str).fold(err => fail(err.message), identity)
-
-  def res(name: String): String = {
-    val path = s"com/malliina/rollup/$name"
-    Option(getClass.getClassLoader.getResourceAsStream(path))
-      .map(inStream => FileIO.using(inStream)(in => sbt.io.IO.readStream(in, utf8)))
-      .getOrElse(fail(s"Resource not found: '$path'."))
-  }
-
-  def fail(message: String) = sys.error(message)
 }

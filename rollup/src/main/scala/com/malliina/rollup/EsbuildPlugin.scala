@@ -36,6 +36,7 @@ object EsbuildPlugin extends AutoPlugin {
   object autoImport {
     val resourceDir = settingKey[Path]("Source directory with package.json etc.")
     val npmRoot = settingKey[Path]("Working dir for npm commands")
+    val copyBuildResources = taskKey[Unit]("Copies files")
     val stageFiles = taskKey[Unit]("Stages files")
     val stageMainJs = taskKey[Unit]("Stages scala.js output")
     val configureEsbuild = taskKey[Unit]("Prepares esbuild")
@@ -71,9 +72,11 @@ object EsbuildPlugin extends AutoPlugin {
     resourceDir := (Compile / resourceDirectory).value.toPath,
     npmRoot := ((Compile / crossTarget).value / "stage").toPath,
     assetsRoot := npmRoot.value / "assets",
+    copyBuildResources := FileIO.copyDir(resourceDir.value, npmRoot.value),
     stageFiles := {
-      FileIO.copyDir(resourceDir.value, npmRoot.value)
+      IO.writePackageJsonIfChanged(resourceDir.value, npmRoot.value, "package.esbuild.json")
     },
+    stageFiles := stageFiles.dependsOn(copyBuildResources).value,
     build := Def.settingDyn {
       val stageTask = scalaJSStage.value match {
         case Stage.FastOpt => fastLinkJS
@@ -152,7 +155,7 @@ object EsbuildPlugin extends AutoPlugin {
           npmRunBuild(cwd, log)
         } else {
           FileIO.writeIfChanged(checksum, cacheFile)
-          if (isProd) npmCi(cwd, log)
+          if (stage == Stage.FullOpt) npmCi(cwd, log)
           else {
             npmInstall(cwd, log)
             val lockFile = resourceDir.value / "package-lock.json"
