@@ -1,5 +1,7 @@
 import com.jsuereth.sbtpgp.PgpKeys
+import sbt.Keys.localStaging
 import sbtrelease.ReleaseStateTransformations.*
+
 import scala.sys.process.Process
 
 // Uses Def.taskIf which is available only in 1.4.x
@@ -117,7 +119,10 @@ val baseSettings = releaseSettings ++ Seq(
     "Michael Skogberg",
     "https://github.com/malliina/sbt-utils"
   ),
-  publishTo := Option(Opts.resolver.sonatypeStaging)
+  publishTo := {
+    if (isSnapshot.value) Some(Resolver.sonatypeCentralSnapshots)
+    else localStaging.value
+  }
 )
 
 val commonSettings = pluginSettings ++ baseSettings ++ Seq(
