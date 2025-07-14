@@ -22,9 +22,15 @@ jobs:
           java-version: 17
           cache: sbt
       - uses: sbt/setup-sbt@v1
+        with:
+          sbt-runner-version: 1.11.3
       - name: Run tests
         run: sbt test
       - name: Run example tests
         run: |
           cd example
+          sbt test
+      - name: Run example-esbuild tests
+        run: |
+          cd example-esbuild
           sbt test

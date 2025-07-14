@@ -6,7 +6,7 @@ import com.malliina.rollup.CommonKeys.{assetsPrefix, assetsRoot, build}
 import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{ModuleKind, fastLinkJS, fullLinkJS, scalaJSLinkerConfig, scalaJSLinkerOutputDirectory, scalaJSStage, scalaJSUseMainModuleInitializer}
 import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
-import sbt.*
+import sbt.{IO => _, *}
 import sbt.Keys.*
 
 import java.nio.charset.StandardCharsets

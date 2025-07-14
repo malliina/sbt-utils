@@ -5,7 +5,7 @@ import sbtrelease.ReleaseStateTransformations.*
 import scala.sys.process.Process
 
 // Uses Def.taskIf which is available only in 1.4.x
-ThisBuild / pluginCrossBuild / sbtVersion := "1.4.9"
+ThisBuild / pluginCrossBuild / sbtVersion := "1.11.3"
 
 val versions = new {
   val circe = "0.14.14"
@@ -57,7 +57,11 @@ ThisBuild / commands += Command.command("releaseArtifacts") { state =>
     ),
     state
   )
-  Command.process("release cross with-defaults", ciState)
+  Command.process(
+    "release cross with-defaults",
+    ciState,
+    str => sLog.value.error(s"Failed to parse command '$str'.")
+  )
 }
 
 Global / pgpPassphrase := sys.env

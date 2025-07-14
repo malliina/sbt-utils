@@ -61,13 +61,17 @@ object MavenCentralPlugin extends AutoPlugin {
             runTest,
             releaseStepTask(beforePublish),
             releaseStepCommandAndRemaining("+publishSigned"),
-            releaseStepCommand("sonatypeReleaseAll"),
+            releaseStepCommand("sonaRelease"),
             releaseStepTask(afterPublish)
           )
         ),
         state
       )
-      Command.process("release cross with-defaults", ciState)
+      Command.process(
+        "release cross with-defaults",
+        ciState,
+        str => sLog.value.error(s"Failed to parse command '$str'.")
+      )
     }
   )
 
@@ -82,7 +86,7 @@ object MavenCentralPlugin extends AutoPlugin {
       developerName.value,
       developerHomePageUrl.value
     ),
-    publishTo := Option(Opts.resolver.sonatypeStaging),
+    publishTo := localStaging.value,
     beforePublish := {},
     afterPublish := {},
     beforeCommitRelease := {},
@@ -98,7 +102,7 @@ object MavenCentralPlugin extends AutoPlugin {
       releaseStepCommandAndRemaining("+publishSigned"),
       setNextVersion,
       commitNextVersion,
-      releaseStepCommand("sonatypeReleaseAll"),
+      releaseStepCommand("sonaRelease"),
       releaseStepTask(afterPublish),
       pushChanges
     ),
