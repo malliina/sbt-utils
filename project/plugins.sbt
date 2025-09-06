@@ -7,14 +7,14 @@ lazy val root = project
   .dependsOn(commonRef)
   .settings(
     libraryDependencies ++= Seq(
-      "com.malliina" %% "primitives" % "3.7.15",
-      "commons-codec" % "commons-codec" % "1.18.0"
+      "com.malliina" %% "primitives" % "3.7.16",
+      "commons-codec" % "commons-codec" % "1.19.0"
     ),
     Seq(
       "org.xerial.sbt" % "sbt-sonatype" % "3.12.2",
       "com.github.sbt" % "sbt-release" % "1.4.0",
       "com.github.sbt" % "sbt-pgp" % "2.3.1",
-      "org.scalameta" % "sbt-mdoc" % "2.7.1",
-      "org.scalameta" % "sbt-scalafmt" % "2.5.4"
+      "org.scalameta" % "sbt-mdoc" % "2.7.2",
+      "org.scalameta" % "sbt-scalafmt" % "2.5.5"
     ) map addSbtPlugin
   )

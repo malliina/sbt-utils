@@ -6,7 +6,7 @@ import com.typesafe.sbt.packager.archetypes.systemloader.SystemdPlugin
 import com.typesafe.sbt.packager.debian.DebianPlugin.autoImport.Debian
 import com.typesafe.sbt.packager.linux.LinuxPlugin.autoImport.{Linux, daemonUser}
 import sbt.Keys.*
-import sbt.{IO as _, *}
+import sbt.{IO => _, *}
 
 object DebPlugin extends AutoPlugin {
   override def requires = JavaServerAppPackaging && SystemdPlugin
