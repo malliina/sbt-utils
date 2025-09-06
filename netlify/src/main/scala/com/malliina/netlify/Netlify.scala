@@ -3,7 +3,7 @@ package com.malliina.netlify
 import cats.effect.{Async, Concurrent}
 import cats.implicits.{toFlatMapOps, toFunctorOps, toTraverseOps}
 import com.malliina.http.io.{HttpClientF2, HttpClientIO}
-import com.malliina.http.{FullUrl, OkHttpResponse}
+import com.malliina.http.{FullUrl, HttpResponse}
 import com.malliina.netlify.Netlify._
 import com.malliina.util.AppLogger
 import com.malliina.values.{AccessToken, StringCompanion, WrappedString}
@@ -121,7 +121,7 @@ class Netlify[F[_]: Async: Files: Concurrent: Hashing](token: AccessToken, http:
       ds <- computeDigests(root)
       digests = FileDigests.from(ds, root)
       us <- uploadables(digests, to)
-      rs <- us.filesList.traverse[F, OkHttpResponse] { sha1 =>
+      rs <- us.filesList.traverse[F, HttpResponse] { sha1 =>
         val maybeUpload = for {
           path <- ds.find(_._2 == sha1).map(_._1).toRight(s"Path not found for '$sha1'.")
           pair <- digests.files.find(_._2 == sha1).toRight(s"Digest not found for '$sha1'.")

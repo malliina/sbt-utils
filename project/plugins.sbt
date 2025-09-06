@@ -7,7 +7,7 @@ lazy val root = project
   .dependsOn(commonRef)
   .settings(
     libraryDependencies ++= Seq(
-      "com.malliina" %% "primitives" % "3.7.10",
+      "com.malliina" %% "primitives" % "3.7.15",
       "commons-codec" % "commons-codec" % "1.18.0"
     ),
     Seq(
