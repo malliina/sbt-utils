@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "esbuild": "0.25.5"
+    "esbuild": "0.27.2"
   },
   "scripts": {
     "build": "node esbuild.cjs"

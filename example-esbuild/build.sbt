@@ -2,15 +2,15 @@ import com.malliina.rollup.CommonKeys.isProd
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.7.1",
+    scalaVersion := "3.8.1",
     organization := "com.malliina",
     version := "0.0.1"
   )
 )
 
 val versions = new {
-  val http4s = "0.23.30"
-  val logback = "1.5.18"
+  val http4s = "0.23.33"
+  val logback = "1.5.25"
   val scalaJsDom = "2.8.0"
   val scalatags = "0.13.1"
 }
