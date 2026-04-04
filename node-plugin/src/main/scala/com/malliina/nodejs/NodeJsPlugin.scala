@@ -3,6 +3,7 @@ package com.malliina.nodejs
 import sbt.Keys._
 import sbt.{IO => _, _}
 import complete.DefaultParsers._
+import java.nio.file.Path
 
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -14,13 +15,13 @@ object NodeJsPlugin extends AutoPlugin {
       settingKey[FailMode]("Whether to warn or fail hard when the node version is unsupported")
     val ncu = taskKey[Int]("Runs npm-check-updates")
     val front = inputKey[Int]("Runs the input as a command in the frontend working directory")
-    val cwd = settingKey[File]("The frontend working directory")
-    val preferredNodeVersion = settingKey[String]("Preferred node version, e.g. '8'")
+    val cwd = settingKey[Path]("The frontend working directory")
+    val preferredNodeVersion = settingKey[String]("Preferred node version, e.g. '24'")
   }
   import autoImport._
 
   override val globalSettings: Seq[Def.Setting[?]] = Seq(
-    preferredNodeVersion := "10",
+    preferredNodeVersion := "24",
     failMode := FailMode.Warn,
     checkNodeOnStartup := false,
     checkNode := runNodeCheck(preferredNodeVersion.value, streams.value.log, failMode.value),
@@ -31,12 +32,12 @@ object NodeJsPlugin extends AutoPlugin {
   )
 
   override val projectSettings = Seq(
-    cwd := target.value,
-    ncu := front.toTask(s" npm run ncu").value,
+    cwd := target.value.toPath,
+    ncu := front.toTask(s" npx npm-check-updates").value,
     front := {
       val log = streams.value.log
       val args: Seq[String] = spaceDelimited("<arg>").parsed
-      val status = IO.runProcess(args, cwd.value, log)
+      val status = IO.runProcess(args, cwd.value.toFile, log)
       if (status != 0) {
         log.error(s"Command '${args.mkString(" ")}' exited with status $status.")
       }

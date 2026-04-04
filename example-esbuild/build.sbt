@@ -10,7 +10,7 @@ inThisBuild(
 
 val versions = new {
   val http4s = "0.23.33"
-  val logback = "1.5.25"
+  val logback = "1.5.32"
   val scalaJsDom = "2.8.0"
   val scalatags = "0.13.1"
 }
@@ -19,9 +19,10 @@ val shared = project.in(file("shared"))
 
 val frontend = project
   .in(file("frontend"))
-  .enablePlugins(EsbuildPlugin)
+  .enablePlugins(EsbuildPlugin, NodeJsPlugin)
   .disablePlugins(RevolverPlugin)
   .settings(
+    cwd := EsbuildPlugin.autoImport.npmRoot.value,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % versions.scalaJsDom
     )

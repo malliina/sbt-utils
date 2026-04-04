@@ -6,7 +6,7 @@ import com.malliina.http.io.{HttpClientF2, HttpClientIO}
 import com.malliina.http.{FullUrl, HttpResponse}
 import com.malliina.netlify.Netlify._
 import com.malliina.util.AppLogger
-import com.malliina.values.{AccessToken, StringCompanion, WrappedString}
+import com.malliina.values.{AccessToken, ErrorMessage, StringCompanion, WrappedString}
 import fs2.hashing.{HashAlgorithm, Hashing}
 import fs2.io.file.{Files, Path}
 import fs2.{Stream, text}
@@ -25,13 +25,19 @@ object Netlify {
   private val log = AppLogger(getClass)
 
   case class SiteId(value: String) extends AnyVal with WrappedString
-  object SiteId extends StringCompanion[SiteId]
+  object SiteId extends StringCompanion[SiteId] {
+    override def build(input: String): Either[ErrorMessage, SiteId] = Right(apply(input))
+  }
 
   case class SHA1(value: String) extends AnyVal with WrappedString
-  object SHA1 extends StringCompanion[SHA1]
+  object SHA1 extends StringCompanion[SHA1] {
+    override def build(input: String): Either[ErrorMessage, SHA1] = Right(apply(input))
+  }
 
   case class SHA256(value: String) extends AnyVal with WrappedString
-  object SHA256 extends StringCompanion[SHA256]
+  object SHA256 extends StringCompanion[SHA256] {
+    override def build(input: String): Either[ErrorMessage, SHA256] = Right(apply(input))
+  }
 
   case class FileDigests(files: Map[String, SHA1], functions: Map[String, SHA256])
   object FileDigests {
@@ -47,7 +53,9 @@ object Netlify {
   }
 
   case class DeployId(value: String) extends AnyVal with WrappedString
-  object DeployId extends StringCompanion[DeployId]
+  object DeployId extends StringCompanion[DeployId] {
+    override def build(input: String): Either[ErrorMessage, DeployId] = Right(apply(input))
+  }
 
   case class Uploadables(
     id: DeployId,
