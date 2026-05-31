@@ -2,7 +2,7 @@ import com.malliina.rollup.CommonKeys.isProd
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.8.1",
+    scalaVersion := "3.8.3",
     organization := "com.malliina",
     version := "0.0.1"
   )
