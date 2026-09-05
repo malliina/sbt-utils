@@ -1,4 +1,4 @@
 Seq(
-  "com.jsuereth" % "sbt-pgp" % "2.1.1",
-  "com.github.sbt" % "sbt-release" % "1.1.0"
+  "com.github.sbt" % "sbt-pgp" % "2.3.1",
+  "com.github.sbt" % "sbt-release" % "1.5.0"
 ) map addSbtPlugin

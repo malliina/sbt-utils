@@ -1,6 +1,6 @@
 package com.malliina.nodejs
 
-import sbt.{File, Logger}
+import sbt.Logger
 
 import java.nio.file.Path
 import scala.sys.process.Process
@@ -9,8 +9,8 @@ object PathIO {
   val isWindows = sys.props("os.name").toLowerCase().contains("win")
   val cmdPrefix = if (isWindows) Seq("cmd", "/c") else Nil
 
-  def runCommand(command: String, cwd: Path, log: Logger) =
-    runProcessSync(command.split(" "), cwd, log)
+  def runCommand(command: String, cwd: Path, log: Logger): Unit =
+    runProcessSync(command.split(" ").toList, cwd, log)
 
   def runProcessSync(command: Seq[String], cwd: Path, log: Logger): Unit = {
     val rc = runProcess(command, cwd, log)

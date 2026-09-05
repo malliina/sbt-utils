@@ -5,29 +5,7 @@ import sbtrelease.ReleaseStateTransformations.*
 import scala.sys.process.Process
 
 // Uses Def.taskIf which is available only in 1.4.x
-ThisBuild / pluginCrossBuild / sbtVersion := "1.11.3"
-
-val versions = new {
-  val circe = "0.14.15"
-  val codeArtifact = "2.42.28"
-  val commonsCodec = "1.21.0"
-  val fs2 = "3.12.2"
-  val liveReload = "0.6.0"
-  val munit = "1.3.1"
-  val nativePackager = "1.11.7"
-  val primitives = "6.13.0"
-  val sbtBuildInfo = "0.13.1"
-  val sbtPgp = "2.3.1"
-  val sbtRelease = "1.5.0"
-  val sbtSonatype = "3.12.2"
-  val scala3 = "3.4.2"
-  val scala212 = "2.12.21"
-  val scalaFmt = "3.11.1"
-  val scalaJs = "1.21.0"
-  val scalaJsBundler = "0.21.1"
-  val scalaJsCross = "1.3.2"
-  val slf4j = "2.0.17"
-}
+ThisBuild / pluginCrossBuild / sbtVersion := "2.0.3"
 
 val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
 val updateDocs = taskKey[Unit]("Updates README.md")
@@ -35,8 +13,7 @@ val updateDocs = taskKey[Unit]("Updates README.md")
 inThisBuild(
   Seq(
     organization := "com.malliina",
-    scalaVersion := versions.scala212,
-    licenses += ("MIT", url("https://opensource.org/licenses/MIT")),
+    licenses += ("MIT", uri("https://opensource.org/licenses/MIT")),
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % versions.munit % Test
     )
@@ -81,8 +58,8 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-    scalaVersion := versions.scala212,
-    crossScalaVersions -= "2.13.16",
+//    scalaVersion := versions.scala212,
+//    crossScalaVersions -= "2.13.16",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := target.value / "docs",
@@ -135,9 +112,6 @@ val common = Project("common-build", file("common"))
 
 val mavenPlugin = Project("sbt-utils-maven", file("maven"))
   .settings(commonSettings)
-  .settings(
-    addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % versions.sbtSonatype)
-  )
 
 val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
   .settings(commonSettings)
@@ -161,7 +135,7 @@ val netlify = project
   .in(file("netlify"))
   .settings(baseSettings)
   .settings(
-    crossScalaVersions := Seq(versions.scala3, versions.scala212),
+    crossScalaVersions := Seq(versions.scala3),
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-api" % versions.slf4j,
       "co.fs2" %% "fs2-io" % versions.fs2,
@@ -216,10 +190,8 @@ val sbtUtils = Project("sbt-utils", file("."))
   .settings(
     publish / skip := true,
     publishArtifact := false,
-    packagedArtifacts := Map.empty,
     publish := {},
-    publishLocal := {},
-    sonatypeProfileName := "com.malliina"
+    publishLocal := {}
   )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges

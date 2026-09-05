@@ -7,7 +7,6 @@ import sbt._
 import sbtrelease.ReleasePlugin
 import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.ReleaseStateTransformations._
-import xerial.sbt.Sonatype
 
 object MavenCentralKeys {
   val gitUserName = settingKey[String]("Git username")
@@ -28,7 +27,7 @@ object MavenCentralKeys {
 }
 
 object MavenCentralPlugin extends AutoPlugin {
-  override def requires = Sonatype && ReleasePlugin
+  override def requires = ReleasePlugin
 
   import ReleasePlugin.autoImport._
 
@@ -52,7 +51,7 @@ object MavenCentralPlugin extends AutoPlugin {
     beforePublish := {},
     afterPublish := {},
     commands += Command.command("releaseArtifacts") { state =>
-      val extracted = Project extract state
+      val extracted = Project.extract(state)
       val ciState = extracted.appendWithoutSession(
         Seq(
           releasePublishArtifactsAction := PgpKeys.publishSigned.value,
@@ -79,7 +78,7 @@ object MavenCentralPlugin extends AutoPlugin {
     gitProjectName := name.value,
     developerHomePageUrl := s"https://github.com/${gitUserName.value}/${gitProjectName.value}",
     sonatypeCredentials := Path.userHome / ".ivy2" / "sonatype.txt",
-    credentials ++= creds(sonatypeCredentials.value),
+    credentials += Credentials(sonatypeCredentials.value),
     pomExtra := SbtGit.gitPom(
       gitProjectName.value,
       gitUserName.value,
@@ -121,10 +120,4 @@ object MavenCentralPlugin extends AutoPlugin {
     releaseProcess := tagReleaseProcess.value,
     releaseCrossBuild := true
   )
-
-  private def creds(file: File): Seq[DirectCredentials] =
-    toSeq(Credentials.loadCredentials(file))
-
-  def toSeq[A, B](either: Either[A, B]) =
-    either.fold(_ => Seq.empty, value => Seq(value))
 }

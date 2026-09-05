@@ -24,7 +24,9 @@ object NodeJsPlugin extends AutoPlugin {
     preferredNodeVersion := "24",
     failMode := FailMode.Warn,
     checkNodeOnStartup := false,
-    checkNode := runNodeCheck(preferredNodeVersion.value, streams.value.log, failMode.value),
+    checkNode := Def.uncached(
+      runNodeCheck(preferredNodeVersion.value, streams.value.log, failMode.value)
+    ),
     Global / onLoad := (Global / onLoad).value andThen { state =>
       if (checkNodeOnStartup.value) "checkNode" :: state
       else state
@@ -45,9 +47,9 @@ object NodeJsPlugin extends AutoPlugin {
     }
   )
 
-  def runNodeCheck(preferredVersion: String, log: ProcessLogger, failMode: FailMode) = {
+  def runNodeCheck(preferredVersion: String, log: ProcessLogger, failMode: FailMode): Unit = {
     val nodeVersion = Process("node --version")
-      .lineStream(log)
+      .lazyLines(log)
       .toList
       .headOption
       .getOrElse(sys.error(s"Unable to resolve node version."))

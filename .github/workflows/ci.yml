@@ -21,9 +21,9 @@ jobs:
           distribution: zulu
           java-version: 17
           cache: sbt
-      - uses: sbt/setup-sbt@v1
+      - uses: sbt/setup-sbt@v2
         with:
-          sbt-runner-version: 1.12.8
+          sbt-runner-version: 2.0.3
       - name: Run tests
         run: sbt test
       - name: Run example-esbuild tests
