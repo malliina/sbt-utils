@@ -14,7 +14,8 @@ import sbt.nio.Keys.fileInputs
 import sbt.{IO => _, *}
 
 import java.nio.file.{Files, Path}
-import scala.jdk.CollectionConverters.asScalaBufferConverter
+import scala.jdk.CollectionConverters.CollectionHasAsScala
+import sbt.internal.FileChangesMacro.inputFileChanges
 
 object RollupPlugin extends AutoPlugin {
   override def requires: Plugins = ScalaJSPlugin && NodeJsPlugin
@@ -61,7 +62,7 @@ object RollupPlugin extends AutoPlugin {
     stage / entryPointFile := (crossTarget.value / "entrypoints.txt").toPath,
     stage / entryPointJsFile := (crossTarget.value / "entrypoints.js").toPath,
     stage / libraryRollupFile := (crossTarget.value / "library.rollup.config.js").toPath,
-    Compile / stage / scalaJSLinker := {
+    Compile / stage / scalaJSLinker := Def.uncached {
       val out = (stage / entryPointFile).value
       val config = (stage / scalaJSLinkerConfig).value
       val linkerImpl = (stage / scalaJSLinkerImpl).value
@@ -125,28 +126,28 @@ object RollupPlugin extends AutoPlugin {
         ),
         state
       )
-    },
-    scalaJSLinkerImpl / fullClasspath := {
-      val s = streams.value
-      val log = s.log
-      val retrieveDir = s.cacheDirectory / "scalajs-bundler-linker"
-      val lm = (scalaJSLinkerImpl / dependencyResolution).value
-      val dependencies = Vector(
-        "org.scala-js" % "scalajs-linker_2.12" % scalaJSVersion
-      )
-      val dummyModuleID =
-        "com.malliina" % "scalajs-rollup-linker-and-scalajs-linker_2.12" % s"$scalaJSVersion"
-      val moduleDescriptor =
-        lm.moduleDescriptor(dummyModuleID, dependencies, scalaModuleInfo = None)
-      lm.retrieve(moduleDescriptor, retrieveDir, log)
-        .fold(w => throw w.resolveException, Attributed.blankSeq(_))
-    },
-    scalaJSLinkerImpl := {
-      val cp = (scalaJSLinkerImpl / fullClasspath).value
-      scalaJSLinkerImplBox.value.ensure {
-        new ForwardingLinker(LinkerImpl.reflect(Attributed.data(cp)))
-      }
     }
+//    scalaJSLinkerImpl / fullClasspath := {
+//      val s = streams.value
+//      val log = s.log
+//      val retrieveDir = s.cacheDirectory / "scalajs-bundler-linker"
+//      val lm = (scalaJSLinkerImpl / dependencyResolution).value
+//      val dependencies = Vector(
+//        "org.scala-js" % "scalajs-linker_2.12" % scalaJSVersion
+//      )
+//      val dummyModuleID =
+//        "com.malliina" % "scalajs-rollup-linker-and-scalajs-linker_2.12" % s"$scalaJSVersion"
+//      val moduleDescriptor =
+//        lm.moduleDescriptor(dummyModuleID, dependencies, scalaModuleInfo = None)
+//      lm.retrieve(moduleDescriptor, retrieveDir, log)
+//        .fold(w => throw w.resolveException, Attributed.blankSeq(_))
+//    },
+//    scalaJSLinkerImpl := {
+//      val cp = (scalaJSLinkerImpl / fullClasspath).value
+//      scalaJSLinkerImplBox.value.ensure {
+//        new ForwardingLinker(LinkerImpl.reflect(Attributed.data(cp)))
+//      }
+//    }
   )
 
   private def stageSettings(stage: Stage): Seq[Setting[?]] = {
@@ -161,7 +162,7 @@ object RollupPlugin extends AutoPlugin {
     val isProd = stage == Stage.FullOpt
     Seq(
       stageTask / urlOptions := UrlOption.defaults,
-      stageTask / prepareRollup := {
+      stageTask / prepareRollup := Def.uncached {
         val jsDir = (Compile / stageTaskOutput).value.toPath
         val jsFilename = "main.js"
         FileIO.copyIfChanged(jsDir.resolve(jsFilename), assetsRoot.value.resolve(jsFilename))
@@ -240,19 +241,19 @@ object RollupPlugin extends AutoPlugin {
           npmRunBuild(cwd, log)
         }
       },
-      stageTask / build := (stageTask / build).dependsOn(stageTask / prepareRollup).value,
-      stageTask / build := Def.taskIf {
-        val hasChanges = build.inputFileChanges.hasChanges || IO.writePackageJsonIfChanged(
-          (Compile / resourceDirectory).value.toPath,
-          npmRoot.value,
-          "package.rollup.json"
-        )
-        if (hasChanges) {
-          (stageTask / build).value
-        } else {
-          Def.task(()).value
-        }
-      }.value
+      stageTask / build := (stageTask / build).dependsOn(stageTask / prepareRollup).value
+//      stageTask / build := Def.taskIf {
+//        val hasChanges = build.inputFileChanges.hasChanges || IO.writePackageJsonIfChanged(
+//          (Compile / resourceDirectory).value.toPath,
+//          npmRoot.value,
+//          "package.rollup.json"
+//        )
+//        if (hasChanges) {
+//          (stageTask / build).value
+//        } else {
+//          Def.task(()).value
+//        }
+//      }.value
     )
   }
 

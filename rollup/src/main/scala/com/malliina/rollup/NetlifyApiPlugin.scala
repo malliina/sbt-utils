@@ -6,7 +6,7 @@ import com.malliina.netlify.Netlify.SiteId
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, deploy}
 import com.malliina.values.{AccessToken, ErrorMessage}
 import sbt.Keys.streams
-import sbt.{AutoPlugin, Plugins, Setting}
+import sbt.{AutoPlugin, Plugins, Setting, dependsOn}
 
 object NetlifyApiPlugin extends AutoPlugin {
   override def requires: Plugins = LoggingPlugin

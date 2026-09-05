@@ -10,16 +10,15 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStag
 import sbt.*
 import sbt.Keys.*
 import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
-import sbtbuildinfo.BuildInfoPlugin
-import sbtbuildinfo.BuildInfoPlugin.autoImport.BuildInfoKey
-import spray.revolver.GlobalState
-import spray.revolver.RevolverPlugin.autoImport.reStart
+import sbtbuildinfo.Entry.Constant
+import sbtbuildinfo.{BuildInfoPlugin, PluginCompat}
+import spray.revolver.RevolverKeys.reStart
 
 object ServerPlugin extends AutoPlugin {
   override def requires: Plugins =
     LiveRevolverPlugin && FileInputPlugin && HashPlugin && BuildInfoPlugin && FileTreePlugin
   object autoImport {
-    val clientProject = settingKey[Project]("Scala.js project")
+    val clientProject = settingKey[ProjectReference]("Scala.js project")
     val start = CommonKeys.start
   }
   import autoImport.*
@@ -27,39 +26,49 @@ object ServerPlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     isProd := scalaJSStage.value == FullOptStage,
     useHash := isProd.value,
-    start := Def.taskIf {
-      val log = streams.value.log
-      val changes = start.inputFileChanges
+    start := Def.uncached {
+//      val log = streams.value.log
+//      val changes = start.inputFileChanges
+//      ()
       // Restarts if a) not running, or b) input files have changed
-      val isRunning = GlobalState.get().getProcess(thisProjectRef.value).isDefined
-      val word = if (isRunning) "" else "not "
-      val fileWord = if (changes.hasChanges) "" else "not "
-      log.debug(s"${name.value} ${word}running. Files ${fileWord}changed.")
-      if (changes.hasChanges || !isRunning) {
-        reStart.toTask(" ").dependsOn(hash).value
-      } else {
-        Def.task(streams.value.log.info(s"No changes to ${name.value}, no restart.")).value
-      }
-    }.value, // sbt warns about pure statement, but without .value this does not work at all
+//      val isRunning = GlobalState.get().getProcess(thisProjectRef.value).isDefined
+//      val word = if (isRunning) "" else "not "
+//      val word = ""
+//      val fileWord = if (changes.hasChanges) "" else "not "
+//      log.debug(s"${name.value} ${word}running. Files ${fileWord}changed.")
+////      if (changes.hasChanges || !isRunning) {
+//      if (changes.hasChanges) {
+//        reStart.toTask(" ").dependsOn(hash).value
+//      } else {
+//        streams.value.log.info(s"No changes to ${name.value}, no restart.")
+////        Def.task(streams.value.log.info(s"No changes to ${name.value}, no restart.")).value
+//      }
+      reStart.toTask(" ").dependsOn(hash).value
+    },
     start := start.dependsOn(Def.taskDyn(clientProject.value / build)).value,
-    refreshBrowsers := refreshBrowsers
-      .triggeredBy(Def.taskDyn(clientProject.value / build), start)
-      .value,
-    watchSources := watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value,
+    start := refreshBrowsers.dependsOn(start).value,
+//    refreshBrowsers := refreshBrowsers
+//      .triggeredBy(Def.taskDyn(clientProject.value / build), start)
+//      .value,
+    watchSources := Def.uncached {
+      watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value
+    },
     hashRoot := Def.settingDyn(clientProject.value / assetsRoot).value,
-    hash := hash
-      .dependsOn(Def.taskDyn(clientProject.value / build))
-      .value,
-    Compile / compile := (Compile / compile).dependsOn(hash).value,
+    hash := Def.uncached {
+      hash
+        .dependsOn(Def.taskDyn(clientProject.value / build))
+        .value
+    },
+    Compile / compile := Def.uncached { (Compile / compile).dependsOn(hash).value },
     Compile / sourceGenerators += hash.map(_.map(_.toFile)),
     copyFolders += ((Compile / resourceDirectory).value / "public").toPath,
-    buildInfoKeys ++= Seq[BuildInfoKey](
-      "gitHash" -> Git.gitHash,
-      "assetsDir" -> Def.settingDyn(clientProject.value / assetsRoot).value.toFile,
-      "publicDir" -> (Compile / resourceDirectory).value.toPath.resolve("public"),
-      "publicFolder" -> Def.settingDyn(clientProject.value / assetsPrefix).value,
-      "mode" -> (if (isProd.value) "prod" else "dev"),
-      "isProd" -> isProd.value
+    buildInfoKeys ++= Seq[PluginCompat.Entry[?]](
+      Constant("gitHash" -> Git.gitHash),
+      Constant("assetsDir" -> Def.settingDyn(clientProject.value / assetsRoot).value.toFile),
+      Constant("publicDir" -> (Compile / resourceDirectory).value.toPath.resolve("public")),
+      Constant("publicFolder" -> Def.settingDyn(clientProject.value / assetsPrefix).value),
+      Constant("mode" -> (if (isProd.value) "prod" else "dev")),
+      Constant("isProd" -> isProd.value)
     ),
     Compile / unmanagedResourceDirectories ++= {
       if (isProd.value)

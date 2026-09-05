@@ -26,7 +26,7 @@ object HashPlugin extends AutoPlugin {
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
     useHash := true,
     copyFolders := Nil,
-    copy := {
+    copy := Def.uncached {
       val root = hashRoot.value
       copyFolders.value
         .toSet[Path]
@@ -38,7 +38,7 @@ object HashPlugin extends AutoPlugin {
     dataUriLimit := 48.kilos,
     hashIncludeExts := Seq(".css", ".js", ".jpg", ".jpeg", ".png", ".svg", ".ico"),
     hashPackage := "com.malliina.assets",
-    hashAssets := {
+    hashAssets := Def.uncached {
       val log = streams.value.log
       val root = hashRoot.value
       val enabled = useHash.value
@@ -56,10 +56,12 @@ object HashPlugin extends AutoPlugin {
           HashedFile.from(file, hashed, root)
         }
     },
-    hashAssets := hashAssets
-      .dependsOn(copy, Def.task(Files.createDirectories(hashRoot.value)))
-      .value,
-    hash := {
+    hashAssets := Def.uncached {
+      hashAssets
+        .dependsOn(copy, Def.task(Files.createDirectories(hashRoot.value)))
+        .value
+    },
+    hash := Def.uncached {
       val hashes = hashAssets.value
       val hashesEnabled = useHash.value
       val cached = FileFunction.cached(streams.value.cacheDirectory / "assets") { in =>

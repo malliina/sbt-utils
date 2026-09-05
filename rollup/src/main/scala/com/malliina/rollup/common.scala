@@ -23,7 +23,7 @@ object Git {
   def gitHash: String =
     sys.env
       .get("GITHUB_SHA")
-      .orElse(Try(Process("git rev-parse HEAD").lineStream.head).toOption)
+      .orElse(Try(Process("git rev-parse HEAD").lazyLines.head).toOption)
       .getOrElse("unknown")
 }
 
@@ -57,13 +57,13 @@ object UrlOption {
   val defaults =
     Seq(exts(Seq("woff", "woff2", "png", "svg"), 64.kilos), anyParent(Option(16.kilos)), anySibling)
   def anyParent(maxSize: Option[StorageSize]): UrlOption =
-    inline("../**/*", maxSize)
-  def anySibling = inline("**/*", Option(1.kilos))
+    inlined("../**/*", maxSize)
+  def anySibling = inlined("**/*", Option(1.kilos))
   def exts(es: Seq[String], maxSize: StorageSize): UrlOption = {
     val extsStr = es.mkString("|")
     val minimatch = s"../**/*.+($extsStr)"
-    inline(minimatch, Option(maxSize))
+    inlined(minimatch, Option(maxSize))
   }
-  def inline(minimatch: String, maxSize: Option[StorageSize]) =
+  def inlined(minimatch: String, maxSize: Option[StorageSize]) =
     UrlOption(minimatch, "inline", maxSize)
 }

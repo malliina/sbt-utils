@@ -6,7 +6,8 @@ import com.typesafe.sbt.packager.archetypes.systemloader.SystemdPlugin
 import com.typesafe.sbt.packager.debian.DebianPlugin.autoImport.Debian
 import com.typesafe.sbt.packager.linux.LinuxPlugin.autoImport.{Linux, daemonUser}
 import sbt.Keys.*
-import sbt.{IO => _, *}
+import sbt.{IO as _, *}
+import sbtcompat.PluginCompat
 
 object DebPlugin extends AutoPlugin {
   override def requires = JavaServerAppPackaging && SystemdPlugin
@@ -26,14 +27,16 @@ object DebPlugin extends AutoPlugin {
     Compile / packageDoc / mappings := Nil,
     Compile / packageDoc / publishArtifact := false,
     maintainer := "Michael Skogberg <malliina123@gmail.com>",
-    Deb / packageBin := {
+    Deb / packageBin := Def.uncached {
+      val conv = fileConverter.value
+      given FileConverter = conv
       val artifact = (Debian / packageBin).value
       val destName = (Linux / name).value
       val dest = target.value / s"$destName.deb"
-      sbt.IO.copyFile(artifact, dest)
+      sbt.IO.copyFile(PluginCompat.toFile(artifact), dest)
       streams.value.log.info(s"Copied '$artifact' to '$dest'.")
-      dest
+      conv.toVirtualFile(dest.toPath)
     },
-    Deb / packageBin := (Deb / packageBin).dependsOn(Debian / packageBin).value
+    Deb / packageBin := Def.uncached((Deb / packageBin).dependsOn(Debian / packageBin).value)
   )
 }

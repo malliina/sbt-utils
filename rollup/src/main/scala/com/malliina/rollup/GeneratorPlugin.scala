@@ -10,14 +10,15 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStag
 import sbt.*
 import sbt.Keys.{compile, run, sourceGenerators, watchSources}
 import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
-import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
+import sbtbuildinfo.Entry.Constant
+import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin, PluginCompat}
 
 object GeneratorPlugin extends AutoPlugin {
   override def requires: Plugins =
     BuildInfoPlugin && LiveReloadPlugin && HashPlugin && FileTreePlugin
 
   object autoImport {
-    val scalajsProject = settingKey[Project]("Scala.js project")
+    val scalajsProject = settingKey[ProjectRef]("Scala.js project")
   }
   import autoImport.*
 
@@ -26,23 +27,29 @@ object GeneratorPlugin extends AutoPlugin {
     assetsRoot := Def.settingDyn { scalajsProject.value / assetsRoot }.value,
     hashRoot := assetsRoot.value,
     liveReloadRoot := assetsRoot.value,
-    buildInfoKeys ++= Seq[BuildInfoKey](
-      "siteDir" -> assetsRoot.value.toFile,
-      "isProd" -> isProd.value,
-      "gitHash" -> Git.gitHash
+    buildInfoKeys ++= Seq[PluginCompat.Entry[?]](
+      Constant("siteDir" -> assetsRoot.value.toFile),
+      Constant("isProd" -> isProd.value),
+      Constant("gitHash" -> Git.gitHash)
     ),
-    refreshBrowsers := refreshBrowsers.triggeredBy(build).value,
-    build := Def.taskDyn {
-      (Compile / run)
-        .toTask(" ")
-        .dependsOn(Def.task(if (isProd.value) () else reloader.value.start()))
-    }.value,
-    watchSources := watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value,
+    build := Def.uncached {
+      Def.taskDyn {
+        (Compile / run)
+          .toTask(" ")
+          .dependsOn(Def.task(if (isProd.value) () else reloader.value.start()))
+      }.value
+    },
+    build := refreshBrowsers.dependsOn(build).value,
+    watchSources := Def.uncached {
+      watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value
+    },
     Compile / sourceGenerators += hash.map(_.map(_.toFile)),
-    Compile / compile := (Compile / compile)
-      .dependsOn(hash)
-      .dependsOn(Def.taskDyn(scalajsProject.value / build))
-      .value,
+    Compile / compile := Def.uncached {
+      (Compile / compile)
+        .dependsOn(hash)
+        .dependsOn(Def.taskDyn(scalajsProject.value / build))
+        .value
+    },
     fileTreeSources += DirMap(assetsRoot.value, s"${hashPackage.value}.FileAssets")
   )
 }

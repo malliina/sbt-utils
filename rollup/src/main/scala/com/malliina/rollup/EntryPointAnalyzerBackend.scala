@@ -6,8 +6,8 @@ import org.scalajs.logging.Logger
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
-import scala.collection.JavaConverters.asJavaIterableConverter
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.CollectionConverters.IterableHasAsJava
 
 final class EntryPointAnalyzerBackend(linkerConfig: StandardConfig, entryPointOutputFile: Path)
   extends LinkerBackend {

@@ -2,7 +2,7 @@ package com.malliina.rollup
 
 import com.malliina.rollup.CommonKeys.{build, isProd}
 import sbt.Keys.{baseDirectory, streams}
-import sbt.{AutoPlugin, Plugins, Setting, ThisBuild, taskKey}
+import sbt.{AutoPlugin, Plugins, Setting, ThisBuild, taskKey, dependsOn}
 
 object NetlifyPlugin extends AutoPlugin {
   override def requires: Plugins = GeneratorPlugin

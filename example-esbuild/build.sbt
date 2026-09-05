@@ -1,19 +1,14 @@
 import com.malliina.rollup.CommonKeys.isProd
+import sbt.*
+import sbt.Keys.*
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.8.3",
+    scalaVersion := "3.9.0",
     organization := "com.malliina",
     version := "0.0.1"
   )
 )
-
-val versions = new {
-  val http4s = "0.23.33"
-  val logback = "1.5.32"
-  val scalaJsDom = "2.8.0"
-  val scalatags = "0.13.1"
-}
 
 val shared = project.in(file("shared"))
 
@@ -24,7 +19,7 @@ val frontend = project
   .settings(
     cwd := EsbuildPlugin.autoImport.npmRoot.value,
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % versions.scalaJsDom
+      "org.scala-js" %% "scalajs-dom" % versions.scalaJsDom
     )
   )
 

@@ -21,7 +21,7 @@ inThisBuild(
 )
 
 ThisBuild / commands += Command.command("releaseArtifacts") { state =>
-  val extracted = Project extract state
+  val extracted = Project.extract(state)
   val ciState = extracted.appendWithoutSession(
     Seq(
       releasePublishArtifactsAction := PgpKeys.publishSigned.value,
@@ -118,17 +118,19 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
-  .settings(
-    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % versions.scalaFmt
-  )
+//  .settings(
+//    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % versions.scalaFmt
+//  )
 
-val bundlerPlugin = Project("sbt-bundler", file("bundler"))
+val liveReloadPlugin = Project("sbt-live-reload", file("live-reload"))
   .settings(commonSettings)
   .settings(
-    Seq(
-      "ch.epfl.scala" % "sbt-scalajs-bundler" % versions.scalaJsBundler,
-      "com.malliina" % "live-reload" % versions.liveReload
-    ) map addSbtPlugin
+    libraryDependencies ++= Seq("ember-server", "dsl").map { m =>
+      "org.http4s" %% s"http4s-$m" % "0.23.23"
+    } ++ Seq(
+      "io.circe" %% "circe-generic" % "0.14.16"
+    ),
+    addSbtPlugin("com.indoorvivants" % "sbt-revolver" % "0.11.2")
   )
 
 val netlify = project
@@ -145,7 +147,7 @@ val netlify = project
   )
 
 val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
-  .dependsOn(common, fileTreePlugin, nodePlugin, netlify)
+  .dependsOn(common, fileTreePlugin, nodePlugin, netlify, liveReloadPlugin)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("generic", "parser").map { m =>
@@ -154,19 +156,11 @@ val revolverRollupPlugin = Project("sbt-revolver-rollup", file("rollup"))
       "org.scala-js" %% "scalajs-linker" % versions.scalaJs
     ),
     Seq(
-      "com.malliina" % "live-reload" % versions.liveReload,
       "org.scala-js" % "sbt-scalajs" % versions.scalaJs,
       "com.eed3si9n" % "sbt-buildinfo" % versions.sbtBuildInfo,
       "org.portable-scala" % "sbt-scalajs-crossproject" % versions.scalaJsCross,
       "com.github.sbt" % "sbt-native-packager" % versions.nativePackager
     ) map addSbtPlugin
-  )
-
-val dockerBundlerPlugin = Project("sbt-docker-bundler", file("docker-bundler"))
-  .dependsOn(bundlerPlugin)
-  .settings(commonSettings)
-  .settings(
-    addSbtPlugin("com.github.sbt" % "sbt-native-packager" % versions.nativePackager)
   )
 
 val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
@@ -177,12 +171,11 @@ val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(
+    liveReloadPlugin,
     mavenPlugin,
     nodePlugin,
     fileTreePlugin,
-    bundlerPlugin,
     revolverRollupPlugin,
-    dockerBundlerPlugin,
     codeArtifactPlugin,
     docs
   )

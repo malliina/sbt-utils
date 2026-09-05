@@ -7,7 +7,7 @@ import sbt.nio.Keys.fileInputs
 object FileInputPlugin extends AutoPlugin {
   val start = CommonKeys.start
   object autoImport {
-    val dependentModule = settingKey[Project]("Module depended on")
+    val dependentModule = settingKey[ProjectReference]("Module depended on")
   }
   import autoImport.dependentModule
 

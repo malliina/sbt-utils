@@ -11,7 +11,7 @@ import sbt.Keys.*
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object EsbuildPlugin extends AutoPlugin {
   val utf8 = StandardCharsets.UTF_8
@@ -92,7 +92,7 @@ object EsbuildPlugin extends AutoPlugin {
       case Stage.FullOpt => fullLinkJS
     }
     Seq(
-      stageTask / stageMainJs := {
+      stageTask / stageMainJs := Def.uncached {
         val report = (Compile / stageTask).value.data
         val mainJs = report.publicModules
           .find(_.moduleID == "main")
@@ -101,7 +101,7 @@ object EsbuildPlugin extends AutoPlugin {
           (Compile / stageTask / scalaJSLinkerOutputDirectory).value.toPath / mainJs.jsFileName
         FileIO.copyIfChanged(jsFile, npmRoot.value / mainJs.jsFileName)
       },
-      stageTask / configureEsbuild := {
+      stageTask / configureEsbuild := Def.uncached {
         val report = (Compile / stageTask).value.data
         val mainJs = report.publicModules
           .find(_.moduleID == "main")
