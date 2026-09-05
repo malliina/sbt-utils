@@ -78,18 +78,18 @@ val docs = project
   .enablePlugins(MdocPlugin)
 
 val releaseSettings = Seq(
-  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runTest,
-    setReleaseVersion,
-    releaseStepTask(docs / updateDocs),
-    commitReleaseVersion,
-    tagRelease,
-    setNextVersion,
-    commitNextVersion,
-    pushChanges
-  )
+//  releaseProcess := Seq[ReleaseStep](
+//    checkSnapshotDependencies,
+//    inquireVersions,
+//    runTest,
+//    setReleaseVersion,
+//    releaseStepTask(docs / updateDocs),
+//    commitReleaseVersion,
+//    tagRelease,
+//    setNextVersion,
+//    commitNextVersion,
+//    pushChanges
+//  )
 )
 
 val baseSettings = releaseSettings ++ Seq(
