@@ -27,7 +27,7 @@ class Service(
   val host: Host,
   val port: Port,
   events: Topic[IO, BrowserEvent]
-) extends Implicits {
+) extends Implicits:
   private val scriptPath = "script.js"
   val scriptUrl: String = s"http://$host:$port/$scriptPath"
   private val eventsPath = "events"
@@ -37,14 +37,13 @@ class Service(
 
   private val pings = fs2.Stream.awakeEvery[IO](30.seconds).map(d => SimpleEvent.ping)
 
-  def routes(builder: WebSocketBuilder2[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  def routes(builder: WebSocketBuilder2[IO]): HttpRoutes[IO] = HttpRoutes.of[IO]:
     case GET -> Root / `scriptPath` =>
       Ok(script).map(_.withContentType(`Content-Type`(MediaType.text.javascript)))
     case GET -> Root / `eventsPath` =>
-      val fromClient: Pipe[IO, WebSocketFrame, Unit] = _.evalMap {
+      val fromClient: Pipe[IO, WebSocketFrame, Unit] = _.evalMap:
         case Text(message, _) => IO(println(message))
         case _                => IO.unit
-      }
       builder.build(
         events
           .subscribe(100)
@@ -54,26 +53,25 @@ class Service(
       )
     case req @ GET -> rest =>
       val segments = rest.segments
-      val file = if (segments.isEmpty) "index.html" else segments.mkString("/")
+      val file = if segments.isEmpty then "index.html" else segments.mkString("/")
       (findFile(file, req) orElse findFile(s"$file.html", req))
         .map(_.putHeaders(`Cache-Control`(cacheHeaders)))
         .fold(notFound(req))(_.pure[IO])
         .flatten
-  }
 
   private def findFile(file: String, req: Request[IO]) =
     StaticFile.fromPath(root.resolve(file), Option(req))
 
-  def router(builder: WebSocketBuilder2[IO]): HttpApp[IO] = Router("/" -> routes(builder)).orNotFound
+  def router(builder: WebSocketBuilder2[IO]): HttpApp[IO] = Router(
+    "/" -> routes(builder)
+  ).orNotFound
 
   def send(message: BrowserEvent): IO[Either[Closed, Unit]] = events.publish1(message)
 
   private def notFound(req: Request[IO]) =
     NotFound(s"Not found: ${req.uri}.")
 
-  private def resourceToString(path: String) = {
+  private def resourceToString(path: String) =
     val src = scala.io.Source.fromResource(path, getClass.getClassLoader)
     try src.getLines().mkString("\n")
     finally src.close()
-  }
-}

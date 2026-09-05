@@ -13,27 +13,26 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-object EsbuildPlugin extends AutoPlugin {
+object EsbuildPlugin extends AutoPlugin:
   val utf8 = StandardCharsets.UTF_8
   val sha1 = "sha1"
 
-  sealed abstract class Loader(val name: String) {
+  sealed abstract class Loader(val name: String):
     override def toString: String = name
-  }
-  object Loader {
+  object Loader:
     case object DataUrl extends Loader("dataurl")
     case object File extends Loader("file")
     case object Copy extends Loader("copy")
     case object Base64 extends Loader("base64")
     case class Other(n: String) extends Loader(n)
-  }
-  val defaultLoaders: Map[String, Loader] = Seq("woff", "woff2", "png", "svg").map { ext =>
-    s".$ext" -> Loader.DataUrl
-  }.toMap
+  val defaultLoaders: Map[String, Loader] = Seq("woff", "woff2", "png", "svg")
+    .map: ext =>
+      s".$ext" -> Loader.DataUrl
+    .toMap
 
   override def requires: Plugins = ScalaJSPlugin
 
-  object autoImport {
+  object autoImport:
     val resourceDir = settingKey[Path]("Source directory with package.json etc.")
     val npmRoot = settingKey[Path]("Working dir for npm commands")
     val copyBuildResources = taskKey[Unit]("Copies files")
@@ -41,27 +40,23 @@ object EsbuildPlugin extends AutoPlugin {
     val stageMainJs = taskKey[Unit]("Stages scala.js output")
     val configureEsbuild = taskKey[Unit]("Prepares esbuild")
     val loaders = settingKey[Map[String, Loader]]("Esbuild loaders (extension to loader)")
-  }
   import autoImport.*
 
   override def globalSettings: Seq[Setting[?]] = Seq(
-    commands += Command.args("mode", "<mode>") { (state, args) =>
-      val newStage = args.toList match {
+    commands += Command.args("mode", "<mode>"): (state, args) =>
+      val newStage = args.toList match
         case h :: Nil =>
-          h match {
+          h match
             case "prod" => Stage.FullOpt
             case "dev"  => Stage.FastOpt
             case other  => sys.error(s"Invalid mode: '$other'.")
-          }
         case other => sys.error("Specify either dev or prod as the only argument.")
-      }
       state.appendWithoutSession(
         Seq(
           Global / scalaJSStage := newStage
         ),
         state
       )
-    }
   )
 
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
@@ -72,29 +67,28 @@ object EsbuildPlugin extends AutoPlugin {
     resourceDir := (Compile / resourceDirectory).value.toPath,
     npmRoot := ((Compile / crossTarget).value / "stage").toPath,
     assetsRoot := npmRoot.value / "assets",
-    copyBuildResources := Def.uncached {
+    copyBuildResources := Def.uncached:
       FileIO.copyDir(resourceDir.value, npmRoot.value)
-    },
-    stageFiles := Def.uncached {
+    ,
+    stageFiles := Def.uncached:
       IO.writePackageJsonIfChanged(resourceDir.value, npmRoot.value, "package.esbuild.json")
-    },
+    ,
     stageFiles := stageFiles.dependsOn(copyBuildResources).value,
-    build := Def.settingDyn {
-      val stageTask = scalaJSStage.value match {
-        case Stage.FastOpt => fastLinkJS
-        case Stage.FullOpt => fullLinkJS
-      }
-      stageTask / build
-    }.value
+    build := Def
+      .settingDyn:
+        val stageTask = scalaJSStage.value match
+          case Stage.FastOpt => fastLinkJS
+          case Stage.FullOpt => fullLinkJS
+        stageTask / build
+      .value
   ) ++ stageSettings(Stage.FastOpt) ++ stageSettings(Stage.FullOpt)
 
-  private def stageSettings(stage: Stage): Seq[Setting[?]] = {
-    val stageTask = stage match {
+  private def stageSettings(stage: Stage): Seq[Setting[?]] =
+    val stageTask = stage match
       case Stage.FastOpt => fastLinkJS
       case Stage.FullOpt => fullLinkJS
-    }
     Seq(
-      stageTask / stageMainJs := Def.uncached {
+      stageTask / stageMainJs := Def.uncached:
         val report = (Compile / stageTask).value.data
         val mainJs = report.publicModules
           .find(_.moduleID == "main")
@@ -102,7 +96,7 @@ object EsbuildPlugin extends AutoPlugin {
         val jsFile =
           (Compile / stageTask / scalaJSLinkerOutputDirectory).value.toPath / mainJs.jsFileName
         FileIO.copyIfChanged(jsFile, npmRoot.value / mainJs.jsFileName)
-      },
+      ,
       stageTask / configureEsbuild := Def.uncached {
         val report = (Compile / stageTask).value.data
         val mainJs = report.publicModules
@@ -111,9 +105,11 @@ object EsbuildPlugin extends AutoPlugin {
         val entrypoint = mainJs.jsFileName
         val out = npmRoot.value.relativize(assetsRoot.value)
         streams.value.log.info(s"Configuring with ${mainJs.jsFileName} to ${out.toAbsolutePath}...")
-        val loadersJs = loaders.value.map { case (ext, l) =>
-          s"""'$ext': '$l'"""
-        }.mkString(", ")
+        val loadersJs = loaders.value
+          .map:
+            case (ext, l) =>
+              s"""'$ext': '$l'"""
+          .mkString(", ")
         val minify = stage == Stage.FullOpt
         val script = s"""
            |const path = require('path');
@@ -140,39 +136,37 @@ object EsbuildPlugin extends AutoPlugin {
         val scriptFile = npmRoot.value / "esbuild.cjs"
         FileIO.writeIfChanged(script, scriptFile)
       },
-      stageTask / build := Def.uncached {
+      stageTask / build := Def.uncached:
         val log = streams.value.log
         val cwd = npmRoot.value
         val packageJson = cwd / "package.json"
         val cacheFile = cwd / "package.json.sha1"
         val checksum = computeChecksum(packageJson)
-        if (
-          Files.exists(cacheFile) && Files
+        if Files.exists(cacheFile) && Files
             .readAllLines(cacheFile, utf8)
             .asScala
             .headOption
             .contains(checksum)
-        ) {
-          npmRunBuild(cwd, log)
-        } else {
+        then npmRunBuild(cwd, log)
+        else
           FileIO.writeIfChanged(checksum, cacheFile)
-          if (stage == Stage.FullOpt) npmCi(cwd, log)
-          else {
+          if stage == Stage.FullOpt then npmCi(cwd, log)
+          else
             npmInstall(cwd, log)
             val lockFile = resourceDir.value / "package-lock.json"
             val newestLockFile = cwd / "package-lock.json"
-            if (Files.exists(newestLockFile)) {
-              FileIO.copyIfChanged(newestLockFile, lockFile)
-            }
-          }
+            if Files.exists(newestLockFile) then FileIO.copyIfChanged(newestLockFile, lockFile)
           npmRunBuild(cwd, log)
-        }
-      },
+      ,
       stageTask / build := (stageTask / build)
-        .dependsOn(stageTask / configureEsbuild, stageTask / stageMainJs, Compile / stageTask, stageFiles)
+        .dependsOn(
+          stageTask / configureEsbuild,
+          stageTask / stageMainJs,
+          Compile / stageTask,
+          stageFiles
+        )
         .value
     )
-  }
 
   def npmRunBuild(cwd: Path, log: Logger) =
     process(Seq("npm", "run", "build"), cwd, log)
@@ -187,4 +181,3 @@ object EsbuildPlugin extends AutoPlugin {
     PathIO.runProcessSync(commands, cwd, log)
 
   def computeChecksum(file: Path) = ChecksumHelper.computeAsString(file.toFile, sha1)
-}

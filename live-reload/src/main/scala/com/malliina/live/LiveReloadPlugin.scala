@@ -7,14 +7,13 @@ import sbt.Keys.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 
-object LiveReloadPlugin extends AutoPlugin {
-  object autoImport {
+object LiveReloadPlugin extends AutoPlugin:
+  object autoImport:
     val reloader = settingKey[Reloadable]("Interface to browsers")
     val liveReloadRoot = settingKey[Path]("Path to live reload root for serving static files")
     val liveReloadHost = settingKey[Host]("Host for live reload, defaults to localhost")
     val liveReloadPort = settingKey[Port]("HTTP port for live reload, defaults to 10101")
     val refreshBrowsers = taskKey[Unit]("Refreshes browsers")
-  }
   import autoImport.*
 
   override def projectSettings: Seq[Setting[?]] = Seq(
@@ -30,16 +29,16 @@ object LiveReloadPlugin extends AutoPlugin {
       ),
       NoopReloadable
     ),
-    Global / onUnload  := {
+    Global / onUnload := {
       val first = (Global / onUnload).value
       sLog.value.info("Shutting down...")
       reloader.value.close()
       first
     },
-    refreshBrowsers := Def.uncached {
+    refreshBrowsers := Def.uncached:
       sLog.value.info("Refreshing browsers...")
       reloader.value.reload()
-    },
+    ,
 //    extraAppenders := {
 //      class BrowserConsoleAppender(key: ScopedKey[?]) extends Appender {
 //        override def close(): Unit = ()
@@ -49,13 +48,14 @@ object LiveReloadPlugin extends AutoPlugin {
 //        (new BrowserConsoleAppender(key)) +: currentFunction(key)
 //      }
 //    },
-    Compile / sourceGenerators += Def.task {
-      val dest = (Compile / sourceManaged).value
-      makeSources(dest, reloader.value)
-    }.taskValue
+    Compile / sourceGenerators += Def
+      .task:
+        val dest = (Compile / sourceManaged).value
+        makeSources(dest, reloader.value)
+      .taskValue
   )
 
-  private def makeSources(destBase: File, server: Reloadable): Seq[File] = {
+  private def makeSources(destBase: File, server: Reloadable): Seq[File] =
     val packageName = "com.malliina.live"
     val host = s"http://localhost:${server.port}"
     val content =
@@ -72,8 +72,6 @@ object LiveReloadPlugin extends AutoPlugin {
     val destFile = destDir(destBase, packageName) / "LiveReload.scala"
     IO.write(destFile, content, StandardCharsets.UTF_8)
     Seq(destFile)
-  }
 
   private def destDir(base: File, packageName: String): File =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
-}

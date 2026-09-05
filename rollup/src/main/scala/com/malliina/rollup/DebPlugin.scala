@@ -9,12 +9,11 @@ import sbt.Keys.*
 import sbt.{IO as _, *}
 import sbtcompat.PluginCompat
 
-object DebPlugin extends AutoPlugin {
+object DebPlugin extends AutoPlugin:
   override def requires = JavaServerAppPackaging && SystemdPlugin
 
-  object autoImport {
+  object autoImport:
     val Deb = config("Deb")
-  }
   import autoImport.Deb
 
   override def projectSettings: Seq[Setting[?]] = Seq(
@@ -27,7 +26,7 @@ object DebPlugin extends AutoPlugin {
     Compile / packageDoc / mappings := Nil,
     Compile / packageDoc / publishArtifact := false,
     maintainer := "Michael Skogberg <malliina123@gmail.com>",
-    Deb / packageBin := Def.uncached {
+    Deb / packageBin := Def.uncached:
       val conv = fileConverter.value
       given FileConverter = conv
       val artifact = (Debian / packageBin).value
@@ -36,7 +35,6 @@ object DebPlugin extends AutoPlugin {
       sbt.IO.copyFile(PluginCompat.toFile(artifact), dest)
       streams.value.log.info(s"Copied '$artifact' to '$dest'.")
       conv.toVirtualFile(dest.toPath)
-    },
+    ,
     Deb / packageBin := Def.uncached((Deb / packageBin).dependsOn(Debian / packageBin).value)
   )
-}

@@ -13,18 +13,20 @@ import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.Entry.Constant
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin, PluginCompat}
 
-object GeneratorPlugin extends AutoPlugin {
+object GeneratorPlugin extends AutoPlugin:
   override def requires: Plugins =
     BuildInfoPlugin && LiveReloadPlugin && HashPlugin && FileTreePlugin
 
-  object autoImport {
+  object autoImport:
     val scalajsProject = settingKey[ProjectRef]("Scala.js project")
-  }
   import autoImport.*
 
   override def projectSettings: Seq[Setting[?]] = Seq(
     isProd := scalaJSStage.value == FullOptStage,
-    assetsRoot := Def.settingDyn { scalajsProject.value / assetsRoot }.value,
+    assetsRoot := Def
+      .settingDyn:
+        scalajsProject.value / assetsRoot
+      .value,
     hashRoot := assetsRoot.value,
     liveReloadRoot := assetsRoot.value,
     buildInfoKeys ++= Seq[PluginCompat.Entry[?]](
@@ -32,24 +34,24 @@ object GeneratorPlugin extends AutoPlugin {
       Constant("isProd" -> isProd.value),
       Constant("gitHash" -> Git.gitHash)
     ),
-    build := Def.uncached {
-      Def.taskDyn {
-        (Compile / run)
-          .toTask(" ")
-          .dependsOn(Def.task(if (isProd.value) () else reloader.value.start()))
-      }.value
-    },
+    build := Def.uncached:
+      Def
+        .taskDyn:
+          (Compile / run)
+            .toTask(" ")
+            .dependsOn(Def.task(if isProd.value then () else reloader.value.start()))
+        .value
+    ,
     build := refreshBrowsers.dependsOn(build).value,
-    watchSources := Def.uncached {
+    watchSources := Def.uncached:
       watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value
-    },
+    ,
     Compile / sourceGenerators += hash.map(_.map(_.toFile)),
-    Compile / compile := Def.uncached {
+    Compile / compile := Def.uncached:
       (Compile / compile)
         .dependsOn(hash)
         .dependsOn(Def.taskDyn(scalajsProject.value / build))
         .value
-    },
+    ,
     fileTreeSources += DirMap(assetsRoot.value, s"${hashPackage.value}.FileAssets")
   )
-}

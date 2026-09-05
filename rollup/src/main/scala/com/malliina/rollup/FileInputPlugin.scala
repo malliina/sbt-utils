@@ -4,11 +4,10 @@ import sbt.*
 import sbt.Keys.{resourceDirectories, sourceDirectories}
 import sbt.nio.Keys.fileInputs
 
-object FileInputPlugin extends AutoPlugin {
+object FileInputPlugin extends AutoPlugin:
   val start = CommonKeys.start
-  object autoImport {
+  object autoImport:
     val dependentModule = settingKey[ProjectReference]("Module depended on")
-  }
   import autoImport.dependentModule
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
@@ -23,4 +22,3 @@ object FileInputPlugin extends AutoPlugin {
       .value
       .map(_.toGlob / **)
   )
-}

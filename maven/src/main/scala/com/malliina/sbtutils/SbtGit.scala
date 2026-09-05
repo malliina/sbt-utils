@@ -2,7 +2,7 @@ package com.malliina.sbtutils
 
 object SbtGit extends SbtGit
 
-trait SbtGit {
+trait SbtGit:
   def gitPom(projectName: String, gitUser: String, realName: String, developerHomePage: String) =
     (<url>https://github.com/{gitUser}/{projectName}</url>
       <licenses>
@@ -23,4 +23,3 @@ trait SbtGit {
           <url>{developerHomePage}</url>
         </developer>
       </developers>)
-}

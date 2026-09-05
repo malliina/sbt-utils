@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters.IterableHasAsJava
 
 final class EntryPointAnalyzerBackend(linkerConfig: StandardConfig, entryPointOutputFile: Path)
-  extends LinkerBackend {
+  extends LinkerBackend:
   private val standard = StandardLinkerBackend(linkerConfig)
 
   val coreSpec: CoreSpec = standard.coreSpec
@@ -20,9 +20,7 @@ final class EntryPointAnalyzerBackend(linkerConfig: StandardConfig, entryPointOu
 
   def emit(moduleSet: ModuleSet, output: OutputDirectory, logger: Logger)(implicit
     ec: ExecutionContext
-  ): Future[Report] = {
+  ): Future[Report] =
     val modules = moduleSet.modules.flatMap(_.externalDependencies).toSet
     Files.write(entryPointOutputFile, modules.asJava, StandardCharsets.UTF_8)
     standard.emit(moduleSet, output, logger)
-  }
-}

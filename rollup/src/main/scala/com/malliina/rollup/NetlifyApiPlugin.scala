@@ -8,7 +8,7 @@ import com.malliina.values.{AccessToken, ErrorMessage}
 import sbt.Keys.streams
 import sbt.{AutoPlugin, Plugins, Setting, dependsOn}
 
-object NetlifyApiPlugin extends AutoPlugin {
+object NetlifyApiPlugin extends AutoPlugin:
   override def requires: Plugins = LoggingPlugin
 
   override def projectSettings: Seq[Setting[?]] = Seq(
@@ -25,11 +25,9 @@ object NetlifyApiPlugin extends AutoPlugin {
     deploy := deploy.dependsOn(build).value
   )
 
-  private def env[T](key: String)(implicit r: com.malliina.values.Readable[T]): T = {
-    val result = for {
+  private def env[T](key: String)(implicit r: com.malliina.values.Readable[T]): T =
+    val result = for
       str <- sys.env.get(key).toRight(ErrorMessage(s"Please define environment variable '$key'."))
       t <- r.read(str)
-    } yield t
+    yield t
     result.fold(err => sys.error(err.message), identity)
-  }
-}

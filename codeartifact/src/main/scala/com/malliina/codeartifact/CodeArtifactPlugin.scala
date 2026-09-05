@@ -1,12 +1,12 @@
 package com.malliina.codeartifact
 
 import sbt.Keys.{credentials, publishMavenStyle, publishTo, resolvers, streams}
-import sbt._
+import sbt.*
 import software.amazon.awssdk.services.codeartifact.CodeartifactClient
 import software.amazon.awssdk.services.codeartifact.model.GetAuthorizationTokenRequest
 import concurrent.duration.DurationInt
 
-object CodeArtifactKeys {
+object CodeArtifactKeys:
   val caDomain = settingKey[String]("CodeArtifact domain")
   val caDomainOwner = settingKey[String]("AWS account ID")
   val caRepo = settingKey[String]("CodeArtifact repository name")
@@ -14,14 +14,13 @@ object CodeArtifactKeys {
     "CodeArtifact repo host, e.g. xxx-111.d.codeartifact.eu-west-1.amazonaws.com"
   )
   val caRepoUrl = settingKey[String]("CodeArtifact repo URL")
-}
 
-object CodeArtifactPlugin extends AutoPlugin {
+object CodeArtifactPlugin extends AutoPlugin:
   // Adds settings automatically to the build; no need to use `.enablePlugins(...)`.
   override val trigger: PluginTrigger = allRequirements
 
   val autoImport = CodeArtifactKeys
-  import CodeArtifactKeys._
+  import CodeArtifactKeys.*
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     resolvers += "CodeArtifact" at caRepoUrl.value,
@@ -37,9 +36,9 @@ object CodeArtifactPlugin extends AutoPlugin {
   )
 
   // https://docs.aws.amazon.com/codeartifact/latest/ug/maven-mvn.html
-  def codeArtifactToken(domain: String, domainOwner: String, log: Logger): String = {
+  def codeArtifactToken(domain: String, domainOwner: String, log: Logger): String =
     val fromEnv = sys.env.get("CODEARTIFACT_AUTH_TOKEN")
-    def fromAws = {
+    def fromAws =
       log.info(s"Fetching CodeArtifact token from AWS...")
       val request =
         GetAuthorizationTokenRequest
@@ -49,7 +48,4 @@ object CodeArtifactPlugin extends AutoPlugin {
           .durationSeconds(12.hours.toSeconds)
           .build()
       CodeartifactClient.create().getAuthorizationToken(request).authorizationToken()
-    }
     fromEnv getOrElse fromAws
-  }
-}

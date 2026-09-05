@@ -4,12 +4,11 @@ import com.malliina.rollup.LoggingPlugin.autoImport.{initLogging, initLoggingOnS
 import sbt.Keys.{logLevel, onLoad, streams}
 import sbt.{AutoPlugin, Def, Global, Level, settingKey, taskKey}
 
-object LoggingPlugin extends AutoPlugin {
-  object autoImport {
+object LoggingPlugin extends AutoPlugin:
+  object autoImport:
     val initLoggingOnStartup = settingKey[Boolean]("True to init logging on startup.")
     val initLogging =
       taskKey[Unit]("Init logging so that logs of SLF4J-using libraries are printed.")
-  }
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     initLoggingOnStartup := true,
@@ -29,4 +28,3 @@ object LoggingPlugin extends AutoPlugin {
 //      else state
 //    }
   )
-}

@@ -6,12 +6,11 @@ import sbt.*
 import spray.revolver.RevolverKeys.{reStart, reStop}
 import spray.revolver.{AppProcess, RevolverPlugin}
 
-object LiveRevolverPlugin extends AutoPlugin {
+object LiveRevolverPlugin extends AutoPlugin:
   override def requires = LiveReloadPlugin && RevolverPlugin
 
-  object autoImport {
+  object autoImport:
     val startApp = taskKey[Unit]("Starts app")
-  }
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     reStart := reStart.dependsOn(Def.task(reloader.value.start())).evaluated,
@@ -19,4 +18,3 @@ object LiveRevolverPlugin extends AutoPlugin {
     startApp := Def.uncached(reStart.toTask(" ").value),
     startApp := refreshBrowsers.dependsOn(startApp).value
   )
-}

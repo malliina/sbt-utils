@@ -2,7 +2,7 @@ package com.malliina.filetree
 
 object ScalaIdentifiers extends ScalaIdentifiers
 
-trait ScalaIdentifiers {
+trait ScalaIdentifiers:
   // TODO get a better reference
   private val illegalChars = ".-åäö".toCharArray.toList
   // SLS 1.1
@@ -15,23 +15,20 @@ trait ScalaIdentifiers {
   def legalName(base: String): String = sanitize(replaced(base, illegalChars, '_'))
 
   def sanitize(word: String) =
-    if (reservedWords.contains(word)) s"`$word`"
+    if reservedWords.contains(word) then s"`$word`"
     else word
 
   def camelCase(in: String): String = camelCase(in, List('-', '_'))
 
-  def camelCase(in: String, triggers: List[Char]): String = {
-    def toCamelCase(cs: List[Char]): List[Char] = cs match {
+  def camelCase(in: String, triggers: List[Char]): String =
+    def toCamelCase(cs: List[Char]): List[Char] = cs match
       case head :: next :: tail =>
-        if (triggers contains head) next.toUpper :: toCamelCase(tail)
+        if triggers contains head then next.toUpper :: toCamelCase(tail)
         else head :: toCamelCase(next :: tail)
       case other =>
         other
-    }
 
     new String(toCamelCase(in.toList).toArray)
-  }
 
   def replaced(in: String, illegal: List[Char], replacement: Char): String =
     illegal.foldLeft(in)((acc, illegal) => acc.replace(illegal, replacement))
-}

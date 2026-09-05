@@ -2,13 +2,13 @@ package com.malliina.sbtutils
 
 import com.jsuereth.sbtpgp.SbtPgp.autoImport.pgpPassphrase
 import com.jsuereth.sbtpgp.PgpKeys
-import sbt.Keys._
-import sbt._
+import sbt.Keys.*
+import sbt.*
 import sbtrelease.ReleasePlugin
 import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
-import sbtrelease.ReleaseStateTransformations._
+import sbtrelease.ReleaseStateTransformations.*
 
-object MavenCentralKeys {
+object MavenCentralKeys:
   val gitUserName = settingKey[String]("Git username")
   val developerName = settingKey[String]("Developer name")
   // has defaults
@@ -24,23 +24,21 @@ object MavenCentralKeys {
   val afterPublish = taskKey[Unit]("Task to run after artifacts have been published")
   val tagReleaseProcess = settingKey[Seq[ReleaseStep]]("Tags and pushes a releasable version")
   val fullReleaseProcess = settingKey[Seq[ReleaseStep]]("Runs the entire release process")
-}
 
-object MavenCentralPlugin extends AutoPlugin {
+object MavenCentralPlugin extends AutoPlugin:
   override def requires = ReleasePlugin
 
-  import ReleasePlugin.autoImport._
+  import ReleasePlugin.autoImport.*
 
   val autoImport = MavenCentralKeys
-  import MavenCentralKeys._
+  import MavenCentralKeys.*
 
   override def buildSettings: Seq[Setting[?]] = Seq(
     pgpPassphrase := sys.env
       .get("PGP_PASSPHRASE")
-      .orElse {
+      .orElse:
         val file = Path.userHome / ".sbt" / ".pgp"
-        if (file.exists()) Option(IO.read(file)) else None
-      }
+        if file.exists() then Option(IO.read(file)) else None
       .map(_.toCharArray())
   )
 
@@ -50,7 +48,7 @@ object MavenCentralPlugin extends AutoPlugin {
     beforeCommitRelease := {},
     beforePublish := {},
     afterPublish := {},
-    commands += Command.command("releaseArtifacts") { state =>
+    commands += Command.command("releaseArtifacts"): state =>
       val extracted = Project.extract(state)
       val ciState = extracted.appendWithoutSession(
         Seq(
@@ -71,7 +69,6 @@ object MavenCentralPlugin extends AutoPlugin {
         ciState,
         str => sLog.value.error(s"Failed to parse command '$str'.")
       )
-    }
   )
 
   override def projectSettings: Seq[Setting[?]] = Seq(
@@ -120,4 +117,3 @@ object MavenCentralPlugin extends AutoPlugin {
     releaseProcess := tagReleaseProcess.value,
     releaseCrossBuild := true
   )
-}

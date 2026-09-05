@@ -14,7 +14,7 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 import org.scalafmt.interfaces.Scalafmt
 
-object FileTreePlugin extends AutoPlugin {
+object FileTreePlugin extends AutoPlugin:
   private val scalafmt = Scalafmt
     .create(this.getClass.getClassLoader)
     .withRepositoryPackageDownloader(CoursierDependencyDownloaderFactory)
@@ -24,12 +24,12 @@ object FileTreePlugin extends AutoPlugin {
   override def projectSettings: Seq[Setting[?]] = Seq(
     fileTreeSources := Nil,
     scalafmtConf := Option(Paths.get(".scalafmt.conf")),
-    Compile / sourceGenerators += Def.task {
-      val dest = (Compile / sourceManaged).value.toPath
-      fileTreeSources.value.flatMap { mapping =>
-        makeSources(mapping, dest, scalafmtConf.value).map(_.toFile)
-      }
-    }.taskValue
+    Compile / sourceGenerators += Def
+      .task:
+        val dest = (Compile / sourceManaged).value.toPath
+        fileTreeSources.value.flatMap: mapping =>
+          makeSources(mapping, dest, scalafmtConf.value).map(_.toFile)
+      .taskValue
   )
 
   val autoImport = FileTreeKeys
@@ -38,7 +38,7 @@ object FileTreePlugin extends AutoPlugin {
     mapping: DirMap,
     destBase: Path,
     scalafmtConfFile: Option[Path]
-  ): Seq[Path] = {
+  ): Seq[Path] =
     val packageName = mapping.packageName
     val className = mapping.className
     val mapFunc = mapping.mapFunc
@@ -63,16 +63,14 @@ object FileTreePlugin extends AutoPlugin {
         .getOrElse(content)
     IO.write(destFile.toFile, formatted, StandardCharsets.UTF_8)
     Seq(destFile)
-  }
 
-  private def members(dir: Path, parent: String): String = {
+  private def members(dir: Path, parent: String): String =
     val paths = Files.list(dir).toList.asScala.toList
     val dirs = paths.filter(Files.isDirectory(_)).map(dir => makeDir(dir, parent)).mkString("")
     val defs = makeDefs(paths.filter(Files.isRegularFile(_)))
     Seq(dirs, defs).mkString(IO.Newline)
-  }
 
-  private def makeDir(dir: Path, parent: String): String = {
+  private def makeDir(dir: Path, parent: String): String =
     val base = dir.toFile.base
     val newParent = s"$parent$base/"
     val inner = members(dir, newParent)
@@ -82,16 +80,13 @@ object FileTreePlugin extends AutoPlugin {
        |$inner
        |}
     """.stripMargin.trim + IO.Newline
-  }
 
   private def makeDefs(files: Seq[Path]) =
     files.map(makeFile).mkString(IO.Newline)
 
-  private def makeFile(file: Path) = {
+  private def makeFile(file: Path) =
     val defName = legalName(file.toFile.name)
     s"""def $defName: T = map(prefix + "${file.toFile.getName}")"""
-  }
 
   def destDir(base: Path, packageName: String): Path =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
-}

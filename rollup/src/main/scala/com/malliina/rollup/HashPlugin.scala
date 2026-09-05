@@ -8,10 +8,10 @@ import sbt.Keys.{streams, target}
 
 import java.nio.file.{Files, Path}
 
-object HashPlugin extends AutoPlugin {
+object HashPlugin extends AutoPlugin:
   val algorithm = "md5"
 
-  object autoImport {
+  object autoImport:
     val hashIncludeExts = settingKey[Seq[String]]("Extensions to hash")
     val hashRoot = settingKey[Path]("Root dir")
     val hashAssets = taskKey[Seq[HashedFile]]("Hashed files")
@@ -21,50 +21,46 @@ object HashPlugin extends AutoPlugin {
     val copyFolders = settingKey[Seq[Path]]("Copy folders")
     val copy = taskKey[Seq[Path]]("Copies folders")
     val dataUriLimit = settingKey[StorageSize]("Maximum asset size for data URI inlining")
-  }
   import autoImport.*
   override val projectSettings: Seq[Def.Setting[?]] = Seq(
     useHash := true,
     copyFolders := Nil,
-    copy := Def.uncached {
+    copy := Def.uncached:
       val root = hashRoot.value
       copyFolders.value
         .toSet[Path]
-        .flatMap { dir =>
+        .flatMap: dir =>
           FileIO.copyDir(dir, root)
-        }
         .toList
-    },
+    ,
     dataUriLimit := 48.kilos,
     hashIncludeExts := Seq(".css", ".js", ".jpg", ".jpeg", ".png", ".svg", ".ico"),
     hashPackage := "com.malliina.assets",
-    hashAssets := Def.uncached {
+    hashAssets := Def.uncached:
       val log = streams.value.log
       val root = hashRoot.value
       val enabled = useHash.value
       val exts = hashIncludeExts.value
       FileIO
         .allPaths(root)
-        .filter { p =>
+        .filter: p =>
           val name = p.getFileName.toString
           Files.isRegularFile(p) &&
           exts.exists(ext => name.endsWith(ext)) &&
           name.count(c => c == '.') < 2
-        }
-        .map { file =>
-          val hashed = if (enabled) prepFile(file, log) else file
+        .map: file =>
+          val hashed = if enabled then prepFile(file, log) else file
           HashedFile.from(file, hashed, root)
-        }
-    },
-    hashAssets := Def.uncached {
+    ,
+    hashAssets := Def.uncached:
       hashAssets
         .dependsOn(copy, Def.task(Files.createDirectories(hashRoot.value)))
         .value
-    },
-    hash := Def.uncached {
+    ,
+    hash := Def.uncached:
       val hashes = hashAssets.value
       val hashesEnabled = useHash.value
-      val cached = FileFunction.cached(streams.value.cacheDirectory / "assets") { in =>
+      val cached = FileFunction.cached(streams.value.cacheDirectory / "assets"): in =>
         val file = makeAssetsFile(
           target.value,
           hashPackage.value,
@@ -74,26 +70,21 @@ object HashPlugin extends AutoPlugin {
           dataUriLimit = dataUriLimit.value
         )
         Set(file)
-      }
       cached(hashes.map(_.hashedFile.toFile).toSet).toSeq.map(_.toPath)
-    }
   )
 
-  def prepFile(file: Path, log: Logger) = {
+  def prepFile(file: Path, log: Logger) =
     val checksum = ChecksumHelper.computeAsString(file.toFile, algorithm)
     val checksumFile = file.getParent.resolve(s"${file.getFileName}.$algorithm")
-    if (!Files.exists(checksumFile)) {
+    if !Files.exists(checksumFile) then
       Files.writeString(checksumFile, checksum)
       log.debug(s"Wrote $checksumFile.")
-    }
     val (base, ext) = file.toFile.baseAndExt
     val hashedFile = file.getParent.resolve(s"$base.$checksum.$ext")
-    if (!Files.exists(hashedFile)) {
+    if !Files.exists(hashedFile) then
       Files.copy(file, hashedFile)
       log.info(s"Wrote $hashedFile.")
-    }
     hashedFile
-  }
 
   def makeAssetsFile(
     base: File,
@@ -102,16 +93,15 @@ object HashPlugin extends AutoPlugin {
     hashes: Seq[HashedFile],
     makeDataUris: Boolean,
     dataUriLimit: StorageSize
-  ): File = {
+  ): File =
     val inlined = hashes.map(h => s""""${h.path}" -> "${h.hashedPath}"""").mkString(", ")
     val dataUris =
-      if (makeDataUris)
+      if makeDataUris then
         hashes
           .filter(h => h.size <= dataUriLimit)
-          .map { h =>
+          .map: h =>
             val dataUri = FileIO.dataUri(h.originalFile)
             s""""${h.path}" -> "$dataUri""""
-          }
           .mkString(", ")
       else ""
     val objectName = "HashedAssets"
@@ -128,8 +118,6 @@ object HashPlugin extends AutoPlugin {
     val destFile = destDir(base, packageName) / s"$objectName.scala"
     FileIO.writeIfChanged(content, destFile.toPath)
     destFile
-  }
 
   def destDir(base: File, packageName: String): File =
     packageName.split('.').foldLeft(base)((acc, part) => acc / part)
-}
