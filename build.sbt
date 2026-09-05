@@ -80,14 +80,14 @@ val docs = project
 val releaseSettings = Seq(
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
-    inquireVersions,
-    runTest,
-    setReleaseVersion,
-    releaseStepTask(docs / updateDocs),
-    commitReleaseVersion,
+//    inquireVersions,
+//    runTest,
+//    setReleaseVersion,
+//    releaseStepTask(docs / updateDocs),
+//    commitReleaseVersion,
     tagRelease,
-    setNextVersion,
-    commitNextVersion,
+//    setNextVersion,
+//    commitNextVersion,
     pushChanges
   )
 )
