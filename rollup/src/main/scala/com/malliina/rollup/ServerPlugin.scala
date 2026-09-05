@@ -47,9 +47,6 @@ object ServerPlugin extends AutoPlugin {
     },
     start := start.dependsOn(Def.taskDyn(clientProject.value / build)).value,
     start := refreshBrowsers.dependsOn(start).value,
-//    refreshBrowsers := refreshBrowsers
-//      .triggeredBy(Def.taskDyn(clientProject.value / build), start)
-//      .value,
     watchSources := Def.uncached {
       watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value
     },

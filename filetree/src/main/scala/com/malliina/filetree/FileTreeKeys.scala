@@ -15,7 +15,7 @@ case class DirMap(source: Path, destination: String, mapFunc: String = "identity
 }
 
 object DirMap {
-  def splitAtLastDot(in: String): (String, String) = {
+  private def splitAtLastDot(in: String): (String, String) = {
     val dot = in.lastIndexOf('.')
     if (dot < 0) ("filetree", in) else (in.substring(0, dot), in.substring(dot + 1))
   }

@@ -14,6 +14,7 @@ inThisBuild(
   Seq(
     organization := "com.malliina",
     licenses += ("MIT", uri("https://opensource.org/licenses/MIT")),
+    scalaVersion := "3.8.4",
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % versions.munit % Test
     )
@@ -58,13 +59,11 @@ val docs = project
   .in(file("mdoc"))
   .settings(
     organization := "com.malliina",
-//    scalaVersion := versions.scala212,
-//    crossScalaVersions -= "2.13.16",
     publish / skip := true,
     mdocVariables := Map("VERSION" -> version.value),
     mdocOut := target.value / "docs",
     mdocExtraArguments += "--no-link-hygiene",
-    updateDocs := {
+    updateDocs := Def.uncached {
       val log = streams.value.log
       val outFile = mdocOut.value / "README.md"
       val rootReadme = (ThisBuild / baseDirectory).value / "README.md"
@@ -118,9 +117,10 @@ val nodePlugin = Project("sbt-nodejs", file("node-plugin"))
 
 val fileTreePlugin = Project("sbt-filetree", file("filetree"))
   .settings(commonSettings)
-//  .settings(
-//    libraryDependencies += "org.scalameta" %% "scalafmt-dynamic" % versions.scalaFmt
-//  )
+  .settings(
+    libraryDependencies += ("org.scalameta" %% "scalafmt-dynamic" % versions.scalaFmt)
+      .exclude("org.scala-lang.modules", "scala-xml_2.13")
+  )
 
 val liveReloadPlugin = Project("sbt-live-reload", file("live-reload"))
   .settings(commonSettings)
@@ -137,7 +137,6 @@ val netlify = project
   .in(file("netlify"))
   .settings(baseSettings)
   .settings(
-    crossScalaVersions := Seq(versions.scala3),
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-api" % versions.slf4j,
       "co.fs2" %% "fs2-io" % versions.fs2,

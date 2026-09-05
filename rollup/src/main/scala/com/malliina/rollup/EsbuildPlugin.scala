@@ -6,7 +6,7 @@ import com.malliina.rollup.CommonKeys.{assetsPrefix, assetsRoot, build}
 import org.apache.ivy.util.ChecksumHelper
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{ModuleKind, fastLinkJS, fullLinkJS, scalaJSLinkerConfig, scalaJSLinkerOutputDirectory, scalaJSStage, scalaJSUseMainModuleInitializer}
 import org.scalajs.sbtplugin.{ScalaJSPlugin, Stage}
-import sbt.{IO => _, *}
+import sbt.{Def, IO as _, *}
 import sbt.Keys.*
 
 import java.nio.charset.StandardCharsets
@@ -64,7 +64,7 @@ object EsbuildPlugin extends AutoPlugin {
     }
   )
 
-  override val projectSettings = Seq(
+  override val projectSettings: Seq[Def.Setting[?]] = Seq(
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
     assetsPrefix := "assets",
@@ -72,8 +72,10 @@ object EsbuildPlugin extends AutoPlugin {
     resourceDir := (Compile / resourceDirectory).value.toPath,
     npmRoot := ((Compile / crossTarget).value / "stage").toPath,
     assetsRoot := npmRoot.value / "assets",
-    copyBuildResources := FileIO.copyDir(resourceDir.value, npmRoot.value),
-    stageFiles := {
+    copyBuildResources := Def.uncached {
+      FileIO.copyDir(resourceDir.value, npmRoot.value)
+    },
+    stageFiles := Def.uncached {
       IO.writePackageJsonIfChanged(resourceDir.value, npmRoot.value, "package.esbuild.json")
     },
     stageFiles := stageFiles.dependsOn(copyBuildResources).value,
@@ -108,7 +110,7 @@ object EsbuildPlugin extends AutoPlugin {
           .getOrElse(sys.error(s"Module 'main' not found."))
         val entrypoint = mainJs.jsFileName
         val out = npmRoot.value.relativize(assetsRoot.value)
-        streams.value.log.info(s"configuring with ${mainJs.jsFileName} to $out")
+        streams.value.log.info(s"Configuring with ${mainJs.jsFileName} to ${out.toAbsolutePath}...")
         val loadersJs = loaders.value.map { case (ext, l) =>
           s"""'$ext': '$l'"""
         }.mkString(", ")
@@ -138,13 +140,12 @@ object EsbuildPlugin extends AutoPlugin {
         val scriptFile = npmRoot.value / "esbuild.cjs"
         FileIO.writeIfChanged(script, scriptFile)
       },
-      stageTask / build := {
+      stageTask / build := Def.uncached {
         val log = streams.value.log
         val cwd = npmRoot.value
         val packageJson = cwd / "package.json"
         val cacheFile = cwd / "package.json.sha1"
         val checksum = computeChecksum(packageJson)
-        val isProd = false
         if (
           Files.exists(cacheFile) && Files
             .readAllLines(cacheFile, utf8)
@@ -168,10 +169,7 @@ object EsbuildPlugin extends AutoPlugin {
         }
       },
       stageTask / build := (stageTask / build)
-        .dependsOn(stageTask / configureEsbuild)
-        .dependsOn(stageTask / stageMainJs)
-        .dependsOn(Compile / stageTask)
-        .dependsOn(stageFiles)
+        .dependsOn(stageTask / configureEsbuild, stageTask / stageMainJs, Compile / stageTask, stageFiles)
         .value
     )
   }
