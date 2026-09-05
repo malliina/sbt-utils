@@ -10,10 +10,6 @@ inThisBuild(
   )
 )
 
-val a = taskKey[Unit]("a")
-val b = taskKey[Unit]("b")
-val c = taskKey[Unit]("c")
-
 val shared = project.in(file("shared"))
 
 val frontend = project
@@ -41,10 +37,6 @@ val server = project
         "ch.qos.logback" % "logback-classic" % versions.logback,
         "com.lihaoyi" %% "scalatags" % versions.scalatags
       ),
-    a := Def.uncached(streams.value.log.info("a")),
-    b := streams.value.log.info("b"),
-    c := streams.value.log.info("c"),
-    a := a.dependsOn(b, c).value
   )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
