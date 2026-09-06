@@ -68,6 +68,10 @@ object EsbuildPlugin extends AutoPlugin:
     npmRoot := ((Compile / crossTarget).value / "stage").toPath,
     assetsRoot := npmRoot.value / "assets",
     copyBuildResources := Def.uncached:
+      val outDir = npmRoot.value.resolve(assetsRoot.value)
+      if !Files.isDirectory(outDir) then
+        Files.createDirectories(outDir)
+        streams.value.log.info(s"Created $outDir.")
       FileIO.copyDir(resourceDir.value, npmRoot.value)
     ,
     stageFiles := Def.uncached:
@@ -104,7 +108,7 @@ object EsbuildPlugin extends AutoPlugin:
           .getOrElse(sys.error(s"Module 'main' not found."))
         val entrypoint = mainJs.jsFileName
         val out = npmRoot.value.relativize(assetsRoot.value)
-        streams.value.log.info(s"Configuring with ${mainJs.jsFileName} to ${out.toAbsolutePath}...")
+        streams.value.log.info(s"Configuring with ${mainJs.jsFileName} to $out...")
         val loadersJs = loaders.value
           .map:
             case (ext, l) =>

@@ -4,7 +4,7 @@ import sbt.Keys.*
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.9.0",
+    scalaVersion := "3.8.4",
     organization := "com.malliina",
     version := "0.0.1"
   )
@@ -36,7 +36,7 @@ val server = project
       } ++ Seq(
         "ch.qos.logback" % "logback-classic" % versions.logback,
         "com.lihaoyi" %% "scalatags" % versions.scalatags
-      ),
+      )
   )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
