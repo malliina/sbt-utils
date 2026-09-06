@@ -1,5 +1,6 @@
 package com.malliina.server
 
+import com.malliina.assets.FileAssets
 import com.malliina.live.LiveReload
 import org.http4s.Uri
 import scalatags.Text.all.*
@@ -26,8 +27,8 @@ class Html(scripts: Seq[String], cssFiles: Seq[String], assets: AssetsSource):
       meta(name := "viewport", content := "width=device-width, initial-scale=1.0"),
       link(
         rel := "shortcut icon",
-        tpe := "image/png"
-//        href := inlineOrAsset(FileAssets.img.jag_16x16_png)
+        tpe := "image/png",
+        href := assets.at(FileAssets.img.jag_16x16_png)
       ),
       cssFiles.map(file => cssLink(file)),
       scripts.map(js => deferredJsPath(js)),

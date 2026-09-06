@@ -1,6 +1,6 @@
 package com.malliina.filetree
 
-import com.malliina.filetree.FileTreeKeys.{fileTreeSources, scalafmtConf}
+import com.malliina.filetree.FileTreeKeys.{fileTreeSources, scalafmtConf, writeFileTree}
 import com.malliina.filetree.ScalaIdentifiers.legalName
 import org.scalafmt.dynamic.coursier.CoursierDependencyDownloaderFactory
 import sbt.*
@@ -9,7 +9,6 @@ import sbt.plugins.JvmPlugin
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
-import scala.jdk.CollectionConverters.IterableHasAsScala
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 import org.scalafmt.interfaces.Scalafmt
@@ -24,12 +23,12 @@ object FileTreePlugin extends AutoPlugin:
   override def projectSettings: Seq[Setting[?]] = Seq(
     fileTreeSources := Nil,
     scalafmtConf := Option(Paths.get(".scalafmt.conf")),
-    Compile / sourceGenerators += Def
-      .task:
-        val dest = (Compile / sourceManaged).value.toPath
-        fileTreeSources.value.flatMap: mapping =>
-          makeSources(mapping, dest, scalafmtConf.value).map(_.toFile)
-      .taskValue
+    writeFileTree := Def.uncached:
+      val dest = (Compile / sourceManaged).value.toPath
+      fileTreeSources.value.flatMap: mapping =>
+        makeSources(mapping, dest, scalafmtConf.value).map(_.toFile)
+    ,
+    Compile / sourceGenerators += writeFileTree
   )
 
   val autoImport = FileTreeKeys

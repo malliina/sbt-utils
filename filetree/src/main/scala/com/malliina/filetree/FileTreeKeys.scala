@@ -1,6 +1,6 @@
 package com.malliina.filetree
 
-import sbt.settingKey
+import sbt.{File, settingKey, taskKey}
 
 import java.nio.file.Path
 
@@ -8,6 +8,7 @@ object FileTreeKeys:
   val fileTreeSources =
     settingKey[Seq[DirMap]]("File tree source directories and generated objects")
   val scalafmtConf = settingKey[Option[Path]]("Path to .scalafmt.conf")
+  val writeFileTree = taskKey[Seq[File]]("Writes the file tree.")
 
 case class DirMap(source: Path, destination: String, mapFunc: String = "identity"):
   val (packageName, className) = DirMap.splitAtLastDot(destination)
