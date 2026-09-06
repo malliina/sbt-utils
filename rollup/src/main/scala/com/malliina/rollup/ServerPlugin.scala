@@ -1,6 +1,6 @@
 package com.malliina.rollup
 
-import com.malliina.filetree.FileTreeKeys.fileTreeSources
+import com.malliina.filetree.FileTreeKeys.{fileTreeSources, writeFileTree}
 import com.malliina.filetree.{DirMap, FileTreePlugin}
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
@@ -20,29 +20,14 @@ object ServerPlugin extends AutoPlugin:
   object autoImport:
     val clientProject = settingKey[ProjectReference]("Scala.js project")
     val start = CommonKeys.start
+    val hashAndWrite = taskKey[Seq[File]]("Hashes assets and writes a file tree.")
   import autoImport.*
 
   override def projectSettings: Seq[Def.Setting[?]] = Seq(
     isProd := scalaJSStage.value == FullOptStage,
     useHash := isProd.value,
     start := Def.uncached:
-//      val log = streams.value.log
-//      val changes = start.inputFileChanges
-//      ()
-      // Restarts if a) not running, or b) input files have changed
-//      val isRunning = GlobalState.get().getProcess(thisProjectRef.value).isDefined
-//      val word = if (isRunning) "" else "not "
-//      val word = ""
-//      val fileWord = if (changes.hasChanges) "" else "not "
-//      log.debug(s"${name.value} ${word}running. Files ${fileWord}changed.")
-////      if (changes.hasChanges || !isRunning) {
-//      if (changes.hasChanges) {
-//        reStart.toTask(" ").dependsOn(hash).value
-//      } else {
-//        streams.value.log.info(s"No changes to ${name.value}, no restart.")
-////        Def.task(streams.value.log.info(s"No changes to ${name.value}, no restart.")).value
-//      }
-      reStart.toTask(" ").dependsOn(hash).value
+      reStart.toTask(" ").dependsOn(writeFileTree).value
     ,
     start := start.dependsOn(Def.taskDyn(clientProject.value / build)).value,
     start := refreshBrowsers.dependsOn(start).value,
@@ -55,10 +40,13 @@ object ServerPlugin extends AutoPlugin:
         .dependsOn(Def.taskDyn(clientProject.value / build))
         .value
     ,
-    Compile / compile := Def.uncached:
-      (Compile / compile).dependsOn(hash).value
+    writeFileTree := Def.uncached:
+      writeFileTree.dependsOn(hash).value
     ,
-    Compile / sourceGenerators += hash.map(_.map(_.toFile)),
+    Compile / sourceGenerators ++= Seq(
+      hash.taskValue,
+      writeFileTree.taskValue
+    ),
     copyFolders += ((Compile / resourceDirectory).value / "public").toPath,
     buildInfoKeys ++= Seq[PluginCompat.Entry[?]](
       Constant("gitHash" -> Git.gitHash),

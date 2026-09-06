@@ -25,7 +25,7 @@ val frontend = project
 
 val server = project
   .in(file("server"))
-  .enablePlugins(ServerPlugin, FileTreePlugin)
+  .enablePlugins(ServerPlugin)
   .settings(
     clientProject := frontend,
     dependentModule := shared,

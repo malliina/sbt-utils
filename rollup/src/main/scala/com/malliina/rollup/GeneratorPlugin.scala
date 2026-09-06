@@ -46,11 +46,10 @@ object GeneratorPlugin extends AutoPlugin:
     watchSources := Def.uncached:
       watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value
     ,
-    Compile / sourceGenerators += hash.map(_.map(_.toFile)),
+    Compile / sourceGenerators += hash.taskValue,
     Compile / compile := Def.uncached:
       (Compile / compile)
-        .dependsOn(hash)
-        .dependsOn(Def.taskDyn(scalajsProject.value / build))
+        .dependsOn(hash, Def.taskDyn(scalajsProject.value / build))
         .value
     ,
     fileTreeSources += DirMap(assetsRoot.value, s"${hashPackage.value}.FileAssets")

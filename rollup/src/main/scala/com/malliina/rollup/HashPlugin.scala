@@ -16,7 +16,7 @@ object HashPlugin extends AutoPlugin:
     val hashRoot = settingKey[Path]("Root dir")
     val hashAssets = taskKey[Seq[HashedFile]]("Hashed files")
     val hashPackage = settingKey[String]("Package name for assets file")
-    val hash = taskKey[Seq[Path]]("Create hash")
+    val hash = taskKey[Seq[File]]("Create hash")
     val useHash = settingKey[Boolean]("Use hashed paths")
     val copyFolders = settingKey[Seq[Path]]("Copy folders")
     val copy = taskKey[Seq[Path]]("Copies folders")
@@ -30,6 +30,7 @@ object HashPlugin extends AutoPlugin:
       copyFolders.value
         .toSet[Path]
         .flatMap: dir =>
+          streams.value.log.info(s"Copying $dir to $root...")
           FileIO.copyDir(dir, root)
         .toList
     ,
@@ -70,10 +71,10 @@ object HashPlugin extends AutoPlugin:
           dataUriLimit = dataUriLimit.value
         )
         Set(file)
-      cached(hashes.map(_.hashedFile.toFile).toSet).toSeq.map(_.toPath)
+      cached(hashes.map(_.hashedFile.toFile).toSet).toSeq
   )
 
-  def prepFile(file: Path, log: Logger) =
+  private def prepFile(file: Path, log: Logger) =
     val checksum = ChecksumHelper.computeAsString(file.toFile, algorithm)
     val checksumFile = file.getParent.resolve(s"${file.getFileName}.$algorithm")
     if !Files.exists(checksumFile) then
@@ -86,7 +87,7 @@ object HashPlugin extends AutoPlugin:
       log.info(s"Wrote $hashedFile.")
     hashedFile
 
-  def makeAssetsFile(
+  private def makeAssetsFile(
     base: File,
     packageName: String,
     prefix: String,

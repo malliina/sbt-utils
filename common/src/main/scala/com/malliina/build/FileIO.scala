@@ -5,23 +5,22 @@ import io.circe.Encoder
 import io.circe.syntax.EncoderOps
 import org.apache.commons.codec.digest.DigestUtils
 
-import java.io._
+import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file._
+import java.nio.file.*
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
-import scala.collection.JavaConverters.asScalaIteratorConverter
+import scala.jdk.CollectionConverters.IteratorHasAsScala
 
-object FileIO {
+object FileIO:
   val log = AppLogger(getClass)
   private val utf8 = StandardCharsets.UTF_8
   private val fallbackContentType = "application/octet-stream"
 
-  def dataUri(file: Path): String = {
+  def dataUri(file: Path): String =
     val contentType = Option(Files.probeContentType(file)).getOrElse(fallbackContentType)
     s"data:$contentType;base64,${base64(file)}"
-  }
 
   def base64(file: Path) = Base64.getEncoder.encodeToString(Files.readAllBytes(file))
 
@@ -31,125 +30,104 @@ object FileIO {
   def writeLines(lines: Seq[String], to: Path): Path =
     write(lines.mkString("\n").getBytes(utf8), to)
 
-  def copyIfChanged(from: Path, to: Path): Boolean = {
+  def copyIfChanged(from: Path, to: Path): Boolean =
     val changed = !Files.exists(to) || Files.mismatch(from, to) != -1L
-    if (changed) copy(from, to)
+    if changed then copy(from, to)
     changed
-  }
 
-  def writeIfChanged(content: String, to: Path): Boolean = {
+  def writeIfChanged(content: String, to: Path): Boolean =
     val changed = mismatch(content, to)
-    if (changed) write(content.getBytes(utf8), to)
+    if changed then write(content.getBytes(utf8), to)
     changed
-  }
 
   def mismatch(content: String, file: Path) = !isSameContent(content, file)
 
   def isSameContent(content: String, file: Path) =
-    if (Files.exists(file)) {
+    if Files.exists(file) then
       val oldHash = md5(file)
       val newHash = DigestUtils.md5Hex(content)
       oldHash == newHash
-    } else false
+    else false
 
   def md5(file: Path) = DigestUtils.md5Hex(Files.readAllBytes(file))
 
-  def write(bytes: Array[Byte], to: Path): Path = {
-    if (!Files.isRegularFile(to)) {
+  def write(bytes: Array[Byte], to: Path): Path =
+    if !Files.isRegularFile(to) then
       val dir = to.getParent
-      if (!Files.isDirectory(dir))
-        Files.createDirectories(dir)
+      if !Files.isDirectory(dir) then Files.createDirectories(dir)
       Files.createFile(to)
-    }
     Files.write(to, bytes, StandardOpenOption.TRUNCATE_EXISTING)
     log.info(s"Wrote ${to.toAbsolutePath}.")
     to
-  }
 
   def writeIfNotExists(in: InputStream, to: Path): Option[StorageSize] =
-    if (!Files.exists(to))
-      Option(write(in, to))
-    else
-      None
+    if !Files.exists(to) then Option(write(in, to))
+    else None
 
   def write(in: InputStream, to: Path): StorageSize =
-    using(new FileOutputStream(to.toFile, false)) { out =>
+    using(new FileOutputStream(to.toFile, false)): out =>
       val size = in.transferTo(out).bytes
       log.info(s"Wrote '${to.toAbsolutePath}', $size.")
       size
-    }
 
-  def copy(from: Path, to: Path): Unit = {
+  def copy(from: Path, to: Path): Unit =
     val dir = to.getParent
-    if (!Files.isDirectory(dir))
-      Files.createDirectories(dir)
+    if !Files.isDirectory(dir) then Files.createDirectories(dir)
     Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING)
     log.info(s"Copied ${from.toAbsolutePath} to ${to.toAbsolutePath}.")
-  }
 
-  def copyDir(from: Path, to: Path) =
-    FileIO.allPaths(from).flatMap { path =>
-      val rel = from.relativize(path)
-      val dest = to.resolve(rel)
-      if (Files.isRegularFile(path)) {
-        FileIO.copyIfChanged(path, dest)
-        Option(dest)
-      } else if (Files.isDirectory(path)) { Option(Files.createDirectories(dest)) }
-      else None
-    }
+  def copyDir(from: Path, to: Path): List[Path] =
+    log.info(s"Copying directory $from to $to...")
+    FileIO
+      .allPaths(from)
+      .flatMap: path =>
+        val rel = from.relativize(path)
+        val dest = to.resolve(rel)
+        if Files.isRegularFile(path) then
+          FileIO.copyIfChanged(path, dest)
+          Option(dest)
+        else if Files.isDirectory(path) then Option(Files.createDirectories(dest))
+        else None
 
   def gzip(src: Path, dest: Path): Unit =
-    using(new FileInputStream(src.toFile)) { in =>
-      using(new FileOutputStream(dest.toFile)) { out =>
-        using(new GZIPOutputStream(out, 8192)) { gzip =>
+    using(new FileInputStream(src.toFile)): in =>
+      using(new FileOutputStream(dest.toFile)): out =>
+        using(new GZIPOutputStream(out, 8192)): gzip =>
           copyStream(in, gzip)
           gzip.finish()
-        }
-      }
-    }
 
   // Adapted from sbt-io
-  private def copyStream(in: InputStream, out: OutputStream): Unit = {
+  private def copyStream(in: InputStream, out: OutputStream): Unit =
     val buffer = new Array[Byte](8192)
 
-    def read(): Unit = {
+    def read(): Unit =
       val byteCount = in.read(buffer)
-      if (byteCount >= 0) {
+      if byteCount >= 0 then
         out.write(buffer, 0, byteCount)
         read()
-      }
-    }
 
     read()
-  }
 
   // https://stackoverflow.com/a/27917071
-  def deleteDirectory(dir: Path): Path = {
-    if (Files.exists(dir)) {
+  def deleteDirectory(dir: Path): Path =
+    if Files.exists(dir) then
       Files.walkFileTree(
         dir,
-        new SimpleFileVisitor[Path] {
-          override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+        new SimpleFileVisitor[Path]:
+          override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult =
             Files.delete(file)
             FileVisitResult.CONTINUE
-          }
 
-          override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult = {
+          override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult =
             Files.delete(dir)
             FileVisitResult.CONTINUE
-          }
-        }
       )
-    } else {
-      dir
-    }
-  }
+    else dir
 
   def allPaths(root: Path): List[Path] =
-    if (Files.exists(root)) FileIO.using(Files.walk(root))(_.iterator().asScala.toList)
+    if Files.exists(root) then FileIO.using(Files.walk(root))(_.iterator().asScala.toList)
     else Nil
 
   def using[T <: AutoCloseable, U](res: T)(code: T => U): U =
     try code(res)
     finally res.close()
-}

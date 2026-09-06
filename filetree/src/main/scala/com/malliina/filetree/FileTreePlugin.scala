@@ -4,7 +4,7 @@ import com.malliina.filetree.FileTreeKeys.{fileTreeSources, scalafmtConf, writeF
 import com.malliina.filetree.ScalaIdentifiers.legalName
 import org.scalafmt.dynamic.coursier.CoursierDependencyDownloaderFactory
 import sbt.*
-import sbt.Keys.{sourceGenerators, sourceManaged}
+import sbt.Keys.{sourceManaged, streams}
 import sbt.plugins.JvmPlugin
 
 import java.nio.charset.StandardCharsets
@@ -26,9 +26,9 @@ object FileTreePlugin extends AutoPlugin:
     writeFileTree := Def.uncached:
       val dest = (Compile / sourceManaged).value.toPath
       fileTreeSources.value.flatMap: mapping =>
+        streams.value.log.info(s"Writing file tree of ${mapping.source} to $dest...")
         makeSources(mapping, dest, scalafmtConf.value).map(_.toFile)
-    ,
-    Compile / sourceGenerators += writeFileTree
+//    Compile / sourceGenerators += writeFileTree.taskValue
   )
 
   val autoImport = FileTreeKeys
