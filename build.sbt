@@ -130,7 +130,8 @@ val liveReloadPlugin = Project("sbt-live-reload", file("live-reload"))
     } ++ Seq(
       "io.circe" %% "circe-generic" % versions.circe
     ),
-    addSbtPlugin("com.indoorvivants" % "sbt-revolver" % "0.11.2")
+    addSbtPlugin("com.indoorvivants" % "sbt-revolver" % "0.11.2"),
+    addSbtPlugin("com.jamesward" % "sbt-reload" % versions.sbtReload)
   )
 
 val netlify = project

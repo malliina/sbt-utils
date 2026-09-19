@@ -4,6 +4,7 @@ import com.malliina.filetree.FileTreeKeys.{fileTreeSources, writeFileTree}
 import com.malliina.filetree.{DirMap, FileTreePlugin}
 import com.malliina.live.LiveReloadPlugin.autoImport.refreshBrowsers
 import com.malliina.live.LiveRevolverPlugin
+import com.malliina.live.LiveRevolverPlugin.autoImport.dev
 import com.malliina.rollup.CommonKeys.{assetsPrefix, assetsRoot, build, isProd}
 import com.malliina.rollup.HashPlugin.autoImport.{copyFolders, hash, hashPackage, hashRoot, useHash}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{FullOptStage, scalaJSStage}
@@ -31,6 +32,7 @@ object ServerPlugin extends AutoPlugin:
     ,
     start := start.dependsOn(Def.taskDyn(clientProject.value / build)).value,
     start := refreshBrowsers.dependsOn(start).value,
+    dev := dev.dependsOn(writeFileTree, Def.taskDyn(clientProject.value / build)).value,
     watchSources := Def.uncached:
       watchSources.value ++ Def.taskDyn(clientProject.value / watchSources).value
     ,

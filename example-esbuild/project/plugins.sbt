@@ -7,5 +7,5 @@ val root = project.in(file(".")).dependsOn(common, node, rollup, liveReload)
 
 Seq(
   "org.scalameta" % "sbt-scalafmt" % "2.6.1",
-  "com.eed3si9n" % "sbt-buildinfo" % "0.13.1"
+  "com.eed3si9n" % "sbt-buildinfo" % "0.13.2"
 ) map addSbtPlugin
