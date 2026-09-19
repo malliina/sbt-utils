@@ -10,8 +10,8 @@ lazy val root = project
     ),
     Seq(
       "com.github.sbt" % "sbt-release" % "1.5.0",
-      "com.github.sbt" % "sbt-pgp" % "2.3.1",
-      "org.scalameta" % "sbt-mdoc" % "2.9.0",
+      "com.github.sbt" % "sbt-pgp" % "2.3.2",
+      "org.scalameta" % "sbt-mdoc" % "2.9.2",
       "org.scalameta" % "sbt-scalafmt" % "2.6.1"
     ) map addSbtPlugin
   )

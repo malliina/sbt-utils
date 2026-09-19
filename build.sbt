@@ -126,9 +126,9 @@ val liveReloadPlugin = Project("sbt-live-reload", file("live-reload"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq("ember-server", "dsl").map { m =>
-      "org.http4s" %% s"http4s-$m" % "0.23.23"
+      "org.http4s" %% s"http4s-$m" % versions.http4s
     } ++ Seq(
-      "io.circe" %% "circe-generic" % "0.14.16"
+      "io.circe" %% "circe-generic" % versions.circe
     ),
     addSbtPlugin("com.indoorvivants" % "sbt-revolver" % "0.11.2")
   )
