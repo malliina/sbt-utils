@@ -1,6 +1,6 @@
 package com.malliina.rollup
 
-import com.malliina.filetree.FileTreeKeys.fileTreeSources
+import com.malliina.filetree.FileTreeKeys.{fileTreeSources, writeFileTree}
 import com.malliina.filetree.{DirMap, FileTreePlugin}
 import com.malliina.live.LiveReloadPlugin
 import com.malliina.live.LiveReloadPlugin.autoImport.{liveReloadRoot, refreshBrowsers, reloader}
@@ -11,14 +11,14 @@ import sbt.*
 import sbt.Keys.{compile, run, sourceGenerators, watchSources}
 import sbtbuildinfo.BuildInfoKeys.buildInfoKeys
 import sbtbuildinfo.Entry.Constant
-import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin, PluginCompat}
+import sbtbuildinfo.{BuildInfoPlugin, PluginCompat}
 
 object GeneratorPlugin extends AutoPlugin:
   override def requires: Plugins =
     BuildInfoPlugin && LiveReloadPlugin && HashPlugin && FileTreePlugin
 
   object autoImport:
-    val scalajsProject = settingKey[ProjectRef]("Scala.js project")
+    val scalajsProject = settingKey[ProjectReference]("Scala.js project")
   import autoImport.*
 
   override def projectSettings: Seq[Setting[?]] = Seq(
@@ -46,10 +46,16 @@ object GeneratorPlugin extends AutoPlugin:
     watchSources := Def.uncached:
       watchSources.value ++ Def.taskDyn(scalajsProject.value / watchSources).value
     ,
-    Compile / sourceGenerators += hash.taskValue,
+    writeFileTree := Def.uncached:
+      writeFileTree.dependsOn(Def.taskDyn(scalajsProject.value / build)).value
+    ,
+    Compile / sourceGenerators ++= Seq(
+      hash.taskValue,
+      writeFileTree.taskValue
+    ),
     Compile / compile := Def.uncached:
       (Compile / compile)
-        .dependsOn(hash, Def.taskDyn(scalajsProject.value / build))
+        .dependsOn(writeFileTree, hash, Def.taskDyn(scalajsProject.value / build))
         .value
     ,
     fileTreeSources += DirMap(assetsRoot.value, s"${hashPackage.value}.FileAssets")
