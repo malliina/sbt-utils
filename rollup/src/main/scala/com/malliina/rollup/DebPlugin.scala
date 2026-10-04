@@ -1,12 +1,14 @@
 package com.malliina.rollup
 
 import com.typesafe.sbt.SbtNativePackager.autoImport.{executableScriptName, maintainer, packageDescription, packageName, packageSummary}
-import com.typesafe.sbt.packager.archetypes.JavaServerAppPackaging
+import com.typesafe.sbt.packager.Keys.{debianMaintainerScripts, linuxScriptReplacements, maintainerScripts}
+import com.typesafe.sbt.packager.archetypes.{JavaServerAppPackaging, TemplateWriter}
 import com.typesafe.sbt.packager.archetypes.systemloader.SystemdPlugin
 import com.typesafe.sbt.packager.debian.DebianPlugin.autoImport.Debian
 import com.typesafe.sbt.packager.linux.LinuxPlugin.autoImport.{Linux, daemonUser}
+import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport.Universal
 import sbt.Keys.*
-import sbt.{IO as _, *}
+import sbt.{File, IO, *}
 import sbtcompat.PluginCompat
 
 object DebPlugin extends AutoPlugin:
@@ -36,5 +38,26 @@ object DebPlugin extends AutoPlugin:
       streams.value.log.info(s"Copied '$artifact' to '$dest'.")
       conv.toVirtualFile(dest.toPath)
     ,
-    Deb / packageBin := Def.uncached((Deb / packageBin).dependsOn(Debian / packageBin).value)
+    Deb / packageBin := Def.uncached((Deb / packageBin).dependsOn(Debian / packageBin).value),
+    debianMaintainerScripts := Def.uncached:
+      generateDebianMaintainerScripts(
+        (Debian / maintainerScripts).value,
+        (Debian / linuxScriptReplacements).value,
+        (Universal / target).value
+      )
   )
+
+  private def generateDebianMaintainerScripts(
+    scripts: Map[String, Seq[String]],
+    replacements: Seq[(String, String)],
+    tmpDir: File
+  ): Seq[(File, String)] =
+    scripts
+      .map:
+        case (scriptName, content) =>
+          val scriptBits =
+            TemplateWriter.generateScriptFromLines(content, replacements)
+          val script = tmpDir / "tmp" / "debian" / scriptName
+          IO.write(script, scriptBits mkString "\n")
+          script -> scriptName
+      .toList
