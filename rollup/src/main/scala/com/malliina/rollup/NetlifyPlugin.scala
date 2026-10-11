@@ -2,7 +2,7 @@ package com.malliina.rollup
 
 import com.malliina.rollup.CommonKeys.{build, isProd}
 import sbt.Keys.{baseDirectory, streams}
-import sbt.{AutoPlugin, Plugins, Setting, ThisBuild, taskKey, dependsOn}
+import sbt.{AutoPlugin, Def, Plugins, Setting, ThisBuild, taskKey, dependsOn}
 
 object NetlifyPlugin extends AutoPlugin:
   override def requires: Plugins = GeneratorPlugin
@@ -12,7 +12,7 @@ object NetlifyPlugin extends AutoPlugin:
   import autoImport.*
 
   override def projectSettings: Seq[Setting[?]] = Seq(
-    deploy := {
+    deploy := Def.uncached:
       val cmd = Seq("netlify", "deploy")
       val params = if isProd.value then List("--prod") else Nil
       IO.runProcessSync(
@@ -20,6 +20,6 @@ object NetlifyPlugin extends AutoPlugin:
         (ThisBuild / baseDirectory).value.toPath,
         streams.value.log
       )
-    },
+    ,
     deploy := deploy.dependsOn(build).value
   )

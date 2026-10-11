@@ -6,13 +6,13 @@ import com.malliina.netlify.Netlify.SiteId
 import com.malliina.rollup.CommonKeys.{assetsRoot, build, deploy}
 import com.malliina.values.{AccessToken, ErrorMessage}
 import sbt.Keys.streams
-import sbt.{AutoPlugin, Plugins, Setting, dependsOn}
+import sbt.{AutoPlugin, Def, Plugins, Setting, dependsOn}
 
 object NetlifyApiPlugin extends AutoPlugin:
   override def requires: Plugins = LoggingPlugin
 
   override def projectSettings: Seq[Setting[?]] = Seq(
-    deploy := {
+    deploy := Def.uncached:
       val io = Netlify
         .deploy[cats.effect.IO](
           fs2.io.file.Path.fromNioPath(assetsRoot.value),
@@ -21,7 +21,7 @@ object NetlifyApiPlugin extends AutoPlugin:
         )
       val id = io.unsafeRunSync()
       streams.value.log.info(s"Deployment '$id' done.")
-    },
+    ,
     deploy := deploy.dependsOn(build).value
   )
 
