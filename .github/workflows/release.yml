@@ -39,6 +39,5 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SonatypePassword }}
           PGP_PASSPHRASE: ${{ secrets.PgpPassphrase }}
         run: |
-          sbt "+common-build/publishSigned;shutdown"
-          sbt "+netlify/publishSigned;shutdown"
+          sbt "common-build/publishSigned;shutdown"
           sbt "releaseArtifacts;shutdown"

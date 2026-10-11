@@ -142,7 +142,9 @@ val netlify = project
       "org.slf4j" % "slf4j-api" % versions.slf4j,
       "co.fs2" %% "fs2-io" % versions.fs2,
       "com.malliina" %% "okclient-io" % versions.primitives,
-      "commons-codec" % "commons-codec" % versions.commonsCodec
+      "commons-codec" % "commons-codec" % versions.commonsCodec,
+      "org.scalameta" %% "munit" % "1.3.6" % Test,
+      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
     )
   )
 
@@ -171,6 +173,8 @@ val codeArtifactPlugin = Project("sbt-codeartifact", file("codeartifact"))
 
 val sbtUtils = Project("sbt-utils", file("."))
   .aggregate(
+    common,
+    netlify,
     liveReloadPlugin,
     mavenPlugin,
     nodePlugin,
