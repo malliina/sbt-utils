@@ -1,9 +1,9 @@
 object versions:
-  val circe = "0.14.16"
+  val circe = "0.14.17"
   val codeArtifact = "2.55.1"
   val commonsCodec = "1.22.1"
   val fs2 = "3.14.0"
-  val http4s = "0.23.37"
+  val http4s = "0.23.38"
   val liveReload = "0.6.0"
   val munit = "1.3.6"
   val nativePackager = "1.12.0"
